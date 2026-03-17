@@ -1,50 +1,178 @@
-You are a React/TypeScript expert. Add a complete Admin Panel 
-to the existing GIVA React project. 
-
-IMPORTANT — Current project structure at workspace root:
-  components/     ← existing UI components
-  layouts/        ← existing layout files (DashboardLayout.tsx exists)
-  pages/          ← existing pages
-  services/       ← existing mock services (userService.ts, 
-                     judgeService.ts, teamService.ts)
-  App.tsx         ← existing router (HashRouter)
-  types.ts        ← existing types
-  constants.ts    ← existing constants
-
-All new files must follow this same root-level structure.
-There is NO src/ folder. Do NOT create a src/ folder.
-Use pnpm as package manager (pnpm-lock.yaml exists).
+You are a React/TypeScript/Tailwind expert. Before writing 
+any code, you MUST research the current state of these 
+technologies using web search or available tools.
 
 =============================================================
-STEP 1 — INSTALL DEPENDENCIES
+STEP 0 — RESEARCH FIRST (MANDATORY)
 =============================================================
 
-Run these commands:
-  pnpm dlx shadcn@latest init
-    → When prompted:
-      Style: Default
-      Base color: Slate
-      CSS variables: Yes
+Before doing anything else, search the web and find:
+
+1. What is the latest version of shadcn/ui as of today?
+   Search: "shadcn ui latest version 2025"
+
+2. What version of Tailwind CSS does the latest 
+   shadcn/ui require?
+   Search: "shadcn ui tailwind css v3 or v4 2025"
+
+3. Is shadcn/ui compatible with Vite + React + 
+   TypeScript without Next.js?
+   Search: "shadcn ui vite react typescript setup 2025"
+
+4. Read the official shadcn docs installation guide for Vite:
+   Fetch: https://ui.shadcn.com/docs/installation/vite
+
+5. What is the correct way to install Tailwind CSS 
+   with Vite in 2025?
+   Fetch: https://tailwindcss.com/docs/installation/using-vite
+
+Based on your research, determine:
+- Which exact shadcn/ui version to use
+- Which exact Tailwind CSS version to use  
+- Whether to use tailwind v3 or v4 approach
+- The correct setup steps for this specific combination
+
+Report your findings BEFORE proceeding to any installation.
+
+=============================================================
+CURRENT PROJECT STATE
+=============================================================
+
+Project: GIVA Science & Innovation Ecosystem
+Location: workspace root (NOT inside src/ folder)
+Package manager: pnpm
+Framework: React 19 + TypeScript + Vite 6
+Router: React Router v7 (HashRouter)
+
+CURRENT TAILWIND SETUP (must be migrated):
+- index.html uses Tailwind via CDN script tag:
+  <script src="https://cdn.tailwindcss.com"></script>
+- Tailwind config is inline in index.html as:
+  <script>tailwind.config = { theme: { extend: {...} } }</script>
+- There is NO tailwind.config.js or tailwind.config.ts file
+- There is NO postcss.config.js file
+- Tailwind is NOT in package.json dependencies
+
+EXISTING TAILWIND CUSTOM CONFIG (from index.html):
+The current config extends colors with:
+  primary: { 50-950 range of grays/blacks }
+  secondary: { grays }
+  accent: { cyan, green, crimson, amber, orange, blue }
+  backgroundImage: { brand-gradient, atmosphere variants }
+  animation: { float, pulse-slow, spin-slow }
+  keyframes: { float }
+  fontFamily: { sans: Inter }
+
+This custom config MUST be preserved when migrating.
+
+EXISTING FILES (do not delete or overwrite):
+  components/          ← existing UI components
+  layouts/             ← DashboardLayout.tsx exists
+  pages/               ← all existing pages
+  services/            ← mock services exist
+  App.tsx              ← HashRouter, existing routes
+  types.ts             ← UserRole types etc
+  constants.ts         ← NAV_ITEMS, EVENTS etc
+  index.html           ← has Tailwind CDN (will be replaced)
+  index.css            ← may have custom styles
+
+=============================================================
+STEP 1 — MIGRATE TAILWIND FROM CDN TO NPM
+=============================================================
+
+Based on your research in Step 0, install Tailwind properly.
+
+IF research shows Tailwind v4 is correct for latest shadcn:
+
+  pnpm add tailwindcss @tailwindcss/vite
   
-  pnpm dlx shadcn@latest add button card table badge dialog
-    sheet input label select textarea form
-    dropdown-menu avatar separator skeleton
-    alert tabs progress
+  Update vite.config.ts:
+    import tailwindcss from '@tailwindcss/vite'
+    plugins: [react(), tailwindcss()]
+  
+  Update index.css (add at top):
+    @import "tailwindcss";
+    @custom-variant dark (&:is(.dark *));
+  
+  Remove from index.html:
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = {...}</script>
+  
+  Migrate the custom config from index.html inline script
+  into CSS theme variables in index.css using v4 syntax:
+    @theme {
+      --color-primary-50: ...;
+      etc.
+    }
 
-  pnpm add @tanstack/react-table
-  pnpm add react-hook-form @hookform/resolvers zod
-  pnpm add axios
-  pnpm add date-fns
+IF research shows Tailwind v3 is correct:
+
+  pnpm add -D tailwindcss@3 postcss autoprefixer
+  pnpx tailwindcss init -p
+  
+  This creates tailwind.config.js and postcss.config.js.
+  
+  Update tailwind.config.js content array:
+    content: ["./*.{ts,tsx}", "./**/*.{ts,tsx}"]
+  
+  Migrate the custom theme from index.html inline script
+  into tailwind.config.js extend section, preserving ALL
+  existing color values and animations exactly.
+  
+  Update index.css (add at top):
+    @tailwind base;
+    @tailwind components;
+    @tailwind utilities;
+  
+  Remove from index.html:
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = {...}</script>
+
+IMPORTANT: After migration, run pnpm dev and verify 
+the existing pages still look correct before proceeding.
 
 =============================================================
-STEP 2 — NEW FOLDER STRUCTURE TO CREATE
+STEP 2 — INSTALL SHADCN/UI
 =============================================================
 
-Create these new folders and files at workspace root:
+Based on research findings, run the correct init command.
+
+For Vite setup (from official docs):
+  pnpm dlx shadcn@latest init
+
+When prompted during init:
+  - Style: Default
+  - Base color: Slate
+  - CSS variables: Yes
+  - Tailwind config: (auto-detected)
+  - Components alias: @/components
+  - Utils alias: @/lib/utils
+
+Then add required components:
+  pnpm dlx shadcn@latest add button card table badge 
+    dialog sheet input label select textarea form
+    dropdown-menu avatar separator skeleton alert 
+    tabs progress toast
+
+=============================================================
+STEP 3 — INSTALL OTHER DEPENDENCIES
+=============================================================
+
+pnpm add @tanstack/react-table
+pnpm add react-hook-form @hookform/resolvers
+pnpm add axios
+pnpm add date-fns
+pnpm add zod
+
+=============================================================
+STEP 4 — CREATE NEW FOLDER STRUCTURE
+=============================================================
+
+All paths are relative to workspace ROOT (no src/ folder):
 
 lib/
-  ├── axios.ts          ← configured axios instance
-  └── utils.ts          ← cn() helper for shadcn
+  ├── axios.ts
+  └── utils.ts
 
 hooks/
   ├── useAuth.ts
@@ -53,7 +181,7 @@ hooks/
 contexts/
   └── AuthContext.tsx
 
-services/api/           ← inside existing services/ folder
+services/api/
   ├── authApi.ts
   ├── profileApi.ts
   ├── eventsApi.ts
@@ -62,16 +190,16 @@ services/api/           ← inside existing services/ folder
   ├── juriApi.ts
   └── adminApi.ts
 
-components/admin/       ← inside existing components/ folder
+components/admin/
   ├── StatsCard.tsx
   ├── DataTable.tsx
   ├── PageHeader.tsx
   └── StatusBadge.tsx
 
 layouts/
-  └── AdminLayout.tsx   ← add alongside existing DashboardLayout.tsx
+  └── AdminLayout.tsx
 
-pages/admin/            ← inside existing pages/ folder
+pages/admin/
   ├── AdminDashboard.tsx
   ├── AdminEvents.tsx
   ├── AdminEventForm.tsx
@@ -80,56 +208,57 @@ pages/admin/            ← inside existing pages/ folder
   ├── AdminCertificates.tsx
   └── AdminReports.tsx
 
-pages/superadmin/       ← inside existing pages/ folder
+pages/superadmin/
   ├── SuperAdminDashboard.tsx
   ├── SuperAdminUsers.tsx
   └── SuperAdminJuriAssignments.tsx
 
 =============================================================
-STEP 3 — lib/axios.ts
+STEP 5 — lib/axios.ts
 =============================================================
 
 import axios from 'axios'
 
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
+const BASE_URL = import.meta.env.VITE_API_URL 
+  || 'http://localhost:5000'
 
 const api = axios.create({
   baseURL: BASE_URL,
   headers: { 'Content-Type': 'application/json' }
 })
 
-// Request interceptor: attach access token
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('moova_access_token')
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`
-  }
+  const token = localStorage.getItem('giva_access_token')
+  if (token) config.headers.Authorization = `Bearer ${token}`
   return config
 })
 
-// Response interceptor: handle token refresh on 401
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    const originalRequest = error.config
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true
+    const original = error.config
+    if (error.response?.status === 401 && !original._retry) {
+      original._retry = true
       try {
-        const refreshToken = localStorage.getItem('moova_refresh_token')
+        const refreshToken = 
+          localStorage.getItem('giva_refresh_token')
         if (!refreshToken) throw new Error('No refresh token')
-
-        const { data } = await axios.post(`${BASE_URL}/api/auth/refresh`, {
-          refreshToken
-        })
-        localStorage.setItem('moova_access_token', data.data.accessToken)
-        localStorage.setItem('moova_refresh_token', data.data.refreshToken)
-        originalRequest.headers.Authorization = 
+        const { data } = await axios.post(
+          `${BASE_URL}/api/auth/refresh`, { refreshToken }
+        )
+        localStorage.setItem(
+          'giva_access_token', data.data.accessToken
+        )
+        localStorage.setItem(
+          'giva_refresh_token', data.data.refreshToken
+        )
+        original.headers.Authorization = 
           `Bearer ${data.data.accessToken}`
-        return api(originalRequest)
+        return api(original)
       } catch {
-        localStorage.removeItem('moova_access_token')
-        localStorage.removeItem('moova_refresh_token')
-        localStorage.removeItem('moova_user')
+        localStorage.removeItem('giva_access_token')
+        localStorage.removeItem('giva_refresh_token')
+        localStorage.removeItem('giva_user')
         window.location.hash = '#/login'
       }
     }
@@ -140,18 +269,7 @@ api.interceptors.response.use(
 export default api
 
 =============================================================
-STEP 4 — lib/utils.ts
-=============================================================
-
-import { type ClassValue, clsx } from 'clsx'
-import { twMerge } from 'tailwind-merge'
-
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
-}
-
-=============================================================
-STEP 5 — contexts/AuthContext.tsx
+STEP 6 — contexts/AuthContext.tsx
 =============================================================
 
 Interface User:
@@ -163,765 +281,255 @@ Interface User:
 Interface AuthContextType:
   user: User | null
   isLoading: boolean
-  login(email: string, password: string): Promise<void>
+  login(email, password): Promise<void>
   logout(): Promise<void>
-  isAdmin: boolean       ← role === 'ADMIN' || 'SUPERADMIN'
-  isSuperAdmin: boolean  ← role === 'SUPERADMIN'
-  isJuri: boolean        ← role === 'JURI'
-  isSiswa: boolean       ← role === 'SISWA'
+  isSuperAdmin: boolean
+  isAdmin: boolean
+  isJuri: boolean
+  isSiswa: boolean
 
-Implementation:
-- On mount: check localStorage for moova_access_token,
-  if exists call GET /api/auth/me to validate,
-  set user from response, setIsLoading(false)
-- login(): POST /api/auth/login, 
-  store accessToken, refreshToken, user in localStorage
-  keys: moova_access_token, moova_refresh_token, moova_user
-- logout(): POST /api/auth/logout, 
-  clear all 3 localStorage keys, set user null
-- Export: AuthProvider component + useAuthContext hook
+localStorage keys: giva_access_token, 
+                   giva_refresh_token, giva_user
+
+On mount: validate token via GET /api/auth/me
+login(): POST /api/auth/login → store tokens + user
+logout(): POST /api/auth/logout → clear storage
+
+Export: AuthProvider + useAuthContext hook
 
 =============================================================
-STEP 6 — hooks/useAuth.ts
+STEP 7 — services/api/ FILES
 =============================================================
 
-Re-export useAuthContext from AuthContext for convenience.
-Also export helper: isAllowed(user, ...roles) boolean check.
+All 7 API files — same as specified previously but:
+- localStorage keys use 'giva_' prefix not 'moova_'
+- Base URL points to http://localhost:5000
+
+authApi.ts:     login, register, logout, me, refresh
+profileApi.ts:  getProfile, updateProfile, uploadAvatar,
+                getMyEvents, getMySubmissions, 
+                getMyCertificates
+eventsApi.ts:   getEvents, getEvent, registerToEvent,
+                getQa, postQuestion, postReply, toggleUpvote
+teamsApi.ts:    getMyTeams, getTeam, createTeam, joinTeam,
+                updateTeam, disbandTeam, leaveTeam,
+                removeMember, updateMemberRole
+submissionsApi.ts: getMySubmissions, getSubmission,
+                   createSubmission, updateSubmission,
+                   uploadFile, deleteFile, 
+                   submitSubmission, withdrawSubmission
+juriApi.ts:     getAssignments, getCategorySubmissions,
+                getSubmissionDetail, saveScore
+adminApi.ts:    getDashboard, getSystemStats,
+                getEvents, createEvent, updateEvent,
+                updateEventStatus, deleteEvent,
+                getSubmissions, advanceStage,
+                getSiswaList, getSiswaDetail,
+                getCertificates, createCertificate,
+                revokeCertificate, getEventReport,
+                getAdminJuriUsers, createAdminOrJuri,
+                updateAdminOrJuri, toggleUserActive,
+                deleteAdminOrJuri, createJuriAssignment,
+                deleteJuriAssignment
 
 =============================================================
-STEP 7 — services/api/authApi.ts
+STEP 8 — ADMIN COMPONENTS
 =============================================================
 
-Using the configured api instance from lib/axios.ts:
+components/admin/StatsCard.tsx:
+  Props: { title, value, icon, description?, trend? }
+  Uses Shadcn Card component
+  Shows: colored icon circle, large value, subtitle
 
-export const authApi = {
-  login: (email, password) =>
-    api.post('/api/auth/login', { email, password }),
-  
-  register: (data: { fullName, email, password, confirmPassword }) =>
-    api.post('/api/auth/register', data),
-  
-  logout: (refreshToken) =>
-    api.post('/api/auth/logout', { refreshToken }),
-  
-  me: () =>
-    api.get('/api/auth/me'),
-  
-  refresh: (refreshToken) =>
-    api.post('/api/auth/refresh', { refreshToken })
-}
+components/admin/DataTable.tsx:
+  Generic TanStack Table wrapper
+  Props: { columns, data, isLoading?, pagination? }
+  Features: sort, paginate, skeleton loading, empty state
 
-=============================================================
-STEP 8 — services/api/profileApi.ts
-=============================================================
+components/admin/PageHeader.tsx:
+  Props: { title, description?, action?: ReactNode }
+  Layout: title left, action button right, border bottom
 
-export const profileApi = {
-  getProfile: () =>
-    api.get('/api/siswa/profile'),
-  
-  updateProfile: (data: Partial<SiswaProfile>) =>
-    api.put('/api/siswa/profile', data),
-  
-  uploadAvatar: (file: File) => {
-    const form = new FormData()
-    form.append('avatar', file)
-    return api.post('/api/siswa/profile/avatar', form, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    })
-  },
-  
-  getMyEvents: () =>
-    api.get('/api/siswa/my-events'),
-  
-  getMySubmissions: () =>
-    api.get('/api/siswa/my-submissions'),
-  
-  getMyCertificates: () =>
-    api.get('/api/siswa/my-certificates')
-}
+components/admin/StatusBadge.tsx:
+  Props: { status: string }
+  OPEN/ACTIVE/VALID → green Badge
+  DRAFT/PENDING/UPCOMING → yellow Badge
+  CLOSED/REVOKED/DISBANDED → gray Badge
+  UNDER_REVIEW/REVISION_REQUESTED → blue Badge
+  SCORED/SUBMITTED → purple Badge
 
 =============================================================
-STEP 9 — services/api/eventsApi.ts
+STEP 9 — layouts/AdminLayout.tsx
 =============================================================
 
-export const eventsApi = {
-  getEvents: (params?) =>
-    api.get('/api/events', { params }),
-  
-  getEvent: (id) =>
-    api.get(`/api/events/${id}`),
-  
-  registerToEvent: (id, data: { teamId?: string }) =>
-    api.post(`/api/events/${id}/register`, data),
-  
-  getQa: (eventId, params?) =>
-    api.get(`/api/events/${eventId}/qa`, { params }),
-  
-  postQuestion: (eventId, text) =>
-    api.post(`/api/events/${eventId}/qa`, { text }),
-  
-  postReply: (eventId, questionId, text) =>
-    api.post(`/api/events/${eventId}/qa/${questionId}/replies`, { text }),
-  
-  toggleUpvote: (eventId, questionId) =>
-    api.post(`/api/events/${eventId}/qa/${questionId}/upvote`)
-}
+Sidebar + Topbar for admin routes.
+Uses Shadcn components for nav items.
+
+Sidebar shows based on role from useAuthContext():
+
+ADMIN and SUPERADMIN see:
+  Dashboard       /admin
+  Events          /admin/events
+  Submissions     /admin/submissions
+  Data Siswa      /admin/siswa
+  Sertifikat      /admin/certificates
+  Laporan         /admin/reports
+
+SUPERADMIN also sees:
+  Kelola Pengguna /superadmin/users
+  Penugasan Juri  /superadmin/assignments
+  System Stats    /superadmin
+
+Topbar: GIVA logo, user name, role badge, logout button
+Mobile: collapsible sidebar
 
 =============================================================
-STEP 10 — services/api/teamsApi.ts
+STEP 10-16 — ADMIN PAGES
 =============================================================
 
-export const teamsApi = {
-  getMyTeams: () =>
-    api.get('/api/teams'),
-  
-  getTeam: (id) =>
-    api.get(`/api/teams/${id}`),
-  
-  createTeam: (name) =>
-    api.post('/api/teams', { name }),
-  
-  joinTeam: (code) =>
-    api.post('/api/teams/join', { code }),
-  
-  updateTeam: (id, name) =>
-    api.put(`/api/teams/${id}`, { name }),
-  
-  disbandTeam: (id) =>
-    api.delete(`/api/teams/${id}`),
-  
-  leaveTeam: (id) =>
-    api.delete(`/api/teams/${id}/leave`),
-  
-  removeMember: (teamId, userId) =>
-    api.delete(`/api/teams/${teamId}/members/${userId}`),
-  
-  updateMemberRole: (teamId, userId, role) =>
-    api.patch(`/api/teams/${teamId}/members/${userId}/role`, { role })
-}
+pages/admin/AdminDashboard.tsx:
+  Fetch: adminApi.getDashboard()
+  Show: 5 StatsCards + BarChart (recharts) + 
+        recent registrations table
+
+pages/admin/AdminEvents.tsx:
+  Fetch: adminApi.getEvents(params)
+  Show: DataTable with search/filter
+  Actions: tambah, edit, ubah status, hapus
+
+pages/admin/AdminEventForm.tsx:
+  React Hook Form + Zod validation
+  Shadcn Tabs: Info Dasar, Detail, Timeline, FAQ, Kategori
+  Dynamic lists for timeline/faq/categories (add/remove)
+  POST or PUT based on route (/new vs /:id/edit)
+
+pages/admin/AdminSubmissions.tsx:
+  Fetch: adminApi.getSubmissions(params)
+  Filter: event, status, stage
+  Actions: lihat detail (Sheet), naikkan tahap
+
+pages/admin/AdminSiswa.tsx:
+  Fetch: adminApi.getSiswaList(params)
+  Show: DataTable with completeness Progress bar
+  Action: lihat detail (Sheet with full profile)
+
+pages/admin/AdminCertificates.tsx:
+  Fetch: adminApi.getCertificates(params)
+  Actions: terbitkan (Dialog form), cabut (Dialog+reason)
+
+pages/admin/AdminReports.tsx:
+  Select event → fetch adminApi.getEventReport(eventId)
+  Show: 4 StatsCards + BarChart per kategori + 
+        top 10 submissions table
 
 =============================================================
-STEP 11 — services/api/submissionsApi.ts
+STEP 17-19 — SUPERADMIN PAGES
 =============================================================
 
-export const submissionsApi = {
-  getMySubmissions: () =>
-    api.get('/api/submissions'),
-  
-  getSubmission: (id) =>
-    api.get(`/api/submissions/${id}`),
-  
-  createSubmission: (data) =>
-    api.post('/api/submissions', data),
-  
-  updateSubmission: (id, data) =>
-    api.put(`/api/submissions/${id}`, data),
-  
-  uploadFile: (id, file: File) => {
-    const form = new FormData()
-    form.append('file', file)
-    return api.post(`/api/submissions/${id}/files`, form, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    })
-  },
-  
-  deleteFile: (submissionId, fileId) =>
-    api.delete(`/api/submissions/${submissionId}/files/${fileId}`),
-  
-  submitSubmission: (id) =>
-    api.post(`/api/submissions/${id}/submit`, { consentGiven: true }),
-  
-  withdrawSubmission: (id) =>
-    api.post(`/api/submissions/${id}/withdraw`)
-}
+pages/superadmin/SuperAdminDashboard.tsx:
+  Fetch: adminApi.getSystemStats()
+  Show: system stats cards + quick navigation links
+
+pages/superadmin/SuperAdminUsers.tsx:
+  Tabs: Admin | Juri
+  DataTable with: nama, email, status badge, dibuat pada
+  Actions: tambah (Dialog), edit (Dialog), 
+           toggle aktif, hapus (AlertDialog)
+
+pages/superadmin/SuperAdminJuriAssignments.tsx:
+  2-column: select event+category | assigned juri list
+  Actions: tugaskan juri (Dialog), hapus assignment
 
 =============================================================
-STEP 12 — services/api/juriApi.ts
+STEP 20 — UPDATE App.tsx
 =============================================================
 
-export const juriApi = {
-  getAssignments: () =>
-    api.get('/api/juri/assignments'),
-  
-  getCategorySubmissions: (categoryId, params?) =>
-    api.get(`/api/juri/assignments/${categoryId}/submissions`, { params }),
-  
-  getSubmissionDetail: (submissionId, stage) =>
-    api.get(`/api/juri/submissions/${submissionId}`, { params: { stage } }),
-  
-  saveScore: (data: {
-    submissionId: string
-    stage: string
-    criteriaScores: Record<string, number>
-    comment: string
-    status: 'draft' | 'submitted'
-  }) =>
-    api.post('/api/juri/scores', data)
-}
+ONLY ADD these changes to existing App.tsx:
+
+1. Wrap <HashRouter> content with <AuthProvider>
+
+2. Add AdminGuard component:
+   - Checks role is ADMIN or SUPERADMIN
+   - Redirects to /login if not authenticated
+   - Renders <AdminLayout /> with <Outlet />
+
+3. Add SuperAdminGuard component:
+   - Checks role is SUPERADMIN only
+   - Redirects to /admin if ADMIN tries to access
+   - Renders <AdminLayout /> with <Outlet />
+
+4. Add new routes inside <Routes>:
+   <Route path="/admin" element={<AdminGuard />}>
+     <Route index element={<AdminDashboard />} />
+     <Route path="events" element={<AdminEvents />} />
+     <Route path="events/new" element={<AdminEventForm />} />
+     <Route path="events/:id/edit" 
+            element={<AdminEventForm />} />
+     <Route path="submissions" 
+            element={<AdminSubmissions />} />
+     <Route path="siswa" element={<AdminSiswa />} />
+     <Route path="certificates" 
+            element={<AdminCertificates />} />
+     <Route path="reports" element={<AdminReports />} />
+   </Route>
+
+   <Route path="/superadmin" element={<SuperAdminGuard />}>
+     <Route index element={<SuperAdminDashboard />} />
+     <Route path="users" element={<SuperAdminUsers />} />
+     <Route path="assignments" 
+            element={<SuperAdminJuriAssignments />} />
+   </Route>
+
+5. Update existing login logic:
+   The existing AuthPage at /login and /join currently 
+   writes to localStorage with keys:
+     'moova_user', 'moova_access_token' etc.
+   
+   Update AuthPage.tsx to use AuthContext login() instead:
+   - Import useAuthContext
+   - Replace handleLoginSubmit localStorage logic with:
+     await login(email, password)
+   - On success redirect based on role:
+     SUPERADMIN/ADMIN → /admin
+     JURI → /dashboard/judge  
+     SISWA → /dashboard
 
 =============================================================
-STEP 13 — services/api/adminApi.ts
+STEP 21 — UPDATE .env.local
 =============================================================
 
-export const adminApi = {
-  // Dashboard
-  getDashboard: () =>
-    api.get('/api/admin/dashboard'),
-  
-  getSystemStats: () =>
-    api.get('/api/superadmin/system-stats'),
-
-  // Events
-  getEvents: (params?) =>
-    api.get('/api/admin/events', { params }),
-  
-  createEvent: (data) =>
-    api.post('/api/admin/events', data),
-  
-  updateEvent: (id, data) =>
-    api.put(`/api/admin/events/${id}`, data),
-  
-  updateEventStatus: (id, status) =>
-    api.patch(`/api/admin/events/${id}/status`, { status }),
-  
-  deleteEvent: (id) =>
-    api.delete(`/api/admin/events/${id}`),
-
-  // Submissions
-  getSubmissions: (params?) =>
-    api.get('/api/admin/submissions', { params }),
-  
-  advanceStage: (id, stage) =>
-    api.patch(`/api/admin/submissions/${id}/stage`, { stage }),
-
-  // Siswa
-  getSiswaList: (params?) =>
-    api.get('/api/admin/siswa', { params }),
-  
-  getSiswaDetail: (id) =>
-    api.get(`/api/admin/siswa/${id}`),
-
-  // Certificates
-  getCertificates: (params?) =>
-    api.get('/api/admin/certificates', { params }),
-  
-  createCertificate: (data) =>
-    api.post('/api/admin/certificates', data),
-  
-  revokeCertificate: (id, reason) =>
-    api.patch(`/api/admin/certificates/${id}/revoke`, { reason }),
-
-  // Reports
-  getEventReport: (eventId) =>
-    api.get(`/api/admin/reports/event/${eventId}`),
-
-  // Superadmin — users
-  getAdminJuriUsers: (params?) =>
-    api.get('/api/superadmin/users', { params }),
-  
-  createAdminOrJuri: (data) =>
-    api.post('/api/superadmin/users', data),
-  
-  updateAdminOrJuri: (id, data) =>
-    api.put(`/api/superadmin/users/${id}`, data),
-  
-  toggleUserActive: (id) =>
-    api.patch(`/api/superadmin/users/${id}/toggle-active`),
-  
-  deleteAdminOrJuri: (id) =>
-    api.delete(`/api/superadmin/users/${id}`),
-
-  // Superadmin — juri assignments
-  createJuriAssignment: (data) =>
-    api.post('/api/superadmin/juri-assignments', data),
-  
-  deleteJuriAssignment: (id) =>
-    api.delete(`/api/superadmin/juri-assignments/${id}`)
-}
-
-=============================================================
-STEP 14 — components/admin/StatsCard.tsx
-=============================================================
-
-import { Card, CardContent } from '@/components/ui/card'
-
-interface StatsCardProps {
-  title: string
-  value: string | number
-  icon: React.ReactNode
-  description?: string
-  trend?: { value: number; isUp: boolean }
-}
-
-Render a Card with:
-- Icon in colored circle (top left)
-- Large bold value (center)
-- Title below value (small, muted)
-- Optional description (xs, muted)
-- Optional trend badge (green if isUp, red if down)
-
-=============================================================
-STEP 15 — components/admin/DataTable.tsx
-=============================================================
-
-Generic TanStack React Table wrapper:
-
-interface DataTableProps<TData> {
-  columns: ColumnDef<TData>[]
-  data: TData[]
-  isLoading?: boolean
-  pagination?: {
-    page: number
-    totalPages: number
-    onPageChange: (page: number) => void
-  }
-}
-
-Features:
-- Show Skeleton rows (5 rows) when isLoading=true
-- Previous/Next pagination buttons at bottom
-- Show "Tidak ada data" empty state
-- Responsive: horizontal scroll on mobile
-
-=============================================================
-STEP 16 — components/admin/PageHeader.tsx
-=============================================================
-
-interface PageHeaderProps {
-  title: string
-  description?: string
-  action?: React.ReactNode
-}
-
-Render: h1 title + optional description paragraph + 
-        optional action button aligned to the right.
-Use a bottom border separator.
-
-=============================================================
-STEP 17 — components/admin/StatusBadge.tsx
-=============================================================
-
-interface StatusBadgeProps {
-  status: string
-}
-
-Map to Shadcn Badge variant + custom color:
-  'OPEN' | 'ACTIVE' | 'VALID' | 'SUBMITTED' → 
-    green background, white text
-  'DRAFT' | 'PENDING' | 'UPCOMING' →
-    yellow/amber background, dark text
-  'CLOSED' | 'REVOKED' | 'DISBANDED' | 'SCORED' →
-    gray background, dark text
-  'UNDER_REVIEW' | 'REVISION_REQUESTED' →
-    blue background, white text
-
-=============================================================
-STEP 18 — layouts/AdminLayout.tsx
-=============================================================
-
-Sidebar + Topbar layout for admin routes.
-Similar structure to existing DashboardLayout.tsx but simpler.
-
-Sidebar nav items depend on user role from useAuthContext():
-
-If role === 'ADMIN' or 'SUPERADMIN':
-  - Dashboard → /admin
-  - Events → /admin/events
-  - Submissions → /admin/submissions  
-  - Data Siswa → /admin/siswa
-  - Sertifikat → /admin/certificates
-  - Laporan → /admin/reports
-
-If role === 'SUPERADMIN' (additional items):
-  - Kelola Admin & Juri → /superadmin/users
-  - Penugasan Juri → /superadmin/assignments
-  - System Stats → /superadmin
-
-Topbar:
-  - MOOVA logo (left)
-  - User avatar + fullName + role Badge (right)
-  - Logout button
-
-Active state: highlight current route with primary color.
-Collapsible on mobile.
-
-=============================================================
-STEP 19 — pages/admin/AdminDashboard.tsx
-=============================================================
-
-On mount: call adminApi.getDashboard()
-
-Layout (grid):
-Row 1 — 5 StatsCards:
-  - Total Siswa Terdaftar (totalSiswa)
-  - Event Aktif (eventsByStatus.OPEN)
-  - Total Submission (totalSubmissions)
-  - Total Sertifikat (totalCertificates)
-  - Submission Dinilai (submissionsByStatus.SCORED)
-
-Row 2 — 2 columns:
-  Left: BarChart (Recharts) — top 5 events by registration count
-    xAxis: event title (truncated 20 chars)
-    bar: registrationCount, fill="#1e293b"
-  
-  Right: Recent Registrations table
-    Columns: Nama Siswa, Event, Waktu Daftar
-    Show last 10 records
-
-=============================================================
-STEP 20 — pages/admin/AdminEvents.tsx
-=============================================================
-
-State: events[], isLoading, search, statusFilter, page
-
-On mount + filter change: call adminApi.getEvents({search, status, page})
-
-Render:
-- PageHeader with "Tambah Event" button → navigate('/admin/events/new')
-- Search input + status Select filter (inline)
-- DataTable with columns:
-  - Judul (bold, clickable → edit)
-  - Kategori
-  - Format (Badge)
-  - Status (StatusBadge)
-  - Deadline
-  - Pendaftar (registrationCount)
-  - Aksi: dropdown with Edit, Ubah Status, Hapus
-
-Hapus: show Shadcn AlertDialog confirm before calling deleteEvent
-Ubah Status: show Dialog with Select for new status
-
-=============================================================
-STEP 21 — pages/admin/AdminEventForm.tsx
-=============================================================
-
-Use React Hook Form + Zod schema validation.
-
-Zod schema:
-  title: string min 5
-  shortDescription: string min 10
-  fullDescription: string min 20
-  theme: string optional
-  date: string required
-  location: string required
-  format: enum ONLINE|IN_PERSON|HYBRID
-  category: string required
-  status: enum DRAFT|OPEN|UPCOMING|CLOSED
-  deadline: string required
-  fee: string default "Gratis"
-  teamSizeMin: number min 1
-  teamSizeMax: number min 1
-  eligibility: string[] (dynamic add/remove)
-  sdgs: number[] (checkbox 1-17)
-  prizePool: string optional
-  organizer: string default "MOOVA"
-  
-  timeline: array of { date, title, description, order }
-  faqs: array of { question, answer, order }
-  categories: array of { name, description }
-
-Form layout (use Shadcn Tabs):
-  Tab 1 "Informasi Dasar": 
-    title, shortDescription, fullDescription, theme,
-    date, deadline, location, format, category,
-    status, fee, teamSizeMin, teamSizeMax, organizer
-  
-  Tab 2 "Detail":
-    prizePool, eligibility (dynamic list with add/remove),
-    sdgs (checkboxes grid 1-17)
-  
-  Tab 3 "Timeline":
-    Dynamic list: add/remove timeline entries
-    Each entry: date input, title input, description textarea
-  
-  Tab 4 "FAQ":
-    Dynamic list: add/remove FAQ entries
-    Each entry: question input, answer textarea
-  
-  Tab 5 "Kategori Lomba":
-    Dynamic list: add/remove categories
-    Each entry: name input, description input
-
-If editing (/admin/events/:id/edit):
-  - Fetch event data on mount
-  - Prefill form with existing data
-  - On submit: call updateEvent
-
-If creating (/admin/events/new):
-  - On submit: call createEvent
-
-Show toast on success/error.
-"Simpan" button at bottom, disabled while submitting.
-
-=============================================================
-STEP 22 — pages/admin/AdminSubmissions.tsx
-=============================================================
-
-State: submissions[], isLoading, eventFilter, 
-       statusFilter, stageFilter, page
-
-DataTable columns:
-  - Judul Proyek
-  - Tim
-  - Event
-  - Tahap (Badge: ABSTRACT/PAPER/FINAL)
-  - Status (StatusBadge)
-  - Total Nilai (or "Belum dinilai")
-  - Aksi
-
-Row actions:
-  1. "Lihat Detail" → opens Sheet (slide panel) with:
-     - Full submission info
-     - File list with download links
-     - Score summary per stage per juri
-  
-  2. "Naikkan Tahap" → Dialog confirm, 
-     then call advanceStage(id, nextStage)
-     only show if status is SCORED
-
-Filters: Event Select, Status Select, Stage Select
-
-=============================================================
-STEP 23 — pages/admin/AdminSiswa.tsx
-=============================================================
-
-State: siswaList[], isLoading, search, 
-       provinceFilter, schoolLevelFilter, page
-
-DataTable columns:
-  - Nama Lengkap
-  - Email
-  - Sekolah
-  - Jenjang
-  - Kelas
-  - Provinsi
-  - Kelengkapan Profil (Progress component 0-100%)
-  - Aksi: "Detail"
-
-"Detail" → opens Sheet with:
-  - Avatar + fullName + email
-  - SiswaProfile all fields
-  - List of registered events
-  - List of submissions (projectTitle + status)
-
-=============================================================
-STEP 24 — pages/admin/AdminCertificates.tsx
-=============================================================
-
-State: certificates[], isLoading, eventFilter, 
-       typeFilter, page
-
-DataTable columns:
-  - Penerima
-  - Event
-  - Tipe (Badge)
-  - Penghargaan
-  - Tanggal Terbit
-  - Diterbitkan Oleh
-  - Status (StatusBadge: VALID/REVOKED)
-  - Aksi
-
-Button "Terbitkan Sertifikat" → Dialog with form:
-  - Pilih Siswa (search input, call /api/admin/siswa)
-  - Pilih Event (select from events list)
-  - Tipe: Select WINNER|PARTICIPANT|JURI
-  - Penghargaan: text input
-  - Diterbitkan Oleh: text input
-
-Row actions:
-  - "Cabut" (only if VALID) → Dialog with reason textarea,
-    then call revokeCertificate
-
-=============================================================
-STEP 25 — pages/admin/AdminReports.tsx
-=============================================================
-
-State: selectedEventId, reportData, isLoading
-
-Layout:
-  - Event selector at top (fetch events list on mount)
-  - On event select: fetch report from adminApi.getEventReport
-
-Show report sections:
-  Row 1 — 4 StatsCards:
-    registrationCount, submissionCount, 
-    scoredCount, averageScore
-
-  Row 2:
-    Left: BarChart — nilai rata-rata per kategori
-      xAxis: categoryName, bar: avgScore
-    Right: Table top 10 submission
-      Columns: Peringkat, Tim, Proyek, Total Nilai
-
-=============================================================
-STEP 26 — pages/superadmin/SuperAdminDashboard.tsx
-=============================================================
-
-On mount: call adminApi.getSystemStats()
-
-Layout:
-  Row 1 — StatsCards:
-    - Total ADMIN, Total JURI, Total SISWA
-    - Total Events, Total Submissions
-    - Storage Used (in MB)
-  
-  Row 2 — Quick access cards:
-    - "Kelola Admin & Juri" → navigate('/superadmin/users')
-    - "Penugasan Juri" → navigate('/superadmin/assignments')
-
-=============================================================
-STEP 27 — pages/superadmin/SuperAdminUsers.tsx
-=============================================================
-
-State: users[], activeTab ('ADMIN'|'JURI'), 
-       isLoading, page, search
-
-On mount + tab change: call adminApi.getAdminJuriUsers({ role: activeTab })
-
-Shadcn Tabs: "Admin" | "Juri"
-
-DataTable columns:
-  - Nama Lengkap
-  - Email
-  - Status: Badge AKTIF (green) or NONAKTIF (red)
-  - Dibuat Pada (formatted date)
-  - Aksi
-
-Button "Tambah Admin/Juri" → Dialog form:
-  Fields: fullName, email, password, 
-          role Select (ADMIN|JURI, default = activeTab)
-  On submit: call createAdminOrJuri
-
-Row actions dropdown:
-  - "Edit" → Dialog same as create form but prefilled,
-    password optional (empty = don't change)
-  - "Aktif/Nonaktifkan" → call toggleUserActive,
-    show confirm dialog first
-  - "Hapus" → AlertDialog confirm, 
-    then call deleteAdminOrJuri
-
-=============================================================
-STEP 28 — pages/superadmin/SuperAdminJuriAssignments.tsx
-=============================================================
-
-Layout: 2-column grid
-
-Left column "Pilih Penugasan":
-  - Select Event (fetch events on mount)
-  - On event select: show categories of that event
-  - Select Category
-  - On category select: show assigned juri list for 
-    that category in right column
-
-Right column "Daftar Juri Bertugas":
-  - Show list of JuriAssignment for selected category
-  - Each item: juri fullName + email + 
-    current stage Badge + progress bar
-  - "Hapus" button per assignment → confirm dialog
-
-Button "Tugaskan Juri" → Dialog:
-  - Select Juri (fetched from superadmin/users?role=JURI)
-  - Select Stage: ABSTRACT|PAPER|FINAL
-  - On submit: call createJuriAssignment
-
-=============================================================
-STEP 29 — UPDATE App.tsx
-=============================================================
-
-Keep all existing routes unchanged.
-Add these modifications:
-
-1. Wrap entire <HashRouter> content with <AuthProvider>
-   from contexts/AuthContext.tsx
-
-2. Add new route guards:
-
-const AdminGuard = () => {
-  const { user, isLoading } = useAuthContext()
-  if (isLoading) return <div>Loading...</div>
-  if (!user) return <Navigate to="/login" replace />
-  if (!['ADMIN', 'SUPERADMIN'].includes(user.role))
-    return <Navigate to="/" replace />
-  return <AdminLayout />  // AdminLayout uses <Outlet />
-}
-
-const SuperAdminGuard = () => {
-  const { user, isLoading } = useAuthContext()
-  if (isLoading) return <div>Loading...</div>
-  if (!user) return <Navigate to="/login" replace />
-  if (user.role !== 'SUPERADMIN')
-    return <Navigate to="/admin" replace />
-  return <AdminLayout />
-}
-
-3. Add routes inside <Routes>:
-
-<Route path="/admin" element={<AdminGuard />}>
-  <Route index element={<AdminDashboard />} />
-  <Route path="events" element={<AdminEvents />} />
-  <Route path="events/new" element={<AdminEventForm />} />
-  <Route path="events/:id/edit" element={<AdminEventForm />} />
-  <Route path="submissions" element={<AdminSubmissions />} />
-  <Route path="siswa" element={<AdminSiswa />} />
-  <Route path="certificates" element={<AdminCertificates />} />
-  <Route path="reports" element={<AdminReports />} />
-</Route>
-
-<Route path="/superadmin" element={<SuperAdminGuard />}>
-  <Route index element={<SuperAdminDashboard />} />
-  <Route path="users" element={<SuperAdminUsers />} />
-  <Route path="assignments" element={<SuperAdminJuriAssignments />} />
-</Route>
-
-4. Update existing AuthPage login to use AuthContext:
-   Instead of directly writing to localStorage,
-   call the login() function from useAuthContext()
-
-=============================================================
-STEP 30 — UPDATE .env.local
-=============================================================
-
-Add this line to existing .env.local:
+Add to existing .env.local:
 VITE_API_URL=http://localhost:5000
 
 =============================================================
-GENERATE ORDER
+EXECUTION ORDER
 =============================================================
 
-Generate all files in this exact order:
-1.  .env.local (add VITE_API_URL line)
-2.  lib/utils.ts
-3.  lib/axios.ts
-4.  contexts/AuthContext.tsx
-5.  hooks/useAuth.ts
-6.  services/api/authApi.ts
-7.  services/api/profileApi.ts
-8.  services/api/eventsApi.ts
-9.  services/api/teamsApi.ts
-10. services/api/submissionsApi.ts
-11. services/api/juriApi.ts
-12. services/api/adminApi.ts
-13. components/admin/StatsCard.tsx
-14. components/admin/DataTable.tsx
-15. components/admin/PageHeader.tsx
-16. components/admin/StatusBadge.tsx
-17. layouts/AdminLayout.tsx
-18. pages/admin/AdminDashboard.tsx
-19. pages/admin/AdminEvents.tsx
-20. pages/admin/AdminEventForm.tsx
-21. pages/admin/AdminSubmissions.tsx
-22. pages/admin/AdminSiswa.tsx
-23. pages/admin/AdminCertificates.tsx
-24. pages/admin/AdminReports.tsx
-25. pages/superadmin/SuperAdminDashboard.tsx
-26. pages/superadmin/SuperAdminUsers.tsx
-27. pages/superadmin/SuperAdminJuriAssignments.tsx
-28. App.tsx (update existing file)
+Execute in this exact order:
+0.  Research Tailwind + shadcn compatibility (MANDATORY)
+1.  Migrate Tailwind from CDN to npm (based on research)
+2.  Test existing pages still work: pnpm dev
+3.  Install shadcn/ui (based on research findings)
+4.  Install other dependencies
+5.  Update .env.local
+6.  lib/utils.ts
+7.  lib/axios.ts
+8.  contexts/AuthContext.tsx
+9.  hooks/useAuth.ts
+10. services/api/ (all 7 files)
+11. components/admin/ (all 4 files)
+12. layouts/AdminLayout.tsx
+13. pages/admin/ (all 7 pages)
+14. pages/superadmin/ (all 3 pages)
+15. Update App.tsx
+16. Update pages/AuthPage.tsx
 
-IMPORTANT RULES:
-- Never use src/ prefix — all paths are from workspace root
-- Keep all existing code in App.tsx, only ADD new routes
-- Do not modify existing components/, layouts/, pages/ files
-  except App.tsx
-- Every file must be fully implemented, no placeholders
-- Use pnpm not npm
+CRITICAL RULES:
+- ALWAYS research before installing (Step 0)
+- NEVER create src/ folder
+- NEVER delete existing components/, pages/, layouts/ files
+- NEVER use CDN imports for React or other libraries
+- ALWAYS use pnpm
+- Replace "MOOVA" with "GIVA" in all new files
+- After Tailwind migration (Step 1), verify 
+  existing UI still renders before continuing

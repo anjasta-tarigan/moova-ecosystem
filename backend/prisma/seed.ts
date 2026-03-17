@@ -60,55 +60,55 @@ async function main() {
   };
 
   const superadmin = await prisma.user.upsert({
-    where: { email: "superadmin@moova.test" },
+    where: { email: "superadmin@giva.test" },
     update: {},
     create: {
       fullName: "Super Admin",
-      email: "superadmin@moova.test",
+      email: "superadmin@giva.test",
       password: passwords.superadmin,
       role: "SUPERADMIN",
     },
   });
 
   const admin = await prisma.user.upsert({
-    where: { email: "admin@moova.test" },
+    where: { email: "admin@giva.test" },
     update: {},
     create: {
-      fullName: "Admin MOOVA",
-      email: "admin@moova.test",
+      fullName: "Admin GIVA",
+      email: "admin@giva.test",
       password: passwords.admin,
       role: "ADMIN",
     },
   });
 
   const juri1 = await prisma.user.upsert({
-    where: { email: "juri1@moova.test" },
+    where: { email: "juri1@giva.test" },
     update: {},
     create: {
       fullName: "Juri 1",
-      email: "juri1@moova.test",
+      email: "juri1@giva.test",
       password: passwords.juri,
       role: "JURI",
     },
   });
 
   const juri2 = await prisma.user.upsert({
-    where: { email: "juri2@moova.test" },
+    where: { email: "juri2@giva.test" },
     update: {},
     create: {
       fullName: "Juri 2",
-      email: "juri2@moova.test",
+      email: "juri2@giva.test",
       password: passwords.juri,
       role: "JURI",
     },
   });
 
   const siswa = await prisma.user.upsert({
-    where: { email: "siswa@moova.test" },
+    where: { email: "siswa@giva.test" },
     update: {},
     create: {
       fullName: "Budi Santoso",
-      email: "siswa@moova.test",
+      email: "siswa@giva.test",
       password: passwords.siswa,
       role: "SISWA",
     },
@@ -180,7 +180,7 @@ async function main() {
       eligibility: ["SMP", "SMA/SMK", "Mahasiswa"],
       sdgs: [4, 9],
       prizePool: "Total hadiah Rp100.000.000",
-      organizer: "MOOVA",
+      organizer: "GIVA",
       createdById: admin.id,
       timeline: {
         create: [
@@ -280,7 +280,7 @@ async function main() {
       eventId: event.id,
       type: "PARTICIPANT",
       award: "Peserta Olimpiade 2024",
-      issuedBy: "Admin MOOVA",
+      issuedBy: "Admin GIVA",
     },
   });
 

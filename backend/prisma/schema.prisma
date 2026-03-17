@@ -160,7 +160,7 @@ model Event {
   eligibility      String[]
   sdgs             Int[]
   prizePool        String       @default("")
-  organizer        String       @default("MOOVA")
+  organizer        String       @default("GIVA")
 
   createdById      String
   createdAt        DateTime     @default(now())
