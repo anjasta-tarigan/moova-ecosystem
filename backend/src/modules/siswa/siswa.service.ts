@@ -1,7 +1,6 @@
 import prisma from "../../config/database";
-import { User } from "@prisma/client";
 
-const calculateCompleteness = (user: User, profile: any) => {
+const calculateCompleteness = (user: { fullName?: string }, profile: any) => {
   const requiredFields = [
     Boolean(user.fullName),
     Boolean(profile.phone),

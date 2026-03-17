@@ -1,14 +1,7 @@
-import {
-  PrismaClient,
-  UserRole,
-  JudgingStage,
-  EventFormat,
-  EventStatus,
-  CertificateType,
-  TeamMemberRole,
-} from "@prisma/client";
+import pkg from "@prisma/client";
 import bcrypt from "bcryptjs";
 
+const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
 const hashPassword = async (password: string) => bcrypt.hash(password, 10);
@@ -74,7 +67,7 @@ async function main() {
       fullName: "Super Admin",
       email: "superadmin@moova.test",
       password: passwords.superadmin,
-      role: UserRole.SUPERADMIN,
+      role: "SUPERADMIN",
     },
   });
 
@@ -85,7 +78,7 @@ async function main() {
       fullName: "Admin MOOVA",
       email: "admin@moova.test",
       password: passwords.admin,
-      role: UserRole.ADMIN,
+      role: "ADMIN",
     },
   });
 
@@ -96,7 +89,7 @@ async function main() {
       fullName: "Juri 1",
       email: "juri1@moova.test",
       password: passwords.juri,
-      role: UserRole.JURI,
+      role: "JURI",
     },
   });
 
@@ -107,7 +100,7 @@ async function main() {
       fullName: "Juri 2",
       email: "juri2@moova.test",
       password: passwords.juri,
-      role: UserRole.JURI,
+      role: "JURI",
     },
   });
 
@@ -118,7 +111,7 @@ async function main() {
       fullName: "Budi Santoso",
       email: "siswa@moova.test",
       password: passwords.siswa,
-      role: UserRole.SISWA,
+      role: "SISWA",
     },
   });
 
@@ -177,10 +170,10 @@ async function main() {
       theme: "Inovasi untuk Negeri",
       date: "2025-07-15",
       location: "Jakarta & Online",
-      format: EventFormat.HYBRID,
+      format: "HYBRID",
       category: "Sains & Teknologi",
       image: "",
-      status: EventStatus.OPEN,
+      status: "OPEN",
       deadline: "2025-06-30",
       fee: "Gratis",
       teamSizeMin: 1,
@@ -254,7 +247,7 @@ async function main() {
       members: {
         create: {
           userId: siswa.id,
-          role: TeamMemberRole.LEADER,
+          role: "LEADER",
         },
       },
     },
@@ -270,12 +263,12 @@ async function main() {
     where: {
       juriId_categoryId: { juriId: juri1.id, categoryId: informatika.id },
     },
-    update: { currentStage: JudgingStage.PAPER },
+    update: { currentStage: "PAPER" },
     create: {
       juriId: juri1.id,
       eventId: event.id,
       categoryId: informatika.id,
-      currentStage: JudgingStage.PAPER,
+      currentStage: "PAPER",
     },
   });
 
@@ -286,7 +279,7 @@ async function main() {
       id: "sample-certificate",
       recipientId: siswa.id,
       eventId: event.id,
-      type: CertificateType.PARTICIPANT,
+      type: "PARTICIPANT",
       award: "Peserta Olimpiade 2024",
       issuedBy: "Admin MOOVA",
     },
