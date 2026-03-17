@@ -10,7 +10,7 @@ const EcosystemPage: React.FC = () => {
         id="overview"
         tag="The Ecosystem"
         headline="Connecting the dots of innovation."
-        subheadline="MOOVA provides a structured environment where every stakeholder in the scientific value chain can thrive."
+        subheadline="GIVA provides a structured environment where every stakeholder in the scientific value chain can thrive."
       >
         <div className="space-y-20 mt-12">
           {/* Startups */}

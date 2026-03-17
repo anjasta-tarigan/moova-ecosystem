@@ -103,7 +103,7 @@ const ALL_SDGS = [
   { id: 6, title: "Clean Water", color: "bg-slate-900", icon: "💧", desc: "Ensure availability and sustainable management of water.", relevance: "Water purification hardware and sensing technologies.", example: "Low-cost filtration membranes." },
   { id: 7, title: "Affordable Energy", color: "bg-slate-900", icon: "⚡", desc: "Ensure access to affordable, reliable, sustainable energy.", relevance: "Renewable energy storage and grid optimization.", example: "Solar-powered cold storage." },
   { id: 8, title: "Decent Work", color: "bg-slate-900", icon: "📈", desc: "Promote sustained, inclusive and sustainable economic growth.", relevance: "Job creation in the knowledge economy.", example: "Gig-economy platforms for scientists." },
-  { id: 9, title: "Industry & Innovation", color: "bg-slate-900", icon: "🏗️", desc: "Build resilient infrastructure and foster innovation.", relevance: "The core mandate of MOOVA: converting science to industry.", example: "Sustainable material manufacturing." },
+  { id: 9, title: "Industry & Innovation", color: "bg-slate-900", icon: "🏗️", desc: "Build resilient infrastructure and foster innovation.", relevance: "The core mandate of GIVA: converting science to industry.", example: "Sustainable material manufacturing." },
   { id: 10, title: "Reduced Inequalities", color: "bg-slate-900", icon: "🤝", desc: "Reduce inequality within and among countries.", relevance: "Bridging the digital divide via technology transfer.", example: "Open-source hardware initiatives." },
   { id: 11, title: "Sustainable Cities", color: "bg-slate-900", icon: "🏙️", desc: "Make cities and human settlements inclusive and safe.", relevance: "Urban mobility, waste management, and smart city tech.", example: "Traffic optimization AI." },
   { id: 12, title: "Consumption", color: "bg-slate-900", icon: "🔄", desc: "Ensure sustainable consumption and production patterns.", relevance: "Circular economy models and waste reduction.", example: "Plastic recycling innovations." },
@@ -172,7 +172,7 @@ const LandingPage: React.FC = () => {
             {/* Subheadline */}
             <FadeIn delay={300}>
               <p className="text-lg md:text-xl text-slate-500 mb-10 max-w-2xl mx-auto leading-relaxed font-light">
-                MOOVA provides the infrastructure for discovery. Connect with mentors, secure funding, and collaborate on challenges that shape the future.
+                GIVA provides the infrastructure for discovery. Connect with mentors, secure funding, and collaborate on challenges that shape the future.
               </p>
             </FadeIn>
 
@@ -189,7 +189,7 @@ const LandingPage: React.FC = () => {
             {/* Stats Ticker */}
             <FadeIn delay={600} className="mt-20 w-full max-w-5xl border-t border-slate-100 pt-8 relative">
                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-white px-4 text-xs font-bold text-slate-300 uppercase tracking-widest">
-                 MOOVA in Numbers
+                 GIVA in Numbers
                </div>
                <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
                  {STATS_TICKER.map((stat, i) => (
@@ -253,7 +253,7 @@ const LandingPage: React.FC = () => {
         </div>
       </Section>
 
-      {/* 3. WHO MOOVA IS FOR (Stakeholder Cards) */}
+      {/* 3. WHO GIVA IS FOR (Stakeholder Cards) */}
       <section className="py-24 bg-slate-50 border-t border-slate-100 relative overflow-hidden">
         {/* Background Atmosphere */}
         <div className="absolute left-[-10%] top-[20%] w-[600px] h-[600px] rounded-full blur-[120px] opacity-5 bg-accent-orange pointer-events-none"></div>
@@ -264,7 +264,7 @@ const LandingPage: React.FC = () => {
               <span className="inline-block px-3 py-1 mb-4 text-xs font-bold tracking-widest uppercase rounded-full bg-white text-slate-900 border border-slate-200">
                 The Ecosystem
               </span>
-              <h2 className="text-3xl md:text-5xl font-bold mb-6 text-slate-900 leading-tight">Who MOOVA Is For.</h2>
+              <h2 className="text-3xl md:text-5xl font-bold mb-6 text-slate-900 leading-tight">Who GIVA Is For.</h2>
               <p className="text-lg text-slate-500 leading-relaxed">
                 Innovation requires a village. We've built specific value streams for every key player in the scientific value chain.
               </p>
@@ -342,7 +342,7 @@ const LandingPage: React.FC = () => {
               </div>
               <h2 className="text-3xl md:text-5xl font-bold mb-6 leading-tight">Our Impact Framework (SDGs)</h2>
               <p className="text-lg text-slate-400 leading-relaxed max-w-2xl">
-                We don't just innovate for the sake of it. Every program, startup, and challenge within MOOVA is mapped to the UN Sustainable Development Goals to ensure we are solving problems that matter.
+                We don't just innovate for the sake of it. Every program, startup, and challenge within GIVA is mapped to the UN Sustainable Development Goals to ensure we are solving problems that matter.
               </p>
             </FadeIn>
           </div>
@@ -391,7 +391,7 @@ const LandingPage: React.FC = () => {
              </div>
              <h2 className="text-4xl md:text-6xl font-bold text-slate-900 mb-8 tracking-tight">Ready to shape the future?</h2>
              <p className="text-xl text-slate-500 mb-12 leading-relaxed max-w-2xl mx-auto">
-               Whether you are a researcher, a founder, or a policy maker, there is a place for you in the MOOVA ecosystem.
+               Whether you are a researcher, a founder, or a policy maker, there is a place for you in the GIVA ecosystem.
              </p>
              <div className="flex flex-col sm:flex-row gap-4 justify-center">
                <Button size="lg" onClick={() => navigate('/join')} className="h-16 px-12 text-lg rounded-full">
@@ -443,7 +443,7 @@ const LandingPage: React.FC = () => {
                <div className="space-y-4">
                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-5">
                    <h4 className="flex items-center gap-2 text-sm font-bold uppercase text-slate-600 mb-2">
-                     <Microscope size={16} /> MOOVA Relevance
+                     <Microscope size={16} /> GIVA Relevance
                    </h4>
                    <p className="text-slate-800 text-sm leading-relaxed">
                      {selectedSdg.relevance}

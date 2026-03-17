@@ -133,7 +133,7 @@ const EventsPage: React.FC = () => {
     url.searchParams.append('action', 'TEMPLATE');
     url.searchParams.append('text', selectedEventForCalendar.title);
     url.searchParams.append('dates', `${formatGoogleDate(startDate)}/${formatGoogleDate(endDate)}`);
-    url.searchParams.append('details', selectedEventForCalendar.shortDescription + "\n\nLearn more at MOOVA.");
+    url.searchParams.append('details', selectedEventForCalendar.shortDescription + "\n\nLearn more at GIVA.");
     url.searchParams.append('location', selectedEventForCalendar.location);
 
     window.open(url.toString(), '_blank');
@@ -151,9 +151,9 @@ const EventsPage: React.FC = () => {
     const icsContent = [
       'BEGIN:VCALENDAR',
       'VERSION:2.0',
-      'PRODID:-//MOOVA//Ecosystem//EN',
+      'PRODID:-//GIVA//Ecosystem//EN',
       'BEGIN:VEVENT',
-      `UID:${selectedEventForCalendar.id}@moova.io`,
+      `UID:${selectedEventForCalendar.id}@GIVA.io`,
       `DTSTAMP:${formatICSDate(new Date())}`,
       `DTSTART:${formatICSDate(startDate)}`,
       `DTEND:${formatICSDate(endDate)}`,

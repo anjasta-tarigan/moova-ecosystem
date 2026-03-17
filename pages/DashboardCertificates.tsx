@@ -15,7 +15,7 @@ const CERTIFICATES = [
     recipient: "Alex Participant",
     event: "Deep Tech Hackathon: AI for Good",
     date: "Nov 05, 2024",
-    issuer: "MOOVA Global",
+    issuer: "GIVA Global",
     description: "Awarded for exceptional innovation in climate resilience technology.",
     status: "Valid",
     signature: "Dr. Alistair Wright",
@@ -80,7 +80,7 @@ const DashboardCertificates: React.FC = () => {
               M
             </div>
             <div>
-              <h4 className={`text-sm font-bold uppercase tracking-widest ${isDark ? 'text-white/60' : 'text-slate-500'}`}>MOOVA Ecosystem</h4>
+              <h4 className={`text-sm font-bold uppercase tracking-widest ${isDark ? 'text-white/60' : 'text-slate-500'}`}>GIVA Ecosystem</h4>
               <p className="text-xs opacity-50">Global Innovation Platform</p>
             </div>
           </div>

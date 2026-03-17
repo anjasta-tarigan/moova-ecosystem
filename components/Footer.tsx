@@ -11,7 +11,7 @@ const Footer: React.FC = () => {
           <div>
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-primary-900 font-bold text-xl">M</div>
-              <span className="text-2xl font-bold tracking-tight">MOOVA</span>
+              <span className="text-2xl font-bold tracking-tight">GIVA</span>
             </div>
             <p className="text-primary-100/70 text-sm leading-relaxed mb-8">
               A global science and innovation ecosystem moving ideas into real-world impact through collaboration, mentorship, and technology.
@@ -65,7 +65,7 @@ const Footer: React.FC = () => {
         </div>
 
         <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-primary-100/50">
-          <p>&copy; {new Date().getFullYear()} MOOVA Ecosystem. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} GIVA Ecosystem. All rights reserved.</p>
           <div className="flex gap-6">
             <Link to="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
             <Link to="/terms" className="hover:text-white transition-colors">Terms of Service</Link>

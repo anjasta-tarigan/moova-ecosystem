@@ -14,7 +14,7 @@ const DEMO_ACCOUNTS = [
     role: 'super_admin', 
     name: 'System', 
     lastName: 'Admin',
-    org: 'MOOVA HQ', 
+    org: 'moova HQ', 
     redirect: '/dashboard/admin' 
   },
   { 
@@ -186,7 +186,7 @@ const AuthPage: React.FC = () => {
          <div className="relative z-10">
             <Link to="/" className="flex items-center gap-3 w-fit group">
               <div className="w-10 h-10 bg-white/10 backdrop-blur-sm border border-white/10 rounded-xl flex items-center justify-center font-bold text-white group-hover:bg-white/20 transition-colors">M</div>
-              <span className="font-bold text-xl tracking-tight">MOOVA</span>
+              <span className="font-bold text-xl tracking-tight">moova</span>
             </Link>
          </div>
 
@@ -422,7 +422,7 @@ const AuthPage: React.FC = () => {
            <div className="flex flex-wrap gap-6 justify-center lg:justify-start text-xs text-primary-400 font-medium">
              <Link to="/privacy" className="hover:text-primary-600 transition-colors">Privacy Policy</Link>
              <Link to="/terms" className="hover:text-primary-600 transition-colors">Terms of Service</Link>
-             <span>© {new Date().getFullYear()} MOOVA Ecosystem</span>
+             <span>© {new Date().getFullYear()} moova Ecosystem</span>
            </div>
         </div>
 

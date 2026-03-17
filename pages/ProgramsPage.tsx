@@ -152,7 +152,7 @@ const PROGRAMS = [
   },
   {
     id: "academy",
-    title: "MOOVA Academy",
+    title: "GIVA Academy",
     subtitle: "The Foundation",
     description: "Curriculum-based learning modules focusing on deep tech commercialization and IP strategy.",
     icon: <BookOpen size={32} />,
@@ -224,7 +224,7 @@ const ProgramsPage: React.FC = () => {
                   <div className="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center text-purple-600">
                     <BookOpen size={20} />
                   </div>
-                  <span className="text-[10px] font-bold bg-slate-100 px-2 py-1 rounded">MOOVA Academy</span>
+                  <span className="text-[10px] font-bold bg-slate-100 px-2 py-1 rounded">GIVA Academy</span>
                 </div>
                 <h4 className="font-bold text-slate-900 mb-2">IP Strategy Course</h4>
                 <div className="w-full bg-slate-100 h-1.5 rounded-full mb-4 overflow-hidden">
@@ -282,7 +282,7 @@ const ProgramsPage: React.FC = () => {
       <Section
         id="pathway"
         tag="The Journey"
-        headline="The MOOVA Innovation Pathway."
+        headline="The GIVA Innovation Pathway."
         subheadline="A continuous lifecycle of support for scientific talent."
       >
         <div className="mt-16 relative">
@@ -338,7 +338,7 @@ const ProgramsPage: React.FC = () => {
         id="personas"
         tag="Ecosystem Members"
         headline="Who is this for?"
-        subheadline="MOOVA is built for the curious, the ambitious, and the committed."
+        subheadline="GIVA is built for the curious, the ambitious, and the committed."
       >
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-12">
           {PERSONAS.map((p, i) => (
@@ -446,7 +446,7 @@ const ProgramsPage: React.FC = () => {
               </span>
               <h2 className="text-3xl font-bold text-slate-900 mb-6">Why Join Early?</h2>
               <p className="text-lg text-slate-600 mb-10 leading-relaxed">
-                MOOVA is currently in its early community phase. By joining now, you become a <strong>Foundational Member</strong>.
+                GIVA is currently in its early community phase. By joining now, you become a <strong>Foundational Member</strong>.
               </p>
               
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10 text-left">

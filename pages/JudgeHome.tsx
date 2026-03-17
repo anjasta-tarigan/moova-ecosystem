@@ -49,7 +49,7 @@ const JudgeHome: React.FC = () => {
   }, []);
 
   const getCurrentUser = () => {
-    const userStr = localStorage.getItem('moova_user');
+    const userStr = localStorage.getItem('GIVA_user');
     return userStr ? JSON.parse(userStr) : { firstName: 'Judge' };
   };
 

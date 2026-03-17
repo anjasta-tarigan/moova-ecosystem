@@ -67,7 +67,7 @@ const MISSIONS = [
   },
   {
     title: "Impact",
-    desc: "We align curiosity with necessity. Every challenge on MOOVA targets real-world problems (SDGs).",
+    desc: "We align curiosity with necessity. Every challenge on GIVA targets real-world problems (SDGs).",
     icon: <Heart size={24} />,
     color: "bg-pink-50 text-pink-600"
   }
@@ -214,9 +214,9 @@ const AboutPage: React.FC = () => {
         </div>
       </section>
 
-      {/* 2. What is MOOVA? */}
+      {/* 2. What is GIVA? */}
       <Section
-        id="what-is-moova"
+        id="what-is-GIVA"
         tag="The Purpose"
         headline="More than a platform."
         subheadline="We are a community-driven engine for student capability."
@@ -227,7 +227,7 @@ const AboutPage: React.FC = () => {
               For too long, brilliant students have been stuck in silos. You have the ideas, the energy, and the will to change things, but often lack the structured roadmap, the network, or the resources to start.
             </p>
             <p>
-              <strong>MOOVA exists to solve this.</strong>
+              <strong>GIVA exists to solve this.</strong>
             </p>
             <p>
               We are building a digital ecosystem where competitions aren't just one-off events, but stepping stones. Where you don't just win a prize, but build a portfolio, find a team, and gain the skills to actually launch your solution.
@@ -240,7 +240,7 @@ const AboutPage: React.FC = () => {
                  <div className="w-12 h-12 bg-primary-50 rounded-full flex items-center justify-center text-primary-600">
                    <Sparkles size={24} />
                  </div>
-                 <h4 className="text-xl font-bold text-slate-900">The MOOVA Standard</h4>
+                 <h4 className="text-xl font-bold text-slate-900">The GIVA Standard</h4>
                </div>
                <ul className="space-y-4">
                  {[
@@ -360,10 +360,10 @@ const AboutPage: React.FC = () => {
             <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm text-primary-600">
               <Shield size={32} />
             </div>
-            <h2 className="text-3xl font-bold text-slate-900 mb-6">Why Trust MOOVA?</h2>
+            <h2 className="text-3xl font-bold text-slate-900 mb-6">Why Trust GIVA?</h2>
             <div className="space-y-6 text-slate-600 text-lg leading-relaxed">
               <p>
-                We know that trust is earned, not claimed. MOOVA is an early-stage platform, but our commitment is long-term.
+                We know that trust is earned, not claimed. GIVA is an early-stage platform, but our commitment is long-term.
               </p>
               <p>
                 We are built by former student innovators who understand the frustration of broken promises and empty networking events. We are bootstrapping this ecosystem with transparency, integrity, and a relentless focus on <strong>your</strong> success.

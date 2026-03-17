@@ -88,7 +88,7 @@ const getMockEvents = (): CalendarEvent[] => {
       title: 'Ecosystem Townhall',
       date: new Date(year, month, 15, 16, 0),
       type: 'event',
-      description: 'Quarterly community updates, new partner announcements, and open Q&A with the MOOVA leadership team.',
+      description: 'Quarterly community updates, new partner announcements, and open Q&A with the GIVA leadership team.',
       location: 'Live Stream',
       status: 'open',
       sdg: 17

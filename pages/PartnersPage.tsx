@@ -67,7 +67,7 @@ const PARTNER_MODELS = [
   },
   {
     title: "Strategic Partner",
-    description: "Long-term partners co-shaping MOOVA programs, reports, and regional initiatives.",
+    description: "Long-term partners co-shaping GIVA programs, reports, and regional initiatives.",
     icon: <Target size={28} />,
     color: "bg-amber-50 text-amber-600 border-amber-100"
   },
@@ -83,7 +83,7 @@ const FLOW_STEPS = [
   { num: "01", title: "Identify Goals", desc: "Align on shared objectives." },
   { num: "02", title: "Define Scope", desc: "Determine resource & roles." },
   { num: "03", title: "Design", desc: "Co-create the initiative." },
-  { num: "04", title: "Execute", desc: "Launch via MOOVA ecosystem." },
+  { num: "04", title: "Execute", desc: "Launch via GIVA ecosystem." },
   { num: "05", title: "Impact", desc: "Measure outcomes." }
 ];
 
@@ -113,7 +113,7 @@ const PartnersPage: React.FC = () => {
                   Connect with the <span className="text-slate-500">Next Wave.</span>
                 </h1>
                 <p className="text-xl text-slate-600 mb-8 leading-relaxed">
-                  Partner with MOOVA to access high-potential talent, de-risked deep tech deal flow, and measurable impact opportunities.
+                  Partner with GIVA to access high-potential talent, de-risked deep tech deal flow, and measurable impact opportunities.
                 </p>
                 <div className="flex flex-wrap gap-4">
                   <Button onClick={() => document.getElementById('models')?.scrollIntoView({ behavior: 'smooth'})}>
@@ -216,7 +216,7 @@ const PartnersPage: React.FC = () => {
       {/* 2. Why Partner */}
       <Section
         id="why-partner"
-        tag="Why MOOVA"
+        tag="Why GIVA"
         headline="More Than Collaboration — An Ecosystem."
         subheadline="We don’t just run programs. We build long-term innovation pathways connecting talent, problems, and impact."
       >
@@ -245,7 +245,7 @@ const PartnersPage: React.FC = () => {
         id="models"
         tag="Partnership Models"
         headline="Flexible Collaboration, Shared Impact."
-        subheadline="MOOVA offers multiple partnership models tailored to different institutions, goals, and levels of involvement."
+        subheadline="GIVA offers multiple partnership models tailored to different institutions, goals, and levels of involvement."
         className="bg-slate-50"
       >
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-12">
@@ -308,7 +308,7 @@ const PartnersPage: React.FC = () => {
               </span>
               <h2 className="text-3xl md:text-5xl font-bold mb-6">Designed for Real Results.</h2>
               <p className="text-lg text-slate-400 leading-relaxed max-w-lg mx-auto lg:mx-0">
-                Partnerships with MOOVA aim to create tangible outcomes — for people, organizations, and society. We measure success beyond participation.
+                Partnerships with GIVA aim to create tangible outcomes — for people, organizations, and society. We measure success beyond participation.
               </p>
             </div>
             
@@ -354,13 +354,13 @@ const PartnersPage: React.FC = () => {
              <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center mx-auto mb-10 text-primary-600 shadow-xl shadow-primary-900/5 rotate-3 hover:rotate-6 transition-transform duration-500 border border-slate-100">
                <Handshake size={40} />
              </div>
-             <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-6 tracking-tight">Become a MOOVA Partner.</h2>
+             <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-6 tracking-tight">Become a GIVA Partner.</h2>
              <p className="text-xl text-slate-500 mb-10 leading-relaxed">
                Whether you represent a university, company, organization, or institution — let’s explore how we can build impact together.
              </p>
              <div className="flex flex-col sm:flex-row gap-4 justify-center">
                <Button size="lg" className="h-14 px-10 text-lg">
-                 Partner with MOOVA
+                 Partner with GIVA
                </Button>
                <Button variant="white" size="lg" className="h-14 px-10 text-lg border border-slate-200 text-slate-600 hover:text-primary-700">
                  Request Collaboration Deck

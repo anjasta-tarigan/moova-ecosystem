@@ -33,10 +33,10 @@ const Navbar: React.FC = () => {
         {/* Logo */}
         <Link to="/" className="flex items-center gap-3 group z-50 relative" onClick={() => setIsOpen(false)}>
           <div className="w-10 h-10 bg-brand-gradient rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-primary-500/20 group-hover:scale-105 transition-transform">
-            M
+            G
           </div>
           <span className="text-2xl font-bold tracking-tight text-primary-900 group-hover:text-primary-600 transition-colors">
-            MOOVA
+            GIVA
           </span>
         </Link>
 
@@ -61,7 +61,7 @@ const Navbar: React.FC = () => {
         {/* Action Button */}
         <div className="hidden lg:flex items-center gap-4">
           <Button variant="primary" size="sm" onClick={handleJoinClick}>
-            Join MOOVA
+            Join GIVA
           </Button>
         </div>
 
@@ -90,7 +90,7 @@ const Navbar: React.FC = () => {
               </Link>
             ))}
             <div className="mt-4">
-              <Button variant="primary" fullWidth onClick={handleJoinClick}>Join MOOVA</Button>
+              <Button variant="primary" fullWidth onClick={handleJoinClick}>Join GIVA</Button>
             </div>
           </div>
         </div>

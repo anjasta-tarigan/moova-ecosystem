@@ -23,7 +23,7 @@ const TermsPage: React.FC = () => {
         id="terms-hero"
         tag="Legal Agreement"
         headline="Rules of Engagement."
-        subheadline="By participating in the MOOVA ecosystem, you agree to uphold standards of professional conduct, scientific integrity, and collaboration."
+        subheadline="By participating in the GIVA ecosystem, you agree to uphold standards of professional conduct, scientific integrity, and collaboration."
         className="bg-white border-b border-slate-200"
       >
          <div className="mt-8 text-sm text-slate-500">
@@ -42,7 +42,7 @@ const TermsPage: React.FC = () => {
               </h3>
               <div className="bg-white p-6 rounded-xl border border-slate-200">
                 <p className="text-slate-600 leading-relaxed mb-4">
-                  MOOVA is a professional network. Users must provide accurate identity and affiliation information. Misrepresentation of academic credentials or institutional status is grounds for immediate account suspension.
+                  GIVA is a professional network. Users must provide accurate identity and affiliation information. Misrepresentation of academic credentials or institutional status is grounds for immediate account suspension.
                 </p>
                 <p className="text-slate-600 leading-relaxed">
                   You agree to use the platform solely for lawful purposes related to scientific innovation, research collaboration, and professional networking.
@@ -56,10 +56,10 @@ const TermsPage: React.FC = () => {
               </h3>
               <div className="bg-white p-6 rounded-xl border border-slate-200">
                 <p className="text-slate-600 leading-relaxed mb-4">
-                  <strong>User Content:</strong> You retain full ownership of any research, data, or content you post to MOOVA. By posting, you grant MOOVA a limited license to display this content within the ecosystem context.
+                  <strong>User Content:</strong> You retain full ownership of any research, data, or content you post to GIVA. By posting, you grant GIVA a limited license to display this content within the ecosystem context.
                 </p>
                 <p className="text-slate-600 leading-relaxed">
-                  <strong>Platform IP:</strong> The MOOVA interface, matching algorithms, and underlying code are the exclusive property of MOOVA Inc.
+                  <strong>Platform IP:</strong> The GIVA interface, matching algorithms, and underlying code are the exclusive property of GIVA Inc.
                 </p>
               </div>
             </section>
@@ -92,7 +92,7 @@ const TermsPage: React.FC = () => {
               </h3>
               <div className="bg-white p-6 rounded-xl border border-slate-200">
                 <p className="text-slate-600 leading-relaxed">
-                  The platform is provided "as is". MOOVA facilitates connections but does not guarantee funding outcomes, employment, or the validity of user-generated scientific claims. We are not liable for disputes arising between users regarding IP ownership or partnership agreements.
+                  The platform is provided "as is". GIVA facilitates connections but does not guarantee funding outcomes, employment, or the validity of user-generated scientific claims. We are not liable for disputes arising between users regarding IP ownership or partnership agreements.
                 </p>
               </div>
             </section>
@@ -123,7 +123,7 @@ const TermsPage: React.FC = () => {
                <div className="mt-8 pt-6 border-t border-slate-100">
                  <h4 className="font-bold text-slate-900 mb-2">Legal Contact</h4>
                  <p className="text-xs text-slate-500 mb-4">For legal notices and subpoenas:</p>
-                 <a href="mailto:legal@moova.io" className="text-primary-600 text-sm font-bold hover:underline">legal@moova.io</a>
+                 <a href="mailto:legal@GIVA.io" className="text-primary-600 text-sm font-bold hover:underline">legal@GIVA.io</a>
                </div>
              </div>
           </div>

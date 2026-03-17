@@ -58,7 +58,7 @@ interface RichEventData {
 // --- Mock Data Helper ---
 const getRichEventData = (id: string): RichEventData => {
   return {
-    organizer: "MOOVA Global",
+    organizer: "GIVA Global",
     deadline: "Oct 10, 2024",
     fee: "Free Entry",
     teamSize: "1-5 Members",
@@ -179,7 +179,7 @@ const EventDetailPage: React.FC = () => {
   const [newQuestion, setNewQuestion] = useState('');
   
   // Check login status
-  const isLoggedIn = !!localStorage.getItem('moova_user');
+  const isLoggedIn = !!localStorage.getItem('GIVA_user');
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href);

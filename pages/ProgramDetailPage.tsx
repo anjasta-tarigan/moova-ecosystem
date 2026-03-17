@@ -79,7 +79,7 @@ const getProgramData = (id: string | undefined) => {
       { date: "Dec 10", title: "Demo Day", desc: "Live pitches to the global investment committee.", status: "upcoming" }
     ],
     whatYouGet: [
-      "Access to the MOOVA proprietary knowledge graph.",
+      "Access to the GIVA proprietary knowledge graph.",
       "3-month license for standard CAD/Simulation software.",
       "Certificate of participation for all team members.",
       "Direct fast-track to Partner Accelerator interviews."
@@ -109,7 +109,7 @@ const getProgramData = (id: string | undefined) => {
     ],
     faqs: [
       { q: "Do I need a fully formed team to apply?", a: "No, you can apply as an individual and we will match you during the team formation phase." },
-      { q: "Does MOOVA take equity?", a: "No. All grants for this challenge are equity-free. We believe in supporting student innovation without barriers." },
+      { q: "Does GIVA take equity?", a: "No. All grants for this challenge are equity-free. We believe in supporting student innovation without barriers." },
       { q: "Can we submit a project we started previously?", a: "Yes, as long as the majority of the new development happens during the program timeline." }
     ]
   };
@@ -332,7 +332,7 @@ const ProgramDetailPage: React.FC = () => {
                  </Button>
                </div>
                <p className="text-slate-600 text-sm mb-8 leading-relaxed">
-                 All participants must adhere to the official rulebook. Key requirements include original work, team composition limits, and adherence to the MOOVA Code of Conduct. Intellectual Property remains 100% with the student teams.
+                 All participants must adhere to the official rulebook. Key requirements include original work, team composition limits, and adherence to the GIVA Code of Conduct. Intellectual Property remains 100% with the student teams.
                </p>
                
                <h4 className="font-bold text-slate-900 mb-4">Judging Criteria</h4>

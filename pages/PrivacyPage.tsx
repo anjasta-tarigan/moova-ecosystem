@@ -20,7 +20,7 @@ const PrivacyPage: React.FC = () => {
     {
       icon: <Globe size={24} />,
       title: "3. International Transfers",
-      content: "As a global ecosystem, MOOVA operates across multiple jurisdictions. Data may be transferred to secure servers in the EU, US, and Singapore. All transfers are protected by Standard Contractual Clauses (SCCs) to ensure GDPR compliance."
+      content: "As a global ecosystem, GIVA operates across multiple jurisdictions. Data may be transferred to secure servers in the EU, US, and Singapore. All transfers are protected by Standard Contractual Clauses (SCCs) to ensure GDPR compliance."
     },
     {
       icon: <Eye size={24} />,
@@ -86,7 +86,7 @@ const PrivacyPage: React.FC = () => {
         <div className="mt-12 bg-slate-100 rounded-2xl p-8 text-center border border-slate-200">
           <h4 className="font-bold text-slate-900 mb-2">Have specific privacy concerns?</h4>
           <p className="text-slate-600 mb-4">Our Data Protection Officer (DPO) is available to address your inquiries.</p>
-          <a href="mailto:privacy@moova.io" className="text-primary-600 font-bold hover:underline">Contact Privacy Team &rarr;</a>
+          <a href="mailto:privacy@GIVA.io" className="text-primary-600 font-bold hover:underline">Contact Privacy Team &rarr;</a>
         </div>
       </div>
     </div>

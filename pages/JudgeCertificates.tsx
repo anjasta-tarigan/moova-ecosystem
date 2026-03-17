@@ -9,7 +9,7 @@ const JudgeCertificates: React.FC = () => {
       id: "CERT-J-2024-001",
       title: "Lead Judge - Global Science Summit",
       date: "Oct 15, 2024",
-      issuer: "MOOVA Global",
+      issuer: "GIVA Global",
       status: "Available"
     },
     {

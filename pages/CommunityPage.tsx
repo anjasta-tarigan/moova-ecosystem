@@ -444,7 +444,7 @@ const CommunityPage: React.FC = () => {
                  <h4 className="font-bold text-sm">Community Guidelines</h4>
                </div>
                <p className="text-xs text-slate-500 leading-relaxed mb-3">
-                 MOOVA is a professional ecosystem. We prioritize constructive feedback, scientific integrity, and respectful collaboration.
+                 GIVA is a professional ecosystem. We prioritize constructive feedback, scientific integrity, and respectful collaboration.
                </p>
                <a href="#" className="text-xs font-bold text-slate-600 hover:text-primary-600 flex items-center gap-1">
                  Read Code of Conduct <ArrowRight size={12} />

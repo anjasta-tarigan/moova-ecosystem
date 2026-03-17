@@ -66,7 +66,7 @@ const CertificateVerificationPage: React.FC = () => {
         <div className="container mx-auto px-6 flex justify-between items-center">
           <div onClick={() => navigate('/')} className="flex items-center gap-2 cursor-pointer">
             <div className="w-8 h-8 bg-brand-gradient rounded-lg flex items-center justify-center font-bold text-white">M</div>
-            <span className="font-bold text-slate-900">MOOVA Verify</span>
+            <span className="font-bold text-slate-900">GIVA Verify</span>
           </div>
           <Button size="sm" variant="outline" onClick={() => navigate('/login')}>Login</Button>
         </div>
@@ -76,7 +76,7 @@ const CertificateVerificationPage: React.FC = () => {
         <div className="text-center mb-10">
           <h1 className="text-3xl font-bold text-slate-900 mb-4">Certificate Verification</h1>
           <p className="text-slate-500">
-            Verify the authenticity of a MOOVA certificate by entering the unique Certificate ID found on the document.
+            Verify the authenticity of a GIVA certificate by entering the unique Certificate ID found on the document.
           </p>
         </div>
 
@@ -151,7 +151,7 @@ const CertificateVerificationPage: React.FC = () => {
                   {result.status === 'Valid' && (
                     <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 flex items-center gap-3 text-sm text-slate-500">
                       <ShieldCheck size={20} className="text-emerald-500" />
-                      This certificate was cryptographically signed by MOOVA.
+                      This certificate was cryptographically signed by GIVA.
                     </div>
                   )}
                 </div>
@@ -186,7 +186,7 @@ const CertificateVerificationPage: React.FC = () => {
       </main>
 
       <footer className="bg-slate-900 text-slate-400 py-8 text-center text-sm">
-        <p>&copy; {new Date().getFullYear()} MOOVA Ecosystem. All rights reserved.</p>
+        <p>&copy; {new Date().getFullYear()} GIVA Ecosystem. All rights reserved.</p>
       </footer>
     </div>
   );
