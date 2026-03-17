@@ -1,4 +1,3 @@
-import pkg from "@prisma/client";
 import bcrypt from "bcryptjs";
 
 const { PrismaClient } = require("@prisma/client");
