@@ -1,0 +1,195 @@
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { CheckCircle, AlertOctagon, Search, ShieldCheck, Download, ExternalLink } from 'lucide-react';
+import Button from '../components/Button';
+
+// Mock DB of certificates
+const MOCK_DB = [
+  {
+    id: "CERT-2024-8821",
+    recipient: "Alex Participant",
+    event: "Deep Tech Hackathon: AI for Good",
+    award: "1st Place Winner",
+    issueDate: "November 05, 2024",
+    status: "Valid"
+  },
+  {
+    id: "CERT-2024-5592",
+    recipient: "Alex Participant",
+    event: "Future Health Innovators Workshop",
+    award: "Participation",
+    issueDate: "September 20, 2024",
+    status: "Valid"
+  },
+  {
+    id: "CERT-2023-1102",
+    recipient: "Alex Participant",
+    event: "Regional Science Fair 2023",
+    award: "Judge",
+    issueDate: "December 12, 2023",
+    status: "Revoked",
+    revocationReason: "Administrative adjustment."
+  }
+];
+
+const CertificateVerificationPage: React.FC = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [certId, setCertId] = useState(id || '');
+  const [result, setResult] = useState<typeof MOCK_DB[0] | null | undefined>(null);
+  const [searched, setSearched] = useState(false);
+
+  useEffect(() => {
+    if (id) {
+      handleVerify(id);
+    }
+  }, [id]);
+
+  const handleVerify = (searchId: string) => {
+    const found = MOCK_DB.find(c => c.id.toLowerCase() === searchId.toLowerCase());
+    setResult(found);
+    setSearched(true);
+  };
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    handleVerify(certId);
+    // Update URL without reload
+    window.history.pushState({}, '', `#/verify/${certId}`);
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-50 flex flex-col">
+      
+      {/* Simple Header */}
+      <header className="bg-white border-b border-slate-200 py-4">
+        <div className="container mx-auto px-6 flex justify-between items-center">
+          <div onClick={() => navigate('/')} className="flex items-center gap-2 cursor-pointer">
+            <div className="w-8 h-8 bg-brand-gradient rounded-lg flex items-center justify-center font-bold text-white">M</div>
+            <span className="font-bold text-slate-900">MOOVA Verify</span>
+          </div>
+          <Button size="sm" variant="outline" onClick={() => navigate('/login')}>Login</Button>
+        </div>
+      </header>
+
+      <main className="flex-1 container mx-auto px-6 py-12 max-w-2xl">
+        <div className="text-center mb-10">
+          <h1 className="text-3xl font-bold text-slate-900 mb-4">Certificate Verification</h1>
+          <p className="text-slate-500">
+            Verify the authenticity of a MOOVA certificate by entering the unique Certificate ID found on the document.
+          </p>
+        </div>
+
+        {/* Search Box */}
+        <form onSubmit={handleSearchSubmit} className="bg-white p-2 rounded-2xl shadow-sm border border-slate-200 flex gap-2 mb-10">
+          <div className="relative flex-1">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+            <input 
+              type="text" 
+              placeholder="Enter Certificate ID (e.g., CERT-2024-8821)" 
+              className="w-full pl-12 pr-4 py-3 rounded-xl focus:outline-none text-slate-900 placeholder:text-slate-400 font-mono"
+              value={certId}
+              onChange={(e) => setCertId(e.target.value)}
+            />
+          </div>
+          <Button type="submit">Verify</Button>
+        </form>
+
+        {/* Results */}
+        {searched && (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {result ? (
+              <div className={`bg-white rounded-2xl border-2 overflow-hidden ${result.status === 'Valid' ? 'border-emerald-100' : 'border-red-100'}`}>
+                
+                {/* Status Banner */}
+                <div className={`p-6 flex items-center justify-center gap-3 ${result.status === 'Valid' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'}`}>
+                  {result.status === 'Valid' ? (
+                    <>
+                      <CheckCircle size={28} />
+                      <span className="text-xl font-bold">Certificate is Valid</span>
+                    </>
+                  ) : (
+                    <>
+                      <AlertOctagon size={28} />
+                      <span className="text-xl font-bold">Certificate Revoked</span>
+                    </>
+                  )}
+                </div>
+
+                {/* Details */}
+                <div className="p-8 space-y-6">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-xs uppercase tracking-widest text-slate-400 font-bold">Recipient</span>
+                    <span className="text-2xl font-bold text-slate-900">{result.recipient}</span>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <span className="text-xs uppercase tracking-widest text-slate-400 font-bold">Event</span>
+                      <p className="font-medium text-slate-700 mt-1">{result.event}</p>
+                    </div>
+                    <div>
+                      <span className="text-xs uppercase tracking-widest text-slate-400 font-bold">Award / Role</span>
+                      <p className="font-medium text-slate-700 mt-1">{result.award}</p>
+                    </div>
+                    <div>
+                      <span className="text-xs uppercase tracking-widest text-slate-400 font-bold">Issue Date</span>
+                      <p className="font-medium text-slate-700 mt-1">{result.issueDate}</p>
+                    </div>
+                    <div>
+                      <span className="text-xs uppercase tracking-widest text-slate-400 font-bold">Certificate ID</span>
+                      <p className="font-mono text-slate-700 mt-1">{result.id}</p>
+                    </div>
+                  </div>
+
+                  {result.status === 'Revoked' && (
+                    <div className="bg-red-50 p-4 rounded-xl border border-red-100 text-sm text-red-800">
+                      <strong>Revocation Reason:</strong> {result.revocationReason}
+                    </div>
+                  )}
+
+                  {result.status === 'Valid' && (
+                    <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 flex items-center gap-3 text-sm text-slate-500">
+                      <ShieldCheck size={20} className="text-emerald-500" />
+                      This certificate was cryptographically signed by MOOVA.
+                    </div>
+                  )}
+                </div>
+
+                {/* Actions */}
+                {result.status === 'Valid' && (
+                  <div className="p-6 bg-slate-50 border-t border-slate-100 flex justify-center gap-4">
+                    <Button variant="outline" size="sm" className="gap-2">
+                      <Download size={16} /> Download PDF
+                    </Button>
+                    <Button variant="outline" size="sm" className="gap-2" onClick={() => window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${window.location.href}`, '_blank')}>
+                      <ExternalLink size={16} /> Share on LinkedIn
+                    </Button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="text-center p-12 bg-white rounded-2xl border border-slate-200">
+                <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-400">
+                  <Search size={24} />
+                </div>
+                <h3 className="text-lg font-bold text-slate-900 mb-1">Certificate Not Found</h3>
+                <p className="text-slate-500">
+                  We could not find a certificate with ID <strong>{certId}</strong>. <br/>
+                  Please check the ID and try again.
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
+      </main>
+
+      <footer className="bg-slate-900 text-slate-400 py-8 text-center text-sm">
+        <p>&copy; {new Date().getFullYear()} MOOVA Ecosystem. All rights reserved.</p>
+      </footer>
+    </div>
+  );
+};
+
+export default CertificateVerificationPage;
