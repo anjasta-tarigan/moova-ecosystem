@@ -1,17 +1,37 @@
-
-import React, { useState, useMemo, useRef, useEffect } from 'react';
-import Section from '../components/Section';
-import Button from '../components/Button';
-import { EVENTS } from '../constants';
-import { 
-  Calendar, MapPin, Search, Filter, ArrowRight, Tag, 
-  Globe, Users, Layers, ChevronDown, X, Trophy, CalendarPlus,
-  Download, ExternalLink, Play, Mic
-} from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import React, {
+  useState,
+  useMemo,
+  useRef,
+  useEffect,
+  useCallback,
+} from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  Calendar,
+  MapPin,
+  Search,
+  Filter,
+  ArrowRight,
+  Tag,
+  Globe,
+  Users,
+  Layers,
+  ChevronDown,
+  X,
+  Trophy,
+  CalendarPlus,
+  Download,
+  ExternalLink,
+  Play,
+  Mic,
+} from "lucide-react";
+import Section from "../components/Section";
+import Button from "../components/Button";
+import { eventsApi } from "../services/api/eventsApi";
+import { formatDate } from "../lib/utils";
 
 // --- Animation Helper (Inlined for standalone usage) ---
-const useOnScreen = (ref: React.RefObject<Element>, rootMargin = '0px') => {
+const useOnScreen = (ref: React.RefObject<Element>, rootMargin = "0px") => {
   const [isIntersecting, setIntersecting] = useState(false);
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -21,7 +41,7 @@ const useOnScreen = (ref: React.RefObject<Element>, rootMargin = '0px') => {
           observer.disconnect();
         }
       },
-      { rootMargin }
+      { rootMargin },
     );
     if (ref.current) observer.observe(ref.current);
     return () => observer.disconnect();
@@ -29,15 +49,19 @@ const useOnScreen = (ref: React.RefObject<Element>, rootMargin = '0px') => {
   return isIntersecting;
 };
 
-const FadeIn: React.FC<{ children: React.ReactNode; delay?: number; className?: string }> = ({ children, delay = 0, className = "" }) => {
+const FadeIn: React.FC<{
+  children: React.ReactNode;
+  delay?: number;
+  className?: string;
+}> = ({ children, delay = 0, className = "" }) => {
   const ref = useRef<HTMLDivElement>(null);
-  const onScreen = useOnScreen(ref, '-50px');
+  const onScreen = useOnScreen(ref, "-50px");
   return (
     <div
       ref={ref}
       style={{ transitionDelay: `${delay}ms` }}
       className={`transition-all duration-700 ease-out ${
-        onScreen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+        onScreen ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
       } ${className}`}
     >
       {children}
@@ -45,98 +69,119 @@ const FadeIn: React.FC<{ children: React.ReactNode; delay?: number; className?: 
   );
 };
 
+type EventItem = {
+  id: string;
+  title: string;
+  shortDescription: string;
+  date: string;
+  location: string;
+  format: string;
+  category: string;
+  image: string;
+  status: string;
+  deadline?: string;
+  registrationCount?: number;
+};
+
+const statusOptions = [
+  { label: "All", value: "All" },
+  { label: "Open", value: "OPEN" },
+  { label: "Upcoming", value: "UPCOMING" },
+  { label: "Closed", value: "CLOSED" },
+];
+
 const EventsPage: React.FC = () => {
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [activeCategory, setActiveCategory] = useState('All');
-  const [activeStatus, setActiveStatus] = useState('All');
-  const [dateRange, setDateRange] = useState({ start: '', end: '' });
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeCategory, setActiveCategory] = useState("All");
+  const [activeStatus, setActiveStatus] = useState<string>(
+    statusOptions[0].value,
+  );
+  const [dateRange, setDateRange] = useState({ start: "", end: "" });
+  const [events, setEvents] = useState<EventItem[]>([]);
+  const [categories, setCategories] = useState<string[]>(["All"]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // Calendar Modal State
   const [calendarModalOpen, setCalendarModalOpen] = useState(false);
-  const [selectedEventForCalendar, setSelectedEventForCalendar] = useState<typeof EVENTS[0] | null>(null);
+  const [selectedEventForCalendar, setSelectedEventForCalendar] =
+    useState<EventItem | null>(null);
 
-  const categories = ['All', 'Conference', 'Competition', 'Workshop', 'Innovation Challenge'];
-  const statuses = ['All', 'Open', 'Upcoming', 'Closed'];
+  useEffect(() => {
+    const timer = setTimeout(() => setSearchQuery(searchTerm.trim()), 300);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
 
-  // Helper to parse event date string (e.g., "Oct 12-14, 2024") to Date object
-  const parseEventDate = (dateStr: string) => {
-    const months: {[key: string]: number} = { Jan:0, Feb:1, Mar:2, Apr:3, May:4, Jun:5, Jul:6, Aug:7, Sep:8, Oct:9, Nov:10, Dec:11 };
-    
+  const fetchEvents = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
     try {
-      // Split "Oct 12-14, 2024" -> ["Oct 12-14", "2024"]
-      const parts = dateStr.split(',');
-      if (parts.length < 2) return new Date(0); // Fallback for invalid format
-      
-      const year = parseInt(parts[1].trim());
-      const datePart = parts[0].trim(); // "Oct 12-14"
-      
-      const [monthStr, dayRange] = datePart.split(' ');
-      // Take the first day if it's a range like "12-14"
-      const day = parseInt(dayRange.split('-')[0]); 
-      
-      const month = months[monthStr];
-      
-      if (month === undefined || isNaN(day) || isNaN(year)) return new Date(0);
-      
-      return new Date(year, month, day);
-    } catch (e) {
-      return new Date(0);
+      const params: Record<string, any> = { page: 1, limit: 100 };
+      if (searchQuery) params.search = searchQuery;
+      if (activeCategory !== "All") params.category = activeCategory;
+      if (activeStatus !== "All") params.status = activeStatus;
+
+      const res = await eventsApi.getEvents(params);
+      const data: EventItem[] = res.data?.data || [];
+      setEvents(data);
+
+      const categoryNames = Array.from(
+        new Set(
+          data
+            .map((evt) => evt.category)
+            .filter((cat): cat is string => Boolean(cat)),
+        ),
+      );
+      setCategories(["All", ...categoryNames]);
+    } catch (err) {
+      setError("Failed to load events. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
+  }, [searchQuery, activeCategory, activeStatus]);
+
+  useEffect(() => {
+    fetchEvents();
+  }, [fetchEvents]);
+
+  // Helper to parse event date string from API to Date object
+  const parseEventDate = (dateStr: string) => {
+    const parsed = new Date(dateStr);
+    return isNaN(parsed.getTime()) ? new Date(0) : parsed;
   };
 
   // --- Calendar Logic ---
 
   const getEventDates = (dateStr: string) => {
-    const months: {[key: string]: number} = { Jan:0, Feb:1, Mar:2, Apr:3, May:4, Jun:5, Jul:6, Aug:7, Sep:8, Oct:9, Nov:10, Dec:11 };
-    const now = new Date();
-    
-    try {
-      // Parse "Oct 12-14, 2024" or "Nov 05, 2024"
-      const parts = dateStr.split(',');
-      const year = parts.length > 1 ? parseInt(parts[1].trim()) : now.getFullYear();
-      const datePart = parts[0].trim(); // "Oct 12-14"
-      
-      const [monthStr, dayRange] = datePart.split(' ');
-      const month = months[monthStr];
-      
-      let startDay = 1;
-      let endDay = 1;
-
-      if (dayRange.includes('-')) {
-        const [s, e] = dayRange.split('-');
-        startDay = parseInt(s);
-        endDay = parseInt(e);
-      } else {
-        startDay = parseInt(dayRange);
-        endDay = parseInt(dayRange);
-      }
-
-      const startDate = new Date(year, month, startDay, 9, 0, 0); // Default 9 AM
-      const endDate = new Date(year, month, endDay, 17, 0, 0);   // Default 5 PM
-
-      return { startDate, endDate };
-    } catch (e) {
-      return { startDate: now, endDate: now };
-    }
+    const startDate = parseEventDate(dateStr);
+    const endDate = new Date(startDate.getTime() + 2 * 60 * 60 * 1000);
+    return { startDate, endDate };
   };
 
   const handleAddToGoogle = () => {
     if (!selectedEventForCalendar) return;
     const { startDate, endDate } = getEventDates(selectedEventForCalendar.date);
-    
+
     const formatGoogleDate = (date: Date) => {
-      return date.toISOString().replace(/-|:|\.\d+/g, '');
+      return date.toISOString().replace(/-|:|\.\d+/g, "");
     };
 
-    const url = new URL('https://calendar.google.com/calendar/render');
-    url.searchParams.append('action', 'TEMPLATE');
-    url.searchParams.append('text', selectedEventForCalendar.title);
-    url.searchParams.append('dates', `${formatGoogleDate(startDate)}/${formatGoogleDate(endDate)}`);
-    url.searchParams.append('details', selectedEventForCalendar.shortDescription + "\n\nLearn more at GIVA.");
-    url.searchParams.append('location', selectedEventForCalendar.location);
+    const url = new URL("https://calendar.google.com/calendar/render");
+    url.searchParams.append("action", "TEMPLATE");
+    url.searchParams.append("text", selectedEventForCalendar.title);
+    url.searchParams.append(
+      "dates",
+      `${formatGoogleDate(startDate)}/${formatGoogleDate(endDate)}`,
+    );
+    url.searchParams.append(
+      "details",
+      selectedEventForCalendar.shortDescription + "\n\nLearn more at GIVA.",
+    );
+    url.searchParams.append("location", selectedEventForCalendar.location);
 
-    window.open(url.toString(), '_blank');
+    window.open(url.toString(), "_blank");
     setCalendarModalOpen(false);
   };
 
@@ -145,14 +190,14 @@ const EventsPage: React.FC = () => {
     const { startDate, endDate } = getEventDates(selectedEventForCalendar.date);
 
     const formatICSDate = (date: Date) => {
-      return date.toISOString().replace(/-|:|\.\d+/g, '');
+      return date.toISOString().replace(/-|:|\.\d+/g, "");
     };
 
     const icsContent = [
-      'BEGIN:VCALENDAR',
-      'VERSION:2.0',
-      'PRODID:-//GIVA//Ecosystem//EN',
-      'BEGIN:VEVENT',
+      "BEGIN:VCALENDAR",
+      "VERSION:2.0",
+      "PRODID:-//GIVA//Ecosystem//EN",
+      "BEGIN:VEVENT",
       `UID:${selectedEventForCalendar.id}@GIVA.io`,
       `DTSTAMP:${formatICSDate(new Date())}`,
       `DTSTART:${formatICSDate(startDate)}`,
@@ -160,21 +205,23 @@ const EventsPage: React.FC = () => {
       `SUMMARY:${selectedEventForCalendar.title}`,
       `DESCRIPTION:${selectedEventForCalendar.shortDescription}`,
       `LOCATION:${selectedEventForCalendar.location}`,
-      'END:VEVENT',
-      'END:VCALENDAR'
-    ].join('\n');
+      "END:VEVENT",
+      "END:VCALENDAR",
+    ].join("\n");
 
-    const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
-    const link = document.createElement('a');
+    const blob = new Blob([icsContent], {
+      type: "text/calendar;charset=utf-8",
+    });
+    const link = document.createElement("a");
     link.href = window.URL.createObjectURL(blob);
-    link.setAttribute('download', `${selectedEventForCalendar.id}.ics`);
+    link.setAttribute("download", `${selectedEventForCalendar.id}.ics`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     setCalendarModalOpen(false);
   };
 
-  const openCalendarModal = (e: React.MouseEvent, event: typeof EVENTS[0]) => {
+  const openCalendarModal = (e: React.MouseEvent, event: EventItem) => {
     e.stopPropagation();
     setSelectedEventForCalendar(event);
     setCalendarModalOpen(true);
@@ -182,13 +229,7 @@ const EventsPage: React.FC = () => {
 
   // Filter Logic
   const filteredEvents = useMemo(() => {
-    return EVENTS.filter(event => {
-      const matchesSearch = event.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          event.shortDescription.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesCategory = activeCategory === 'All' || event.category === activeCategory;
-      const matchesStatus = activeStatus === 'All' || event.status === activeStatus;
-      
-      // Date Range Check
+    return events.filter((event) => {
       let inDateRange = true;
       const eventDate = parseEventDate(event.date);
 
@@ -203,31 +244,42 @@ const EventsPage: React.FC = () => {
         endDate.setHours(23, 59, 59, 999);
         if (eventDate > endDate) inDateRange = false;
       }
-      
-      return matchesSearch && matchesCategory && matchesStatus && inDateRange;
+
+      return inDateRange;
     });
-  }, [searchTerm, activeCategory, activeStatus, dateRange]);
+  }, [events, dateRange]);
 
   // Status Badge Helper
   const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'Open': return 'bg-emerald-100 text-emerald-800 border-emerald-200';
-      case 'Upcoming': return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'Closed': return 'bg-slate-100 text-slate-500 border-slate-200';
-      default: return 'bg-slate-100 text-slate-800';
+    switch (status.toUpperCase()) {
+      case "OPEN":
+        return "bg-emerald-100 text-emerald-800 border-emerald-200";
+      case "UPCOMING":
+        return "bg-blue-100 text-blue-800 border-blue-200";
+      case "CLOSED":
+        return "bg-slate-100 text-slate-500 border-slate-200";
+      default:
+        return "bg-slate-100 text-slate-800";
     }
   };
 
+  const formatStatusLabel = (status: string) => {
+    const normalized = status.toUpperCase();
+    if (normalized === "OPEN") return "Open";
+    if (normalized === "UPCOMING") return "Upcoming";
+    if (normalized === "CLOSED") return "Closed";
+    return status;
+  };
+
   const clearFilters = () => {
-    setSearchTerm('');
-    setActiveCategory('All');
-    setActiveStatus('All');
-    setDateRange({ start: '', end: '' });
+    setSearchTerm("");
+    setActiveCategory("All");
+    setActiveStatus("All");
+    setDateRange({ start: "", end: "" });
   };
 
   return (
     <div className="bg-slate-50 min-h-screen">
-      
       {/* 1. HERO SECTION */}
       <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden bg-slate-50">
         <div className="absolute inset-0 bg-grid-pattern opacity-50 pointer-events-none"></div>
@@ -236,7 +288,6 @@ const EventsPage: React.FC = () => {
 
         <div className="container mx-auto px-6 md:px-12 lg:px-20 max-w-7xl relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            
             {/* Text Content */}
             <div className="max-w-xl">
               <FadeIn>
@@ -245,13 +296,21 @@ const EventsPage: React.FC = () => {
                   Live Stages
                 </div>
                 <h1 className="text-5xl md:text-6xl font-bold text-slate-900 mb-6 tracking-tight leading-[1.1]">
-                  Where ideas <span className="text-slate-500">Compete & Evolve.</span>
+                  Where ideas{" "}
+                  <span className="text-slate-500">Compete & Evolve.</span>
                 </h1>
                 <p className="text-xl text-slate-600 mb-8 leading-relaxed">
-                  Join summits, hackathons, and workshops designed to foster connection and accelerate knowledge exchange.
+                  Join summits, hackathons, and workshops designed to foster
+                  connection and accelerate knowledge exchange.
                 </p>
                 <div className="flex flex-wrap gap-4">
-                  <Button onClick={() => document.getElementById('events-list')?.scrollIntoView({ behavior: 'smooth'})}>
+                  <Button
+                    onClick={() =>
+                      document
+                        .getElementById("events-list")
+                        ?.scrollIntoView({ behavior: "smooth" })
+                    }
+                  >
                     Explore Upcoming Events
                   </Button>
                   <Button variant="white">Host an Event</Button>
@@ -261,7 +320,6 @@ const EventsPage: React.FC = () => {
 
             {/* Interactive Events UI */}
             <div className="relative h-[550px] w-full hidden lg:flex items-center justify-center">
-              
               {/* Event Ticket (Back) */}
               <div className="absolute top-8 right-10 w-[300px] bg-white rounded-2xl shadow-xl border border-slate-200 p-0 overflow-hidden transform rotate-6 opacity-60">
                 <div className="h-32 bg-slate-800"></div>
@@ -277,45 +335,69 @@ const EventsPage: React.FC = () => {
               </div>
 
               {/* Live Player Mockup (Front) */}
-              <div className="absolute top-20 left-0 right-10 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-float" style={{ animationDuration: '7s' }}>
+              <div
+                className="absolute top-20 left-0 right-10 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-float"
+                style={{ animationDuration: "7s" }}
+              >
                 <div className="bg-black aspect-video relative flex items-center justify-center group">
                   <div className="absolute top-4 left-4 bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded-sm uppercase tracking-wider flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span> Live
+                    <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span>{" "}
+                    Live
                   </div>
                   <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white cursor-pointer hover:bg-white/30 transition-colors">
                     <Play size={24} fill="currentColor" />
                   </div>
                   <div className="absolute bottom-4 left-4 right-4 text-white">
-                    <div className="text-sm font-bold">Keynote: The Future of Biotech</div>
-                    <div className="text-xs opacity-70">Dr. Sarah Miller • Live from London</div>
+                    <div className="text-sm font-bold">
+                      Keynote: The Future of Biotech
+                    </div>
+                    <div className="text-xs opacity-70">
+                      Dr. Sarah Miller • Live from London
+                    </div>
                   </div>
                 </div>
-                
+
                 <div className="p-4 bg-white flex justify-between items-center">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200"></div>
                     <div className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 -ml-4"></div>
-                    <div className="text-xs text-slate-500 font-medium pl-1">+420 Watching</div>
+                    <div className="text-xs text-slate-500 font-medium pl-1">
+                      +420 Watching
+                    </div>
                   </div>
-                  <Button size="sm" variant="outline" className="text-xs h-8">Join Session</Button>
+                  <Button size="sm" variant="outline" className="text-xs h-8">
+                    Join Session
+                  </Button>
                 </div>
               </div>
 
               {/* Agenda Card */}
-              <div className="absolute -bottom-4 left-4 bg-white p-4 rounded-xl shadow-xl border border-slate-200 w-64 z-20 animate-float" style={{ animationDelay: '1.5s' }}>
-                <div className="text-xs font-bold text-slate-400 uppercase mb-3">Up Next</div>
+              <div
+                className="absolute -bottom-4 left-4 bg-white p-4 rounded-xl shadow-xl border border-slate-200 w-64 z-20 animate-float"
+                style={{ animationDelay: "1.5s" }}
+              >
+                <div className="text-xs font-bold text-slate-400 uppercase mb-3">
+                  Up Next
+                </div>
                 <div className="space-y-3">
                   <div className="flex gap-3 items-center">
-                    <div className="text-xs font-mono text-slate-500">10:00</div>
-                    <div className="text-sm font-bold text-slate-900">Panel Discussion</div>
+                    <div className="text-xs font-mono text-slate-500">
+                      10:00
+                    </div>
+                    <div className="text-sm font-bold text-slate-900">
+                      Panel Discussion
+                    </div>
                   </div>
                   <div className="flex gap-3 items-center">
-                    <div className="text-xs font-mono text-slate-500">11:30</div>
-                    <div className="text-sm font-bold text-slate-900">Networking Break</div>
+                    <div className="text-xs font-mono text-slate-500">
+                      11:30
+                    </div>
+                    <div className="text-sm font-bold text-slate-900">
+                      Networking Break
+                    </div>
                   </div>
                 </div>
               </div>
-
             </div>
           </div>
         </div>
@@ -331,13 +413,15 @@ const EventsPage: React.FC = () => {
         {/* Search and Controls */}
         <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm mt-8">
           <div className="flex flex-col xl:flex-row gap-6 justify-between items-center">
-            
             {/* Search */}
             <div className="relative w-full xl:max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-              <input 
-                type="text" 
-                placeholder="Search events, topics, or locations..." 
+              <Search
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                size={20}
+              />
+              <input
+                type="text"
+                placeholder="Search events, topics, or locations..."
                 className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:outline-none transition-all"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -346,50 +430,57 @@ const EventsPage: React.FC = () => {
 
             {/* Filters */}
             <div className="flex flex-wrap gap-3 w-full xl:w-auto items-center justify-end">
-              
               {/* Date Range Picker */}
               <div className="flex items-center gap-2 px-3 py-3 bg-white border border-slate-200 rounded-lg text-sm hover:border-slate-300 transition-colors shadow-sm w-full sm:w-auto">
                 <Calendar size={16} className="text-slate-400 shrink-0" />
-                <input 
-                  type="date" 
+                <input
+                  type="date"
                   className="bg-transparent border-none p-0 text-slate-600 focus:ring-0 outline-none w-full sm:w-auto"
                   value={dateRange.start}
-                  onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))}
+                  onChange={(e) =>
+                    setDateRange((prev) => ({ ...prev, start: e.target.value }))
+                  }
                   aria-label="Start Date"
                 />
                 <span className="text-slate-300 px-1">-</span>
-                <input 
-                  type="date" 
+                <input
+                  type="date"
                   className="bg-transparent border-none p-0 text-slate-600 focus:ring-0 outline-none w-full sm:w-auto"
                   value={dateRange.end}
-                  onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))}
+                  onChange={(e) =>
+                    setDateRange((prev) => ({ ...prev, end: e.target.value }))
+                  }
                   aria-label="End Date"
                 />
                 {(dateRange.start || dateRange.end) && (
-                   <button 
-                    onClick={() => setDateRange({ start: '', end: '' })}
+                  <button
+                    onClick={() => setDateRange({ start: "", end: "" })}
                     className="ml-1 p-1 hover:bg-slate-100 rounded-full text-slate-400 hover:text-red-500"
-                   >
-                     <X size={14} />
-                   </button>
+                  >
+                    <X size={14} />
+                  </button>
                 )}
               </div>
 
               <div className="relative group w-full sm:w-auto">
                 <button className="flex items-center gap-2 px-4 py-3 bg-white border border-slate-200 rounded-lg text-sm font-medium hover:border-slate-300 transition-colors w-full justify-between sm:w-48 shadow-sm">
                   <div className="flex items-center gap-2 truncate">
-                    <Filter size={16} className="shrink-0" /> 
-                    <span className="truncate">{activeCategory === 'All' ? 'Category: All' : activeCategory}</span>
+                    <Filter size={16} className="shrink-0" />
+                    <span className="truncate">
+                      {activeCategory === "All"
+                        ? "Category: All"
+                        : activeCategory}
+                    </span>
                   </div>
                   <ChevronDown size={14} className="shrink-0" />
                 </button>
                 {/* Dropdown Logic (Simplified for CSS) */}
                 <div className="absolute top-full right-0 mt-2 w-full sm:w-48 bg-white border border-slate-100 shadow-lg rounded-xl overflow-hidden hidden group-hover:block z-20">
-                  {categories.map(cat => (
-                    <button 
+                  {categories.map((cat) => (
+                    <button
                       key={cat}
                       onClick={() => setActiveCategory(cat)}
-                      className={`w-full text-left px-4 py-2 text-sm hover:bg-slate-50 ${activeCategory === cat ? 'text-primary-600 font-bold' : 'text-slate-600'}`}
+                      className={`w-full text-left px-4 py-2 text-sm hover:bg-slate-50 ${activeCategory === cat ? "text-primary-600 font-bold" : "text-slate-600"}`}
                     >
                       {cat}
                     </button>
@@ -398,17 +489,17 @@ const EventsPage: React.FC = () => {
               </div>
 
               <div className="flex gap-2 bg-slate-100 p-1 rounded-lg w-full sm:w-auto overflow-x-auto no-scrollbar">
-                {statuses.slice(0, 3).map(status => (
+                {statusOptions.slice(0, 3).map(({ label, value }) => (
                   <button
-                    key={status}
-                    onClick={() => setActiveStatus(status)}
+                    key={value}
+                    onClick={() => setActiveStatus(value)}
                     className={`px-4 py-2 text-sm font-medium rounded-md transition-all whitespace-nowrap flex-1 sm:flex-none ${
-                      activeStatus === status 
-                        ? 'bg-white text-slate-900 shadow-sm' 
-                        : 'text-slate-500 hover:text-slate-700'
+                      activeStatus === value
+                        ? "bg-white text-slate-900 shadow-sm"
+                        : "text-slate-500 hover:text-slate-700"
                     }`}
                   >
-                    {status}
+                    {label}
                   </button>
                 ))}
               </div>
@@ -421,105 +512,141 @@ const EventsPage: React.FC = () => {
       <section className="pb-24 bg-slate-50 pt-12">
         <div className="container mx-auto px-6 md:px-12 lg:px-20 max-w-7xl">
           <div className="grid grid-cols-1 gap-6">
-            {filteredEvents.map((event) => (
-              <div 
-                key={event.id} 
-                onClick={() => navigate(`/events/${event.id}`)}
-                className="group bg-white rounded-2xl border border-slate-200 overflow-hidden hover:border-primary-400 hover:shadow-lg transition-all duration-300 cursor-pointer flex flex-col md:flex-row relative"
-              >
-                {/* Image */}
-                <div className="md:w-1/3 lg:w-1/4 h-56 md:h-auto overflow-hidden relative">
-                   <img 
-                    src={event.image} 
-                    alt={event.title} 
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                  />
-                  <div className="absolute top-4 left-4">
-                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide border ${getStatusColor(event.status)}`}>
-                      {event.status}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Content */}
-                <div className="p-6 md:p-8 flex-1 flex flex-col justify-between">
-                  <div>
-                    <div className="flex flex-wrap items-center gap-3 mb-4">
-                      <span className="text-primary-600 text-xs font-bold uppercase tracking-wider flex items-center gap-1">
-                        <Tag size={12} /> {event.category}
-                      </span>
-                      {event.format === 'Hybrid' && (
-                        <span className="text-slate-500 text-xs font-bold uppercase tracking-wider flex items-center gap-1">
-                          <Layers size={12} /> Hybrid
-                        </span>
-                      )}
-                       {event.format === 'Online' && (
-                        <span className="text-slate-500 text-xs font-bold uppercase tracking-wider flex items-center gap-1">
-                          <Globe size={12} /> Online
-                        </span>
-                      )}
-                    </div>
-                    
-                    <h3 className="text-2xl font-bold text-slate-900 mb-3 group-hover:text-primary-700 transition-colors">
-                      {event.title}
-                    </h3>
-                    
-                    <p className="text-slate-600 leading-relaxed mb-6 line-clamp-2">
-                      {event.shortDescription}
-                    </p>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-                      <div className="flex items-center gap-3 text-slate-600 text-sm">
-                        <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400">
-                          <Calendar size={16} />
-                        </div>
-                        <span className="font-medium">{event.date}</span>
-                      </div>
-                      <div className="flex items-center gap-3 text-slate-600 text-sm">
-                        <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400">
-                          <MapPin size={16} />
-                        </div>
-                        <span className="font-medium">{event.location}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between border-t border-slate-100 pt-6 mt-auto">
-                    <div className="flex -space-x-2">
-                      {[1,2,3].map(i => (
-                        <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-slate-200 flex items-center justify-center text-[10px] font-bold text-slate-500">
-                          <Users size={12} />
-                        </div>
-                      ))}
-                      <div className="w-8 h-8 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-500 pl-1">
-                        +40
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <button 
-                        onClick={(e) => openCalendarModal(e, event)}
-                        className="flex items-center justify-center w-10 h-10 rounded-full border border-slate-200 text-slate-400 hover:text-primary-600 hover:bg-slate-50 transition-colors"
-                        title="Add to Calendar"
-                      >
-                        <CalendarPlus size={18} />
-                      </button>
-                      <span className="text-primary-600 font-semibold text-sm flex items-center gap-2 group-hover:translate-x-1 transition-transform">
-                        View Details <ArrowRight size={16} />
-                      </span>
-                    </div>
-                  </div>
-                </div>
+            {error && (
+              <div className="bg-red-50 text-red-700 border border-red-100 rounded-xl p-4 flex items-center justify-between">
+                <span className="text-sm font-medium">{error}</span>
+                <Button size="sm" variant="white" onClick={fetchEvents}>
+                  Retry
+                </Button>
               </div>
-            ))}
+            )}
 
-            {filteredEvents.length === 0 && (
+            {isLoading && (
+              <div className="bg-white border border-slate-200 rounded-2xl p-10 flex flex-col items-center justify-center gap-3">
+                <div
+                  className="w-8 h-8 border-2 border-slate-300 border-t-primary-600 rounded-full animate-spin"
+                  aria-label="Loading events"
+                />
+                <p className="text-slate-500 text-sm">
+                  Fetching the latest events...
+                </p>
+              </div>
+            )}
+
+            {!isLoading &&
+              filteredEvents.map((event) => (
+                <div
+                  key={event.id}
+                  onClick={() => navigate(`/events/${event.id}`)}
+                  className="group bg-white rounded-2xl border border-slate-200 overflow-hidden hover:border-primary-400 hover:shadow-lg transition-all duration-300 cursor-pointer flex flex-col md:flex-row relative"
+                >
+                  {/* Image */}
+                  <div className="md:w-1/3 lg:w-1/4 h-56 md:h-auto overflow-hidden relative">
+                    <img
+                      src={
+                        event.image ||
+                        "https://images.unsplash.com/photo-1522199710521-72d69614c702?auto=format&fit=crop&w=1200&q=80"
+                      }
+                      alt={event.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute top-4 left-4">
+                      <span
+                        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide border ${getStatusColor(event.status)}`}
+                      >
+                        {formatStatusLabel(event.status)}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Content */}
+                  <div className="p-6 md:p-8 flex-1 flex flex-col justify-between">
+                    <div>
+                      <div className="flex flex-wrap items-center gap-3 mb-4">
+                        <span className="text-primary-600 text-xs font-bold uppercase tracking-wider flex items-center gap-1">
+                          <Tag size={12} /> {event.category}
+                        </span>
+                        {event.format?.toUpperCase() === "HYBRID" && (
+                          <span className="text-slate-500 text-xs font-bold uppercase tracking-wider flex items-center gap-1">
+                            <Layers size={12} /> Hybrid
+                          </span>
+                        )}
+                        {event.format?.toUpperCase() === "ONLINE" && (
+                          <span className="text-slate-500 text-xs font-bold uppercase tracking-wider flex items-center gap-1">
+                            <Globe size={12} /> Online
+                          </span>
+                        )}
+                      </div>
+
+                      <h3 className="text-2xl font-bold text-slate-900 mb-3 group-hover:text-primary-700 transition-colors">
+                        {event.title}
+                      </h3>
+
+                      <p className="text-slate-600 leading-relaxed mb-6 line-clamp-2">
+                        {event.shortDescription}
+                      </p>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                        <div className="flex items-center gap-3 text-slate-600 text-sm">
+                          <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400">
+                            <Calendar size={16} />
+                          </div>
+                          <span className="font-medium">
+                            {formatDate(event.date)}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-3 text-slate-600 text-sm">
+                          <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400">
+                            <MapPin size={16} />
+                          </div>
+                          <span className="font-medium">{event.location}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between border-t border-slate-100 pt-6 mt-auto">
+                      <div className="flex -space-x-2">
+                        {[1, 2, 3].map((i) => (
+                          <div
+                            key={i}
+                            className="w-8 h-8 rounded-full border-2 border-white bg-slate-200 flex items-center justify-center text-[10px] font-bold text-slate-500"
+                          >
+                            <Users size={12} />
+                          </div>
+                        ))}
+                        <div className="w-8 h-8 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-500 pl-1">
+                          +40
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={(e) => openCalendarModal(e, event)}
+                          className="flex items-center justify-center w-10 h-10 rounded-full border border-slate-200 text-slate-400 hover:text-primary-600 hover:bg-slate-50 transition-colors"
+                          title="Add to Calendar"
+                        >
+                          <CalendarPlus size={18} />
+                        </button>
+                        <span className="text-primary-600 font-semibold text-sm flex items-center gap-2 group-hover:translate-x-1 transition-transform">
+                          View Details <ArrowRight size={16} />
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+            {!isLoading && filteredEvents.length === 0 && (
               <div className="text-center py-20 bg-white rounded-2xl border border-slate-200 border-dashed">
                 <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-400">
                   <Search size={24} />
                 </div>
-                <h3 className="text-lg font-bold text-slate-900">No events found</h3>
-                <p className="text-slate-500">Try adjusting your filters, search terms, or date range.</p>
-                <button 
+                <h3 className="text-lg font-bold text-slate-900">
+                  No events found
+                </h3>
+                <p className="text-slate-500">
+                  Try adjusting your filters, search terms, or date range.
+                </p>
+                <button
                   onClick={clearFilters}
                   className="mt-4 text-primary-600 font-medium hover:underline"
                 >
@@ -534,51 +661,68 @@ const EventsPage: React.FC = () => {
       {/* Add to Calendar Modal */}
       {calendarModalOpen && selectedEventForCalendar && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => setCalendarModalOpen(false)}></div>
+          <div
+            className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+            onClick={() => setCalendarModalOpen(false)}
+          ></div>
           <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200">
-             <div className="p-6">
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <h3 className="text-lg font-bold text-slate-900">Add to Calendar</h3>
-                    <p className="text-sm text-slate-500 mt-1 line-clamp-1">{selectedEventForCalendar.title}</p>
-                  </div>
-                  <button onClick={() => setCalendarModalOpen(false)} className="text-slate-400 hover:text-slate-600">
-                    <X size={20} />
-                  </button>
+            <div className="p-6">
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900">
+                    Add to Calendar
+                  </h3>
+                  <p className="text-sm text-slate-500 mt-1 line-clamp-1">
+                    {selectedEventForCalendar.title}
+                  </p>
                 </div>
-                
-                <div className="space-y-3">
-                  <button 
-                    onClick={handleAddToGoogle}
-                    className="w-full flex items-center gap-3 p-3 rounded-xl border border-slate-200 hover:border-blue-200 hover:bg-blue-50 transition-all group text-left"
-                  >
-                    <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600 shrink-0">
-                      <ExternalLink size={20} />
-                    </div>
-                    <div>
-                      <div className="font-bold text-slate-900 group-hover:text-blue-700">Google Calendar</div>
-                      <div className="text-xs text-slate-500">Open in new tab</div>
-                    </div>
-                  </button>
+                <button
+                  onClick={() => setCalendarModalOpen(false)}
+                  className="text-slate-400 hover:text-slate-600"
+                >
+                  <X size={20} />
+                </button>
+              </div>
 
-                  <button 
-                    onClick={handleDownloadICS}
-                    className="w-full flex items-center gap-3 p-3 rounded-xl border border-slate-200 hover:border-primary-200 hover:bg-primary-50 transition-all group text-left"
-                  >
-                    <div className="w-10 h-10 rounded-lg bg-primary-100 flex items-center justify-center text-primary-600 shrink-0">
-                      <Download size={20} />
+              <div className="space-y-3">
+                <button
+                  onClick={handleAddToGoogle}
+                  className="w-full flex items-center gap-3 p-3 rounded-xl border border-slate-200 hover:border-blue-200 hover:bg-blue-50 transition-all group text-left"
+                >
+                  <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600 shrink-0">
+                    <ExternalLink size={20} />
+                  </div>
+                  <div>
+                    <div className="font-bold text-slate-900 group-hover:text-blue-700">
+                      Google Calendar
                     </div>
-                    <div>
-                      <div className="font-bold text-slate-900 group-hover:text-primary-700">Outlook / Apple</div>
-                      <div className="text-xs text-slate-500">Download .ics file</div>
+                    <div className="text-xs text-slate-500">
+                      Open in new tab
                     </div>
-                  </button>
-                </div>
-             </div>
+                  </div>
+                </button>
+
+                <button
+                  onClick={handleDownloadICS}
+                  className="w-full flex items-center gap-3 p-3 rounded-xl border border-slate-200 hover:border-primary-200 hover:bg-primary-50 transition-all group text-left"
+                >
+                  <div className="w-10 h-10 rounded-lg bg-primary-100 flex items-center justify-center text-primary-600 shrink-0">
+                    <Download size={20} />
+                  </div>
+                  <div>
+                    <div className="font-bold text-slate-900 group-hover:text-primary-700">
+                      Outlook / Apple
+                    </div>
+                    <div className="text-xs text-slate-500">
+                      Download .ics file
+                    </div>
+                  </div>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
-
     </div>
   );
 };
