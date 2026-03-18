@@ -84,7 +84,7 @@ const SuperAdminDashboard: React.FC = () => {
           </p>
         </a>
         <a
-          href="#/superadmin/judge-assignments"
+          href="#/superadmin/assignments"
           className="bg-white p-6 rounded-2xl border border-slate-200 hover:border-slate-900 hover:shadow-md transition-all group"
         >
           <h3 className="font-bold text-slate-900 mb-1 group-hover:text-slate-700">

@@ -92,7 +92,9 @@ const AuthPage: React.FC = () => {
       const userStr = localStorage.getItem("giva_user");
       const user = userStr ? JSON.parse(userStr) : null;
       if (!user) throw new Error("Login failed");
-      if (user.role === "SUPERADMIN" || user.role === "ADMIN") {
+      if (user.role === "SUPERADMIN") {
+        navigate("/superadmin");
+      } else if (user.role === "ADMIN") {
         navigate("/admin");
       } else if (user.role === "JURI") {
         navigate("/dashboard/judge");

@@ -158,6 +158,14 @@ class JudgeService {
     });
   }
 
+  async getEventSubmissions(
+    eventId: string,
+    stage: JudgingStage,
+  ): Promise<JudgeSubmissionSummary[]> {
+    // Reuse category submissions endpoint while event-level endpoint is not available.
+    return this.getCategorySubmissions(eventId, stage);
+  }
+
   async getSubmissionDetails(
     submissionId: string,
     stage: JudgingStage,

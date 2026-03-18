@@ -1,6 +1,6 @@
 import React from "react";
 import { HashRouter, Routes, Route, Outlet, Navigate } from "react-router-dom";
-import { AuthProvider } from "./contexts/AuthContext";
+import { AuthProvider, useAuthContext } from "./contexts/AuthContext";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import LandingPage from "./pages/LandingPage";
@@ -40,7 +40,6 @@ import AdminReports from "./pages/admin/AdminReports";
 import SuperAdminDashboard from "./pages/superadmin/SuperAdminDashboard";
 import SuperAdminUsers from "./pages/superadmin/SuperAdminUsers";
 import SuperAdminJudgeAssignments from "./pages/superadmin/SuperAdminJudgeAssignments.tsx";
-import useAuth from "./hooks/useAuth";
 
 // Helper to scroll to top on route change
 const ScrollToTop = () => {
@@ -64,22 +63,25 @@ const MainLayout = () => {
   );
 };
 
-// Auth Guard: Ensures user is logged in via context
+const LoadingSpinner = () => <div className="p-8 text-center">Loading...</div>;
+
 const AuthGuard = () => {
-  const { user, isLoading } = useAuth();
+  const user = localStorage.getItem("giva_user");
+  if (!user) return <Navigate to="/login" replace />;
 
-  if (isLoading) {
-    return <div>Loading...</div>;
+  const parsedUser = JSON.parse(user);
+
+  // Redirect admin/superadmin away from participant dashboard
+  if (parsedUser.role === "SUPERADMIN") {
+    return <Navigate to="/superadmin" replace />;
   }
-
-  if (!user) {
-    return <Navigate to="/login" replace />;
+  if (parsedUser.role === "ADMIN") {
+    return <Navigate to="/admin" replace />;
   }
 
   return <DashboardLayout />;
 };
 
-// Role Guard: Restricts access based on user role
 const RoleGuard = ({
   children,
   allowedRoles,
@@ -87,30 +89,40 @@ const RoleGuard = ({
   children?: React.ReactNode;
   allowedRoles: string[];
 }) => {
-  const { user, isLoading } = useAuth();
-
-  if (isLoading) {
-    return <div>Loading...</div>; // Or a spinner
-  }
+  const userStr = localStorage.getItem("giva_user");
+  const user = userStr ? JSON.parse(userStr) : null;
 
   if (!user) return <Navigate to="/login" replace />;
 
   if (!allowedRoles.includes(user.role)) {
-    // Role-based redirection logic
-    if (user.role === "JURI") {
-      return <Navigate to="/dashboard/judge" replace />;
-    }
     if (user.role === "SUPERADMIN") {
-      return <Navigate to="/superadmin/dashboard" replace />;
+      return <Navigate to="/superadmin" replace />;
+    } else if (user.role === "ADMIN") {
+      return <Navigate to="/admin" replace />;
+    } else if (user.role === "JURI") {
+      return <Navigate to="/dashboard/judge" replace />;
+    } else {
+      return <Navigate to="/dashboard" replace />;
     }
-    if (user.role === "ADMIN") {
-      return <Navigate to="/admin/dashboard" replace />;
-    }
-    // Default for SISWA/others
-    return <Navigate to="/dashboard" replace />;
   }
-
   return <>{children}</>;
+};
+
+const AdminGuard: React.FC = () => {
+  const { user, isLoading } = useAuthContext();
+  if (isLoading) return <LoadingSpinner />;
+  if (!user) return <Navigate to="/login" replace />;
+  if (!["ADMIN", "SUPERADMIN"].includes(user.role))
+    return <Navigate to="/" replace />;
+  return <AdminLayout />;
+};
+
+const SuperAdminGuard: React.FC = () => {
+  const { user, isLoading } = useAuthContext();
+  if (isLoading) return <LoadingSpinner />;
+  if (!user) return <Navigate to="/login" replace />;
+  if (user.role !== "SUPERADMIN") return <Navigate to="/" replace />;
+  return <AdminLayout />;
 };
 
 const App: React.FC = () => {
@@ -229,55 +241,26 @@ const App: React.FC = () => {
               <Route path="certificates" element={<JudgeCertificates />} />
               <Route path="profile" element={<DashboardProfile />} />
             </Route>
-
-            {/* Placeholder for Admin if needed later */}
-            <Route
-              path="admin"
-              element={
-                <RoleGuard allowedRoles={["ADMIN", "SUPERADMIN"]}>
-                  <div className="p-8">Admin Dashboard Placeholder</div>
-                </RoleGuard>
-              }
-            />
-
-            {/* Fallback */}
             <Route path="*" element={<DashboardPage />} />
           </Route>
 
           {/* Admin Routes */}
-          <Route
-            path="/admin"
-            element={
-              <RoleGuard allowedRoles={["ADMIN", "SUPERADMIN"]}>
-                <AdminLayout />
-              </RoleGuard>
-            }
-          >
+          <Route path="/admin" element={<AdminGuard />}>
             <Route index element={<AdminDashboard />} />
-            <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="events" element={<AdminEvents />} />
             <Route path="events/new" element={<AdminEventForm />} />
-            <Route path="events/:id" element={<AdminEventForm />} />
+            <Route path="events/:id/edit" element={<AdminEventForm />} />
             <Route path="submissions" element={<AdminSubmissions />} />
             <Route path="siswa" element={<AdminSiswa />} />
             <Route path="certificates" element={<AdminCertificates />} />
             <Route path="reports" element={<AdminReports />} />
           </Route>
 
-          {/* Super Admin Routes */}
-          <Route
-            path="/superadmin"
-            element={
-              <RoleGuard allowedRoles={["SUPERADMIN"]}>
-                <AdminLayout />
-              </RoleGuard>
-            }
-          >
+          <Route path="/superadmin" element={<SuperAdminGuard />}>
             <Route index element={<SuperAdminDashboard />} />
-            <Route path="dashboard" element={<SuperAdminDashboard />} />
             <Route path="users" element={<SuperAdminUsers />} />
             <Route
-              path="judge-assignments"
+              path="assignments"
               element={<SuperAdminJudgeAssignments />}
             />
           </Route>
