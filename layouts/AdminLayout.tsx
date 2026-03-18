@@ -27,7 +27,7 @@ const superAdminNavItems = [
   { to: "/superadmin/dashboard", icon: LayoutDashboard, label: "Dashboard" },
   { to: "/superadmin/users", icon: Users, label: "Users" },
   {
-    to: "/superadmin/assignments",
+    to: "/superadmin/judge-assignments",
     icon: Award,
     label: "Judge Assignments",
   },

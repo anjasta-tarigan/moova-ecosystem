@@ -23,7 +23,8 @@ const SuperAdminUsers = () => {
       setLoading(true);
       setError(null);
       const response = await adminApi.getAdminJudgeUsers();
-      setUsers(response.data.data);
+      const payload = response.data?.data ?? response.data ?? [];
+      setUsers(Array.isArray(payload) ? payload : []);
     } catch (err) {
       setError("Failed to fetch users");
     } finally {

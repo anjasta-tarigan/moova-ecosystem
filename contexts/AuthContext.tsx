@@ -38,6 +38,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         try {
           const response = await authApi.me();
           setUser(response.data.data);
+          localStorage.setItem(
+            "giva_user",
+            JSON.stringify(response.data.data),
+          );
         } catch (error) {
           console.error("Token validation failed", error);
           localStorage.removeItem("giva_access_token");

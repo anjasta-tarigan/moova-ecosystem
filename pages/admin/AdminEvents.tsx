@@ -28,9 +28,14 @@ const AdminEvents: React.FC = () => {
       setIsLoading(true);
       setError(null);
       // Passing primitives separately instead of an object to avoid infinite loops if mapped directly
-      const response = await adminApi.getEvents();
-      setEvents(response.data.data || []);
-      setTotalPages(response.data.pagination?.totalPages || 1);
+      const response = await adminApi.getEvents({
+        search,
+        status: statusFilter,
+        page,
+      });
+      const payload = response.data?.data ?? response.data ?? [];
+      setEvents(Array.isArray(payload) ? payload : []);
+      setTotalPages(response.data?.pagination?.totalPages || 1);
     } catch (err) {
       console.error("Failed to fetch events", err);
       setError("Failed to load data");

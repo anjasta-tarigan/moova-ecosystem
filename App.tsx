@@ -39,7 +39,7 @@ import AdminCertificates from "./pages/admin/AdminCertificates";
 import AdminReports from "./pages/admin/AdminReports";
 import SuperAdminDashboard from "./pages/superadmin/SuperAdminDashboard";
 import SuperAdminUsers from "./pages/superadmin/SuperAdminUsers";
-import SuperAdminJudgeAssignments from "./pages/superadmin/SuperAdminJudgeAssignments";
+import SuperAdminJudgeAssignments from "./pages/superadmin/SuperAdminJudgeAssignments.tsx";
 import useAuth from "./hooks/useAuth";
 
 // Helper to scroll to top on route change
@@ -64,12 +64,18 @@ const MainLayout = () => {
   );
 };
 
-// Auth Guard: Ensures user is logged in
+// Auth Guard: Ensures user is logged in via context
 const AuthGuard = () => {
-  const user = localStorage.getItem("moova_user");
+  const { user, isLoading } = useAuth();
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
   if (!user) {
     return <Navigate to="/login" replace />;
   }
+
   return <DashboardLayout />;
 };
 
@@ -93,12 +99,15 @@ const RoleGuard = ({
     // Role-based redirection logic
     if (user.role === "JURI") {
       return <Navigate to="/dashboard/judge" replace />;
-    } else if (user.role === "SUPERADMIN" || user.role === "ADMIN") {
-      return <Navigate to="/admin/dashboard" replace />;
-    } else {
-      // Default for SISWA/others
-      return <Navigate to="/dashboard" replace />;
     }
+    if (user.role === "SUPERADMIN") {
+      return <Navigate to="/superadmin/dashboard" replace />;
+    }
+    if (user.role === "ADMIN") {
+      return <Navigate to="/admin/dashboard" replace />;
+    }
+    // Default for SISWA/others
+    return <Navigate to="/dashboard" replace />;
   }
 
   return <>{children}</>;
@@ -145,14 +154,7 @@ const App: React.FC = () => {
               index
               element={
                 <RoleGuard
-                  allowedRoles={[
-                    "participant",
-                    "team_leader",
-                    "team_member",
-                    "guest",
-                    "partner",
-                    "mentor",
-                  ]}
+                  allowedRoles={["SISWA"]}
                 >
                   <DashboardPage />
                 </RoleGuard>
@@ -164,14 +166,7 @@ const App: React.FC = () => {
               path="event/:id"
               element={
                 <RoleGuard
-                  allowedRoles={[
-                    "participant",
-                    "team_leader",
-                    "team_member",
-                    "guest",
-                    "partner",
-                    "mentor",
-                  ]}
+                  allowedRoles={["SISWA"]}
                 >
                   <DashboardEventHub />
                 </RoleGuard>
@@ -181,14 +176,7 @@ const App: React.FC = () => {
               path="team/:id"
               element={
                 <RoleGuard
-                  allowedRoles={[
-                    "participant",
-                    "team_leader",
-                    "team_member",
-                    "guest",
-                    "partner",
-                    "mentor",
-                  ]}
+                  allowedRoles={["SISWA"]}
                 >
                   <DashboardTeam />
                 </RoleGuard>
@@ -198,14 +186,7 @@ const App: React.FC = () => {
               path="submission/:id"
               element={
                 <RoleGuard
-                  allowedRoles={[
-                    "participant",
-                    "team_leader",
-                    "team_member",
-                    "guest",
-                    "partner",
-                    "mentor",
-                  ]}
+                  allowedRoles={["SISWA"]}
                 >
                   <DashboardSubmission />
                 </RoleGuard>
@@ -261,7 +242,7 @@ const App: React.FC = () => {
             <Route
               path="admin"
               element={
-                <RoleGuard allowedRoles={["super_admin", "admin"]}>
+                <RoleGuard allowedRoles={["ADMIN", "SUPERADMIN"]}>
                   <div className="p-8">Admin Dashboard Placeholder</div>
                 </RoleGuard>
               }
@@ -304,7 +285,7 @@ const App: React.FC = () => {
             <Route path="dashboard" element={<SuperAdminDashboard />} />
             <Route path="users" element={<SuperAdminUsers />} />
             <Route
-              path="assignments"
+              path="judge-assignments"
               element={<SuperAdminJudgeAssignments />}
             />
           </Route>

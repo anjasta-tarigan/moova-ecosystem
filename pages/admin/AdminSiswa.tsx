@@ -14,7 +14,8 @@ const AdminSiswa: React.FC = () => {
       setIsLoading(true);
       setError(null);
       const response = await adminApi.getSiswaList();
-      setSiswa(response.data.data || []);
+      const payload = response.data?.data ?? response.data ?? [];
+      setSiswa(Array.isArray(payload) ? payload : []);
     } catch (err) {
       console.error("Failed to fetch siswa list", err);
       setError("Failed to load data");

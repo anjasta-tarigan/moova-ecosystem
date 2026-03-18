@@ -14,7 +14,8 @@ const AdminSubmissions: React.FC = () => {
       setIsLoading(true);
       setError(null);
       const response = await adminApi.getSubmissions();
-      setSubmissions(response.data.data || []);
+      const payload = response.data?.data ?? response.data ?? [];
+      setSubmissions(Array.isArray(payload) ? payload : []);
     } catch (err) {
       console.error("Failed to fetch submissions", err);
       setError("Failed to load data");
