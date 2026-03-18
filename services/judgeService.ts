@@ -1,277 +1,225 @@
+import { judgeApi } from "./api/judgeApi";
 
-
-export type JudgingStage = 'abstract' | 'paper' | 'final';
+export type JudgingStage = "abstract" | "paper" | "final";
 
 export interface Criterion {
   id: string;
   label: string;
   max: number;
-  desc: string;
+  desc?: string;
 }
 
 export interface JudgeAssignment {
   id: string;
   eventId: string;
   eventTitle: string;
-  categoryId: string; // e.g., "cat-a"
-  categoryName: string; // e.g., "Life Sciences"
+  categoryId: string;
+  categoryName: string;
   currentStage: JudgingStage;
-  status: 'active' | 'completed' | 'pending';
+  status: "active" | "completed" | "pending";
   progress: number;
   total: number;
 }
 
-// Rubric Definitions per Stage
-export const RUBRICS: Record<JudgingStage, Criterion[]> = {
-  abstract: [
-    { id: 'novelty', label: 'Novelty & Innovation', max: 10, desc: 'Is the idea original and distinct from existing research?' },
-    { id: 'clarity', label: 'Problem Statement', max: 10, desc: 'Is the problem clearly defined and significant?' },
-    { id: 'relevance', label: 'Theme Relevance', max: 10, desc: 'Alignment with the competition theme and category.' },
-  ],
-  paper: [
-    { id: 'methodology', label: 'Methodology', max: 20, desc: 'Rigor of the research methods, experimental design, and data collection.' },
-    { id: 'results', label: 'Results & Analysis', max: 20, desc: 'Data-driven evidence, statistical analysis, and interpretation.' },
-    { id: 'poster', label: 'Poster Design', max: 10, desc: 'Visual clarity, flow, and ability to communicate key findings effectively.' },
-    { id: 'impact', label: 'Scientific Impact', max: 20, desc: 'Contribution to the field and potential for real-world application.' },
-    { id: 'writing', label: 'Documentation Quality', max: 10, desc: 'Structure, citations, and professional tone of the full paper.' },
-  ],
-  final: [
-    { id: 'presentation', label: 'Presentation Delivery', max: 30, desc: 'Oratory skills, timing, engagement, and professionalism.' },
-    { id: 'qa', label: 'Q&A Mastery', max: 30, desc: 'Ability to answer technical questions confidently and accurately.' },
-    { id: 'feasibility', label: 'Feasibility & Scalability', max: 20, desc: 'Commercial viability or potential for deployment.' },
-    { id: 'overall', label: 'Overall Impression', max: 20, desc: 'Final holistic assessment of the project.' },
-  ]
+export interface JudgeSubmissionSummary {
+  id: string;
+  title: string;
+  team: string;
+  institution: string;
+  scoringStatus: "pending" | "draft" | "submitted";
+  totalScore: number | null;
+}
+
+export interface JudgeSubmissionDetail {
+  id: string;
+  title: string;
+  team: string;
+  abstract: string;
+  abstractPdf?: string | null;
+  fullPaperPdf?: string | null;
+  posterUrl?: string | null;
+  presentationUrl?: string | null;
+}
+
+export interface ScoreRecord {
+  criteriaScores: Record<string, number>;
+  comment: string;
+  status: "draft" | "submitted" | "pending";
+}
+
+const mapStageToApi = (stage: JudgingStage) =>
+  stage === "abstract" ? "ABSTRACT" : stage === "paper" ? "PAPER" : "FINAL";
+
+const mapStageFromApi = (stage: string): JudgingStage => {
+  switch ((stage || "").toUpperCase()) {
+    case "PAPER":
+      return "paper";
+    case "FINAL":
+      return "final";
+    default:
+      return "abstract";
+  }
 };
 
-// Mock Data Seeding
-const SEED_DATA = {
-  // Assignments link a Judge to an Event + Category
-  assignments: [
-    {
-      id: "asn-001",
-      eventId: "ev-001",
-      eventTitle: "M-GFEST 2024",
-      categoryId: "cat-life-sci",
-      categoryName: "Life Sciences & Medicine",
-      currentStage: "paper" as JudgingStage,
-      status: "active"
-    },
-    {
-      id: "asn-002",
-      eventId: "ev-001",
-      eventTitle: "M-GFEST 2024",
-      categoryId: "cat-eng",
-      categoryName: "Engineering & Technology",
-      currentStage: "abstract" as JudgingStage,
-      status: "completed"
-    },
-    {
-      id: "asn-003",
-      eventId: "ev-002",
-      eventTitle: "Global Innovation Challenge",
-      categoryId: "cat-sustain",
-      categoryName: "Sustainability",
-      currentStage: "final" as JudgingStage,
-      status: "active"
-    }
-  ],
-  submissions: [
-    // Life Sciences (Paper Stage)
-    { 
-      id: "sub-101", 
-      eventId: "ev-001", 
-      categoryId: "cat-life-sci",
-      title: "Novel Malaria Diagnostic Kit", 
-      team: "MediDetect", 
-      institution: "University of Lagos",
-      abstract: "A low-cost, rapid diagnostic test using synthetic biology.",
-      abstractPdf: "abstract.pdf",
-      fullPaperPdf: "paper.pdf",
-      posterUrl: "poster.jpg",
-      presentationUrl: "http://youtube.com"
-    },
-    { 
-      id: "sub-102", 
-      eventId: "ev-001", 
-      categoryId: "cat-life-sci",
-      title: "AI for Early Cancer Detection", 
-      team: "OncoAI", 
-      institution: "MIT",
-      abstract: "Using deep learning on radiology scans for early detection.",
-      abstractPdf: "abstract.pdf",
-      fullPaperPdf: "paper.pdf",
-      posterUrl: "poster.jpg",
-      presentationUrl: "http://youtube.com"
-    },
-    // Engineering (Abstract Stage)
-    { 
-      id: "sub-201", 
-      eventId: "ev-001", 
-      categoryId: "cat-eng",
-      title: "Autonomous Drone Swarm", 
-      team: "SkyHive", 
-      institution: "Imperial College",
-      abstract: "Coordinated drone flight for agricultural monitoring.",
-      abstractPdf: "abstract.pdf", 
-      fullPaperPdf: null,
-      posterUrl: null
-    },
-    // Sustainability (Final Stage)
-    { 
-      id: "sub-301", 
-      eventId: "ev-002", 
-      categoryId: "cat-sustain",
-      title: "Ocean Plastic Recycler", 
-      team: "BlueClean", 
-      institution: "NUS",
-      abstract: "Autonomous vessel for microplastic filtration.",
-      abstractPdf: "abstract.pdf",
-      fullPaperPdf: "paper.pdf",
-      posterUrl: "poster.jpg",
-      presentationUrl: "http://youtube.com"
-    }
-  ],
-  // Scores keyed by submissionId + stage
-  scores: [] as any[]
+const normalizeStatus = (status?: string) => {
+  const value = (status || "").toLowerCase();
+  if (value === "completed") return "completed" as const;
+  if (value === "active") return "active" as const;
+  return "pending" as const;
 };
 
-const DB_KEY = 'moova_judge_db_v3';
+const normalizeScoreStatus = (status?: string) => {
+  const value = (status || "").toLowerCase();
+  if (value === "submitted") return "submitted" as const;
+  if (value === "draft") return "draft" as const;
+  return "pending" as const;
+};
+
+const capitalizeLabel = (key: string) =>
+  key
+    .replace(/_/g, " ")
+    .split(" ")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+    .join(" ");
+
+const extractInstitution = (submission: any) => {
+  const memberSchool =
+    submission?.team?.members?.[0]?.user?.profile?.schoolName || "";
+  return memberSchool || submission?.team?.name || "";
+};
 
 class JudgeService {
-  constructor() {
-    this.init();
-  }
-
-  init() {
-    if (!localStorage.getItem(DB_KEY)) {
-      localStorage.setItem(DB_KEY, JSON.stringify(SEED_DATA));
-    }
-  }
-
-  private getDB() {
-    return JSON.parse(localStorage.getItem(DB_KEY) || '{}');
-  }
-
-  private saveDB(data: any) {
-    localStorage.setItem(DB_KEY, JSON.stringify(data));
-  }
-
-  // Get high-level assignments for the dashboard
+  // Fetch assignments and derive progress counters from submissions for each category
   async getAssignments(): Promise<JudgeAssignment[]> {
-    await new Promise(r => setTimeout(r, 400));
-    const db = this.getDB();
-    
-    // Calculate progress for each assignment
-    const assignments = db.assignments.map((asn: any) => {
-      const relevantSubmissions = db.submissions.filter((s: any) => 
-        s.eventId === asn.eventId && s.categoryId === asn.categoryId
-      );
-      
-      const scoredCount = relevantSubmissions.reduce((acc: number, sub: any) => {
-        const hasScore = db.scores.find((s: any) => 
-          s.submissionId === sub.id && 
-          s.stage === asn.currentStage && 
-          s.status === 'submitted'
-        );
-        return acc + (hasScore ? 1 : 0);
-      }, 0);
+    const res = await judgeApi.getAssignments();
+    const assignments = res.data?.data || [];
 
-      return {
-        ...asn,
-        progress: scoredCount,
-        total: relevantSubmissions.length
-      };
-    });
+    const withProgress = await Promise.all(
+      assignments.map(async (raw: any) => {
+        const stage = mapStageFromApi(raw.currentStage);
+        let total = 0;
+        let progress = 0;
 
-    return assignments;
+        try {
+          const subsRes = await judgeApi.getCategorySubmissions(
+            raw.categoryId,
+            {
+              stage: mapStageToApi(stage),
+              status: "all",
+            },
+          );
+          const subs = subsRes.data?.data || [];
+          total = subs.length;
+          progress = subs.filter((sub: any) => {
+            const score = sub.scores?.[0];
+            return normalizeScoreStatus(score?.status) === "submitted";
+          }).length;
+        } catch (err) {
+          console.error("Failed to load submissions for assignment", err);
+        }
+
+        return {
+          id: raw.id,
+          eventId: raw.eventId,
+          eventTitle: raw.event?.title || raw.eventTitle || "",
+          categoryId: raw.categoryId,
+          categoryName: raw.category?.name || raw.categoryName || "",
+          currentStage: stage,
+          status: normalizeStatus(raw.status),
+          progress,
+          total,
+        } as JudgeAssignment;
+      }),
+    );
+
+    return withProgress;
   }
 
-  // Get submissions for an event and stage (for JudgeRoundView)
-  async getEventSubmissions(eventId: string, stage: JudgingStage) {
-    await new Promise(r => setTimeout(r, 300));
-    const db = this.getDB();
-    const submissions = db.submissions.filter((s: any) => s.eventId === eventId);
+  async getCategorySubmissions(
+    categoryId: string,
+    stage: JudgingStage,
+  ): Promise<JudgeSubmissionSummary[]> {
+    const res = await judgeApi.getCategorySubmissions(categoryId, {
+      stage: mapStageToApi(stage),
+      status: "all",
+    });
 
+    const submissions = res.data?.data || [];
     return submissions.map((sub: any) => {
-      const scoreRecord = db.scores.find((s: any) => s.submissionId === sub.id && s.stage === stage);
+      const score = sub.scores?.[0];
       return {
-        ...sub,
-        scoringStatus: scoreRecord ? scoreRecord.status : 'pending',
-        totalScore: scoreRecord ? scoreRecord.totalScore : null,
-        updatedAt: scoreRecord ? scoreRecord.updatedAt : null
-      };
+        id: sub.id,
+        title: sub.projectTitle || sub.title || "Untitled Submission",
+        team: sub.team?.name || "Unknown Team",
+        institution: extractInstitution(sub),
+        scoringStatus: normalizeScoreStatus(score?.status),
+        totalScore: score?.totalScore ?? null,
+      } as JudgeSubmissionSummary;
     });
   }
 
-  // Get submissions for a specific category workspace
-  async getCategorySubmissions(categoryId: string, stage: JudgingStage) {
-    await new Promise(r => setTimeout(r, 300));
-    const db = this.getDB();
-    const submissions = db.submissions.filter((s: any) => s.categoryId === categoryId);
+  async getSubmissionDetails(
+    submissionId: string,
+    stage: JudgingStage,
+  ): Promise<{
+    submission: JudgeSubmissionDetail;
+    rubric: Criterion[];
+    scoreRecord: ScoreRecord | null;
+  }> {
+    const res = await judgeApi.getSubmissionDetail(
+      submissionId,
+      mapStageToApi(stage),
+    );
+    const data = res.data?.data || {};
+    const submission = data.submission || {};
+    const scoreRecord: ScoreRecord | null = data.score
+      ? {
+          criteriaScores: data.score.criteriaScores || {},
+          comment: data.score.comment || "",
+          status: normalizeScoreStatus(data.score.status),
+        }
+      : null;
 
-    return submissions.map((sub: any) => {
-      const scoreRecord = db.scores.find((s: any) => s.submissionId === sub.id && s.stage === stage);
-      return {
-        ...sub,
-        scoringStatus: scoreRecord ? scoreRecord.status : 'pending', // pending, draft, submitted
-        totalScore: scoreRecord ? scoreRecord.totalScore : null,
-        updatedAt: scoreRecord ? scoreRecord.updatedAt : null
-      };
-    });
-  }
+    const rubric: Criterion[] = Object.entries(data.rubric || {}).map(
+      ([key, value]) => ({
+        id: key,
+        label: capitalizeLabel(key),
+        max: Number(value) || 0,
+        desc: "",
+      }),
+    );
 
-  // Get details for scoring
-  async getSubmissionDetails(submissionId: string, stage: JudgingStage) {
-    await new Promise(r => setTimeout(r, 400));
-    const db = this.getDB();
-    const submission = db.submissions.find((s: any) => s.id === submissionId);
-    
-    if (!submission) throw new Error("Submission not found");
-
-    const scoreRecord = db.scores.find((s: any) => s.submissionId === submissionId && s.stage === stage);
+    const detail: JudgeSubmissionDetail = {
+      id: submission.id,
+      title:
+        submission.projectTitle || submission.title || "Untitled Submission",
+      team: submission.team?.name || "Unknown Team",
+      abstract: submission.description || submission.tagline || "",
+      abstractPdf: submission.abstractPdf || submission.files?.[0]?.url || null,
+      fullPaperPdf: submission.fullPaperPdf || null,
+      posterUrl: submission.posterUrl || null,
+      presentationUrl:
+        submission.presentationUrl || submission.demoLink || null,
+    };
 
     return {
-      submission,
-      scoreRecord: scoreRecord || null,
-      rubric: RUBRICS[stage]
+      submission: detail,
+      rubric,
+      scoreRecord,
     };
   }
 
-  async saveScore(payload: { 
-    submissionId: string, 
-    stage: JudgingStage,
-    criteriaScores: Record<string, number>, 
-    comment: string, 
-    status: 'draft' | 'submitted' 
+  async saveScore(payload: {
+    submissionId: string;
+    stage: JudgingStage;
+    criteriaScores: Record<string, number>;
+    comment: string;
+    status: "draft" | "submitted";
   }) {
-    await new Promise(r => setTimeout(r, 600));
-    const db = this.getDB();
-    
-    let total = 0;
-    const rubric = RUBRICS[payload.stage];
-    rubric.forEach(c => {
-      total += (payload.criteriaScores[c.id] || 0);
-    });
-
-    const record = {
+    await judgeApi.saveScore({
       ...payload,
-      judgeId: "current_user",
-      totalScore: total,
-      updatedAt: new Date().toISOString()
-    };
-
-    const existingIndex = db.scores.findIndex((s: any) => 
-      s.submissionId === payload.submissionId && s.stage === payload.stage
-    );
-    
-    if (existingIndex >= 0) {
-      db.scores[existingIndex] = { ...db.scores[existingIndex], ...record };
-    } else {
-      db.scores.push(record);
-    }
-
-    this.saveDB(db);
-    return record;
+      stage: mapStageToApi(payload.stage),
+    });
   }
 }
 
