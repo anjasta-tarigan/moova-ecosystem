@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Users, Calendar, FileText, Award } from "lucide-react";
-import { adminApi } from "../services/api/adminApi";
-import PageHeader from "../components/admin/PageHeader";
-import StatsCard from "../components/admin/StatsCard";
+import { adminApi } from "../../services/api/adminApi";
+import PageHeader from "../../components/admin/PageHeader";
+import StatsCard from "../../components/admin/StatsCard";
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState<any>(null);
