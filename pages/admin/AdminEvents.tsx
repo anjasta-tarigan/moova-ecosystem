@@ -1,48 +1,235 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { adminApi } from "../../services/api/adminApi";
-import { DataTable } from "../../components/admin/DataTable";
-import PageHeader from "../../components/admin/PageHeader";
-import { columns } from "./AdminEventsColumns"; // We will create this file next
 import Button from "../../components/Button";
 
-const AdminEvents = () => {
-  const [events, setEvents] = useState([]);
-  const [loading, setLoading] = useState(true);
+const formatDate = (dateStr?: string) => {
+  if (!dateStr) return "-";
+  return new Date(dateStr).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+};
+
+const AdminEvents: React.FC = () => {
+  const [events, setEvents] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        const response = await adminApi.getEvents();
-        setEvents(response.data.data);
-      } catch (error) {
-        console.error("Failed to fetch events", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchEvents();
-  }, []);
+  const fetchEvents = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      // Passing primitives separately instead of an object to avoid infinite loops if mapped directly
+      const response = await adminApi.getEvents();
+      setEvents(response.data.data || []);
+      setTotalPages(response.data.pagination?.totalPages || 1);
+    } catch (err) {
+      console.error("Failed to fetch events", err);
+      setError("Failed to load data");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [search, statusFilter, page]);
 
-  if (loading) {
-    return <div>Loading...</div>;
+  useEffect(() => {
+    fetchEvents();
+  }, [fetchEvents]); // use callback fn as dep
+
+  if (error) {
+    return (
+      <div className="p-8 text-center">
+        <p className="text-red-600 font-medium">{error}</p>
+        <p className="text-slate-500 text-sm mt-2">
+          Make sure the backend server is running on port 5000
+        </p>
+      </div>
+    );
   }
 
   return (
-    <>
-      <PageHeader
-        title="Manage Events"
-        subtitle="Create, edit, and oversee all events."
-      >
-        <Button onClick={() => navigate("/admin/events/new")}>
-          <Plus className="w-4 h-4 mr-2" />
-          Create Event
-        </Button>
-      </PageHeader>
-      <DataTable columns={columns} data={events} />
-    </>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between pb-6 border-b border-slate-200">
+        <h1 className="text-2xl font-bold text-slate-900">Event Management</h1>
+        <button
+          onClick={() => navigate("/admin/events/new")}
+          className="flex items-center gap-2 px-4 py-2.5 bg-slate-900 text-white rounded-xl text-sm font-bold hover:bg-black transition-colors"
+        >
+          <Plus className="w-4 h-4" />
+          Add Event
+        </button>
+      </div>
+
+      {/* Filter bar */}
+      <div className="flex gap-3">
+        <input
+          type="text"
+          placeholder="Search events..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="flex-1 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-slate-900"
+        />
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none"
+        >
+          <option value="">All Status</option>
+          <option value="DRAFT">Draft</option>
+          <option value="OPEN">Open</option>
+          <option value="UPCOMING">Upcoming</option>
+          <option value="CLOSED">Closed</option>
+        </select>
+      </div>
+
+      {/* Table */}
+      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+        {isLoading ? (
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="w-8 h-8 border-2 border-slate-900 border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : events.length === 0 ? (
+          <div className="p-12 text-center text-slate-400">No events found</div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm whitespace-nowrap">
+              <thead className="bg-slate-50 border-b border-slate-200">
+                <tr>
+                  <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase">
+                    Title
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase">
+                    Category
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase">
+                    Status
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase">
+                    Deadline
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase">
+                    Format
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase">
+                    Registrants
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {events.map((event: any) => (
+                  <tr
+                    key={event.id}
+                    className="border-b border-slate-100 hover:bg-slate-50 transition-colors"
+                  >
+                    <td className="px-6 py-4">
+                      <span
+                        className="font-medium text-slate-900 cursor-pointer hover:underline"
+                        onClick={() =>
+                          navigate(`/admin/events/${event.id}/edit`)
+                        }
+                      >
+                        {event?.title || "-"}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-slate-600">
+                      {event?.category || "-"}
+                    </td>
+                    <td className="px-6 py-4">
+                      <span
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold border ${
+                          event.status === "OPEN"
+                            ? "bg-emerald-100 text-emerald-700 border-emerald-200"
+                            : event.status === "DRAFT"
+                              ? "bg-amber-100 text-amber-700 border-amber-200"
+                              : event.status === "UPCOMING"
+                                ? "bg-blue-100 text-blue-700 border-blue-200"
+                                : "bg-slate-100 text-slate-600 border-slate-200"
+                        }`}
+                      >
+                        {event?.status || "-"}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-slate-600">
+                      {formatDate(
+                        event?.deadline || event?.registrationStartDate,
+                      )}
+                    </td>
+                    <td className="px-6 py-4 text-slate-600">
+                      {event?.format || "-"}
+                    </td>
+                    <td className="px-6 py-4 text-slate-600">
+                      {event?._count?.registrations ??
+                        event?.participantCount ??
+                        0}
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() =>
+                            navigate(`/admin/events/${event.id}/edit`)
+                          }
+                          className="text-xs font-bold text-blue-600 hover:underline"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => {
+                            if (window.confirm("Delete this event?")) {
+                              adminApi
+                                .deleteEvent(event.id)
+                                .then(() => fetchEvents())
+                                .catch((err: any) => console.error(err));
+                            }
+                          }}
+                          className="text-xs font-bold text-red-600 hover:underline"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between px-2 py-4">
+          <p className="text-sm text-slate-500">
+            Page {page} of {totalPages}
+          </p>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="px-4 py-2 text-sm font-medium border border-slate-200 rounded-lg disabled:opacity-50 hover:bg-slate-50"
+            >
+              Previous
+            </button>
+            <button
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={page === totalPages}
+              className="px-4 py-2 text-sm font-medium border border-slate-200 rounded-lg disabled:opacity-50 hover:bg-slate-50"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 

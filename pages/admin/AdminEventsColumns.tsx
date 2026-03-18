@@ -2,48 +2,63 @@ import { ColumnDef } from "@tanstack/react-table";
 import { MoreHorizontal } from "lucide-react";
 import { Link } from "react-router-dom";
 import { StatusBadge } from "../../components/admin/StatusBadge";
-import { formatDate } from "../../lib/utils";
 
 export type Event = {
   id: string;
-  name: string;
-  status: string;
-  registrationStartDate: string;
-  submissionStartDate: string;
-  participantCount: number;
+  title?: string;
+  category?: string;
+  status?: string;
+  deadline?: string;
+  format?: string;
+  _count?: { registrations?: number };
+};
+
+const formatDate = (dateStr?: string) => {
+  if (!dateStr) return "-";
+  return new Date(dateStr).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
 };
 
 export const columns: ColumnDef<Event>[] = [
   {
-    accessorKey: "name",
-    header: "Name",
+    accessorKey: "title",
+    header: "Title",
     cell: ({ row }) => (
       <Link
         to={`/admin/events/${row.original.id}`}
         className="font-medium text-indigo-600 hover:underline"
       >
-        {row.getValue("name")}
+        {row.original.title || "-"}
       </Link>
     ),
   },
   {
+    accessorKey: "category",
+    header: "Category",
+    cell: ({ row }) => row.original.category || "-",
+  },
+  {
     accessorKey: "status",
     header: "Status",
-    cell: ({ row }) => <StatusBadge status={row.getValue("status")} />,
+    cell: ({ row }) => <StatusBadge status={row.original.status || "-"} />,
   },
   {
-    accessorKey: "registrationStartDate",
-    header: "Registration Start",
-    cell: ({ row }) => formatDate(row.getValue("registrationStartDate")),
+    accessorKey: "deadline",
+    header: "Deadline",
+    cell: ({ row }) => formatDate(row.original.deadline),
   },
   {
-    accessorKey: "submissionStartDate",
-    header: "Submission Start",
-    cell: ({ row }) => formatDate(row.getValue("submissionStartDate")),
+    accessorKey: "format",
+    header: "Format",
+    cell: ({ row }) => row.original.format || "-",
   },
   {
-    accessorKey: "participantCount",
-    header: "Participants",
+    id: "registrants",
+    header: "Registrants",
+    cell: ({ row }) => row.original._count?.registrations ?? 0,
   },
   {
     id: "actions",

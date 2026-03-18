@@ -22,8 +22,8 @@ router.put("/users/:id", updateUser);
 router.patch("/users/:id/toggle-active", toggleActive);
 router.delete("/users/:id", deleteUser);
 
-router.post("/juri-assignments", createAssignment);
-router.delete("/juri-assignments/:id", deleteAssignment);
+router.post("/judge-assignments", createAssignment);
+router.delete("/judge-assignments/:id", deleteAssignment);
 
 router.get("/system-stats", systemStats);
 

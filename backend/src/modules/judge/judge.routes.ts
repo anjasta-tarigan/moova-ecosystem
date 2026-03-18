@@ -7,8 +7,8 @@ import {
   getSubmissionDetail,
   listSubmissions,
   upsertScore,
-} from "./juri.controller";
-import { scoreSchema } from "./juri.schema";
+} from "./judge.controller";
+import { scoreSchema } from "./judge.schema";
 
 const router = Router();
 

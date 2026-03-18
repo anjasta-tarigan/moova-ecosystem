@@ -5,8 +5,8 @@ import bcrypt from "bcryptjs";
 
 const mapError = (err: any, res: Response) => {
   if (err?.code === "P2025") return error(res, "Data not found", 404);
-  if (err?.message === "Invalid juri")
-    return error(res, "Invalid juri selection", 400);
+  if (err?.message === "Invalid judge")
+    return error(res, "Invalid judge selection", 400);
   if (err?.message === "Invalid category")
     return error(res, "Category does not belong to event", 400);
   if (err?.message === "Cannot edit superadmin")

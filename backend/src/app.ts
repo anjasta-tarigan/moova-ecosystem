@@ -7,7 +7,7 @@ import siswaRoutes from "./modules/siswa/siswa.routes";
 import eventsRoutes from "./modules/events/events.routes";
 import teamsRoutes from "./modules/teams/teams.routes";
 import submissionsRoutes from "./modules/submissions/submissions.routes";
-import juriRoutes from "./modules/juri/juri.routes";
+import judgeRoutes from "./modules/judge/judge.routes";
 import certificatesRoutes from "./modules/certificates/certificates.routes";
 import adminRoutes from "./modules/admin/admin.routes";
 import superadminRoutes from "./modules/superadmin/superadmin.routes";
@@ -39,7 +39,7 @@ app.use(
   requireRole("SISWA"),
   submissionsRoutes,
 );
-app.use("/api/juri", authenticate, requireRole("JURI"), juriRoutes);
+app.use("/api/judge", authenticate, requireRole("JURI"), judgeRoutes);
 app.use("/api/certificates", certificatesRoutes);
 app.use(
   "/api/admin",

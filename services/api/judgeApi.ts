@@ -1,13 +1,13 @@
 import api from "../../lib/axios";
 
-export const juriApi = {
-  getAssignments: () => api.get("/api/juri/assignments"),
+export const judgeApi = {
+  getAssignments: () => api.get("/api/judge/assignments"),
 
   getCategorySubmissions: (categoryId: string, params?: Record<string, any>) =>
-    api.get(`/api/juri/assignments/${categoryId}/submissions`, { params }),
+    api.get(`/api/judge/assignments/${categoryId}/submissions`, { params }),
 
   getSubmissionDetail: (submissionId: string, stage: string) =>
-    api.get(`/api/juri/submissions/${submissionId}`, { params: { stage } }),
+    api.get(`/api/judge/submissions/${submissionId}`, { params: { stage } }),
 
   saveScore: (data: {
     submissionId: string;
@@ -15,5 +15,5 @@ export const juriApi = {
     criteriaScores: Record<string, number>;
     comment: string;
     status: "draft" | "submitted";
-  }) => api.post("/api/juri/scores", data),
+  }) => api.post("/api/judge/scores", data),
 };

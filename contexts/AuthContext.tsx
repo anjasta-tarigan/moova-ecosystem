@@ -21,7 +21,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
   isSuperAdmin: boolean;
   isAdmin: boolean;
-  isJuri: boolean;
+  isJudge: boolean;
   isSiswa: boolean;
 }
 
@@ -76,7 +76,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const isSuperAdmin = user?.role === "SUPERADMIN";
   const isAdmin = user?.role === "ADMIN" || isSuperAdmin;
-  const isJuri = user?.role === "JURI";
+  const isJudge = user?.role === "JURI";
   const isSiswa = user?.role === "SISWA";
 
   return (
@@ -88,7 +88,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         logout,
         isSuperAdmin,
         isAdmin,
-        isJuri,
+        isJudge,
         isSiswa,
       }}
     >

@@ -49,7 +49,7 @@ enum ScoreStatus {
 enum CertificateType {
   WINNER
   PARTICIPANT
-  JURI
+  JUDGE
 }
 
 enum CertificateStatus {
@@ -88,8 +88,8 @@ model User {
   eventRegistrations  EventRegistration[]
   submissions         Submission[]        @relation("SubmittedBy")
   certificates        Certificate[]
-  juriAssignments     JuriAssignment[]    @relation("JuriAssignments")
-  scores              Score[]             @relation("JuriScores")
+  judgeAssignments    JudgeAssignment[]   @relation("JudgeAssignments")
+  scores              Score[]             @relation("JudgeScores")
   refreshTokens       RefreshToken[]
   qaQuestions         QaQuestion[]
   qaReplies           QaReply[]
@@ -171,7 +171,7 @@ model Event {
   categories       EventCategory[]
   registrations    EventRegistration[]
   submissions      Submission[]
-  juriAssignments  JuriAssignment[]
+  judgeAssignments JudgeAssignment[]
   qaQuestions      QaQuestion[]
   certificates     Certificate[]
 
@@ -208,7 +208,7 @@ model EventCategory {
   name        String
   description String  @default("")
 
-  juriAssignments JuriAssignment[]
+  judgeAssignments JudgeAssignment[]
   submissions     Submission[]
 
   @@map("event_categories")
@@ -301,10 +301,10 @@ model SubmissionFile {
   @@map("submission_files")
 }
 
-model JuriAssignment {
+model JudgeAssignment {
   id           String           @id @default(cuid())
-  juriId       String
-  juri         User             @relation("JuriAssignments", fields: [juriId], references: [id])
+  judgeId      String
+  judge        User             @relation("JudgeAssignments", fields: [judgeId], references: [id])
   eventId      String
   event        Event            @relation(fields: [eventId], references: [id])
   categoryId   String
@@ -313,14 +313,14 @@ model JuriAssignment {
   status       AssignmentStatus @default(ACTIVE)
   createdAt    DateTime         @default(now())
 
-  @@unique([juriId, categoryId])
-  @@map("juri_assignments")
+  @@unique([judgeId, categoryId])
+  @@map("judge_assignments")
 }
 
 model Score {
   id             String       @id @default(cuid())
-  juriId         String
-  juri           User         @relation("JuriScores", fields: [juriId], references: [id])
+  judgeId        String
+  judge          User         @relation("JudgeScores", fields: [judgeId], references: [id])
   submissionId   String
   submission     Submission   @relation(fields: [submissionId], references: [id])
   stage          JudgingStage
@@ -331,7 +331,7 @@ model Score {
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 
-  @@unique([juriId, submissionId, stage])
+  @@unique([judgeId, submissionId, stage])
   @@map("scores")
 }
 

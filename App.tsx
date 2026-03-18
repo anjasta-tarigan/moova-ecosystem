@@ -39,7 +39,7 @@ import AdminCertificates from "./pages/admin/AdminCertificates";
 import AdminReports from "./pages/admin/AdminReports";
 import SuperAdminDashboard from "./pages/superadmin/SuperAdminDashboard";
 import SuperAdminUsers from "./pages/superadmin/SuperAdminUsers";
-import SuperAdminJuriAssignments from "./pages/superadmin/SuperAdminJuriAssignments";
+import SuperAdminJudgeAssignments from "./pages/superadmin/SuperAdminJudgeAssignments";
 import useAuth from "./hooks/useAuth";
 
 // Helper to scroll to top on route change
@@ -236,7 +236,7 @@ const App: React.FC = () => {
             <Route
               path="judge"
               element={
-                <RoleGuard allowedRoles={["judge"]}>
+                <RoleGuard allowedRoles={["JURI"]}>
                   <Outlet />
                 </RoleGuard>
               }
@@ -280,6 +280,7 @@ const App: React.FC = () => {
               </RoleGuard>
             }
           >
+            <Route index element={<AdminDashboard />} />
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="events" element={<AdminEvents />} />
             <Route path="events/new" element={<AdminEventForm />} />
@@ -299,11 +300,12 @@ const App: React.FC = () => {
               </RoleGuard>
             }
           >
+            <Route index element={<SuperAdminDashboard />} />
             <Route path="dashboard" element={<SuperAdminDashboard />} />
             <Route path="users" element={<SuperAdminUsers />} />
             <Route
-              path="juri-assignments"
-              element={<SuperAdminJuriAssignments />}
+              path="assignments"
+              element={<SuperAdminJudgeAssignments />}
             />
           </Route>
         </Routes>

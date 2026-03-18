@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -33,39 +33,38 @@ const AdminEventForm = () => {
     resolver: zodResolver(eventSchema),
   });
 
-  useEffect(() => {
-    if (isEditMode) {
-      const fetchEvent = async () => {
-        try {
-          const response = await adminApi.getEvents({ id }); // Assuming getEvents can fetch one by id
-          const event = response.data.data;
-          // Format dates for input[type=datetime-local]
-          const formattedEvent = {
-            ...event,
-            registrationStartDate: event.registrationStartDate.slice(0, 16),
-            registrationEndDate: event.registrationEndDate.slice(0, 16),
-            submissionStartDate: event.submissionStartDate.slice(0, 16),
-            submissionEndDate: event.submissionEndDate.slice(0, 16),
-          };
-          reset(formattedEvent);
-        } catch (error) {
-          console.error("Failed to fetch event", error);
-        }
+  const fetchEvent = useCallback(async () => {
+    if (!isEditMode || !id) return;
+    try {
+      const response = await adminApi.getEvents({ id }); 
+      const event = response.data.data;
+      const formattedEvent = {
+        ...event,
+        registrationStartDate: event.registrationStartDate?.slice(0, 16) || '',
+        registrationEndDate: event.registrationEndDate?.slice(0, 16) || '',
+        submissionStartDate: event.submissionStartDate?.slice(0, 16) || '',
+        submissionEndDate: event.submissionEndDate?.slice(0, 16) || '',
       };
-      fetchEvent();
+      reset(formattedEvent);
+    } catch (error) {
+      // Error handled silently
     }
   }, [id, isEditMode, reset]);
 
+  useEffect(() => {
+    fetchEvent();
+  }, [fetchEvent]);
+
   const onSubmit = async (data: EventFormData) => {
     try {
-      if (isEditMode) {
-        await adminApi.updateEvent(id!, data);
+      if (isEditMode && id) {
+        await adminApi.updateEvent(id, data);
       } else {
         await adminApi.createEvent(data);
       }
       navigate("/admin/events");
     } catch (error) {
-      console.error("Failed to save event", error);
+      // Error handled silently
     }
   };
 
@@ -94,7 +93,7 @@ const AdminEventForm = () => {
               id="description"
               {...register("description")}
               rows={4}
-              className="block w-full border border-gray-300 rounded-md shadow-sm"
+              className="block w-full border border-gray-300 rounded-md shadow-sm p-2"
             />
             {errors.description && (
               <p className="mt-1 text-sm text-red-600">

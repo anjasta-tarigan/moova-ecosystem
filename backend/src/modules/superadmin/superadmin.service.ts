@@ -72,21 +72,23 @@ export const deleteUser = async (id: string, currentUserId: string) => {
 };
 
 export const createAssignment = async (data: {
-  juriId: string;
-  eventId: string;
+  judgeId: string;
+  eventId?: string;
   categoryId: string;
   currentStage?: string;
 }) => {
-  const juri = await prisma.user.findUnique({ where: { id: data.juriId } });
-  if (!juri || juri.role !== "JURI") throw new Error("Invalid juri");
+  const judge = await prisma.user.findUnique({ where: { id: data.judgeId } });
+  if (!judge || judge.role !== "JURI") throw new Error("Invalid judge");
   const category = await prisma.eventCategory.findUnique({
     where: { id: data.categoryId },
   });
-  if (!category || category.eventId !== data.eventId)
+  if (!category) throw new Error("Invalid category");
+  if (data.eventId && category.eventId !== data.eventId)
     throw new Error("Invalid category");
-  return prisma.juriAssignment.create({
+  return prisma.judgeAssignment.create({
     data: {
       ...data,
+      eventId: category.eventId,
       currentStage: (data.currentStage ?? "ABSTRACT") as any,
       status: "ACTIVE" as any,
     },
@@ -94,7 +96,7 @@ export const createAssignment = async (data: {
 };
 
 export const deleteAssignment = async (id: string) => {
-  return prisma.juriAssignment.delete({ where: { id } });
+  return prisma.judgeAssignment.delete({ where: { id } });
 };
 
 export const systemStats = async () => {

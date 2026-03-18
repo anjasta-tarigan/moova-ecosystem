@@ -55,8 +55,8 @@ async function main() {
   const passwords = {
     superadmin: await hashPassword("superadmin123"),
     admin: await hashPassword("admin123"),
-    juri: await hashPassword("juri123"),
-    siswa: await hashPassword("siswa123"),
+    judge: await hashPassword("judge123"),
+    siswa: await hashPassword("student123"),
   };
 
   const superadmin = await prisma.user.upsert({
@@ -81,77 +81,81 @@ async function main() {
     },
   });
 
-  const juri1 = await prisma.user.upsert({
-    where: { email: "juri1@giva.test" },
+  const judge1 = await prisma.user.upsert({
+    where: { email: "judge1@giva.test" },
     update: {},
     create: {
-      fullName: "Juri 1",
-      email: "juri1@giva.test",
-      password: passwords.juri,
+      fullName: "Judge 1",
+      email: "judge1@giva.test",
+      password: passwords.judge,
       role: "JURI",
     },
   });
 
-  const juri2 = await prisma.user.upsert({
-    where: { email: "juri2@giva.test" },
+  const judge2 = await prisma.user.upsert({
+    where: { email: "judge2@giva.test" },
     update: {},
     create: {
-      fullName: "Juri 2",
-      email: "juri2@giva.test",
-      password: passwords.juri,
+      fullName: "Judge 2",
+      email: "judge2@giva.test",
+      password: passwords.judge,
       role: "JURI",
     },
   });
 
   const siswa = await prisma.user.upsert({
-    where: { email: "siswa@giva.test" },
+    where: { email: "student@giva.test" },
     update: {},
     create: {
-      fullName: "Budi Santoso",
-      email: "siswa@giva.test",
+      fullName: "Alex Smith",
+      email: "student@giva.test",
       password: passwords.siswa,
       role: "SISWA",
     },
   });
 
-  const profileCompleteness = computeCompleteness("Budi Santoso", {
-    phone: "08123456789",
+  const profileCompleteness = computeCompleteness("Alex Smith", {
+    phone: "+62-812-3456-7890",
     birthDate: new Date("2008-01-01"),
-    gender: "Laki-laki",
-    schoolName: "SMAN 1 Jakarta",
-    schoolLevel: "SMA",
-    grade: "Kelas 11",
+    gender: "Male",
+    schoolName: "Jakarta Science High School",
+    schoolLevel: "High School",
+    grade: "Grade 11",
     province: "DKI Jakarta",
-    city: "Jakarta Selatan",
+    city: "South Jakarta",
     skills: ["Python", "Machine Learning"],
-    github: "https://github.com/budi",
+    github: "https://github.com/alex-smith",
   });
 
   await prisma.siswaProfile.upsert({
     where: { userId: siswa.id },
     update: {
-      phone: "08123456789",
+      phone: "+62-812-3456-7890",
       birthDate: new Date("2008-01-01"),
-      gender: "Laki-laki",
-      schoolName: "SMAN 1 Jakarta",
-      schoolLevel: "SMA",
-      grade: "Kelas 11",
+      gender: "Male",
+      schoolName: "Jakarta Science High School",
+      schoolLevel: "High School",
+      grade: "Grade 11",
       province: "DKI Jakarta",
-      city: "Jakarta Selatan",
+      city: "South Jakarta",
       skills: ["Python", "Machine Learning"],
+      github: "https://github.com/alex-smith",
+      linkedin: "https://linkedin.com/in/alex-smith",
       completeness: profileCompleteness,
     },
     create: {
       userId: siswa.id,
-      phone: "08123456789",
+      phone: "+62-812-3456-7890",
       birthDate: new Date("2008-01-01"),
-      gender: "Laki-laki",
-      schoolName: "SMAN 1 Jakarta",
-      schoolLevel: "SMA",
-      grade: "Kelas 11",
+      gender: "Male",
+      schoolName: "Jakarta Science High School",
+      schoolLevel: "High School",
+      grade: "Grade 11",
       province: "DKI Jakarta",
-      city: "Jakarta Selatan",
+      city: "South Jakarta",
       skills: ["Python", "Machine Learning"],
+      github: "https://github.com/alex-smith",
+      linkedin: "https://linkedin.com/in/alex-smith",
       completeness: profileCompleteness,
     },
   });
@@ -163,43 +167,43 @@ async function main() {
       title: "Olimpiade Sains dan Teknologi Nasional 2025",
       slug: "olimpiade-sains-dan-teknologi-nasional-2025",
       shortDescription:
-        "Kompetisi sains dan teknologi tingkat nasional untuk siswa Indonesia.",
+        "A national science and technology competition for Indonesian students.",
       fullDescription:
-        "Ajang kompetisi untuk mendorong inovasi sains dan teknologi bagi siswa.",
-      theme: "Inovasi untuk Negeri",
+        "A platform to inspire science and technology innovation among students.",
+      theme: "Innovation for the Nation",
       date: "2025-07-15",
       location: "Jakarta & Online",
       format: "HYBRID",
-      category: "Sains & Teknologi",
+      category: "Science & Technology",
       image: "",
       status: "OPEN",
       deadline: "2025-06-30",
-      fee: "Gratis",
+      fee: "Free",
       teamSizeMin: 1,
       teamSizeMax: 5,
-      eligibility: ["SMP", "SMA/SMK", "Mahasiswa"],
+      eligibility: ["Junior High", "Senior High", "College"],
       sdgs: [4, 9],
-      prizePool: "Total hadiah Rp100.000.000",
+      prizePool: "Prize pool IDR 100,000,000",
       organizer: "GIVA",
       createdById: admin.id,
       timeline: {
         create: [
           {
             date: "2025-05-01",
-            title: "Pendaftaran Dibuka",
-            description: "Mulai pendaftaran peserta",
+            title: "Registration Opens",
+            description: "Participant registration opens",
             order: 1,
           },
           {
             date: "2025-06-30",
-            title: "Pendaftaran Ditutup",
-            description: "Penutupan pendaftaran",
+            title: "Registration Closes",
+            description: "Registration period ends",
             order: 2,
           },
           {
             date: "2025-07-15",
             title: "Grand Final",
-            description: "Presentasi final dan awarding",
+            description: "Final presentations and awarding",
             order: 3,
           },
         ],
@@ -207,22 +211,22 @@ async function main() {
       faqs: {
         create: [
           {
-            question: "Apakah berbayar?",
-            answer: "Tidak, kompetisi ini gratis.",
+            question: "Is there a fee?",
+            answer: "No, this competition is free.",
             order: 1,
           },
           {
-            question: "Apakah bisa tim lintas sekolah?",
-            answer: "Bisa selama memenuhi syarat.",
+            question: "Can teams be cross-school?",
+            answer: "Yes, as long as they meet the requirements.",
             order: 2,
           },
         ],
       },
       categories: {
         create: [
-          { name: "Matematika" },
-          { name: "Fisika" },
-          { name: "Informatika" },
+          { name: "Mathematics" },
+          { name: "Physics" },
+          { name: "Informatics" },
         ],
       },
     },
@@ -231,9 +235,9 @@ async function main() {
   const categories = await prisma.eventCategory.findMany({
     where: { eventId: event.id },
   });
-  const informatika = categories.find((c) => c.name === "Informatika");
-  if (!informatika) {
-    throw new Error("Category Informatika not found");
+  const informatics = categories.find((c) => c.name === "Informatics");
+  if (!informatics) {
+    throw new Error("Category Informatics not found");
   }
 
   const team = await prisma.team.upsert({
@@ -260,13 +264,13 @@ async function main() {
 
   await prisma.juriAssignment.upsert({
     where: {
-      juriId_categoryId: { juriId: juri1.id, categoryId: informatika.id },
+      juriId_categoryId: { juriId: judge1.id, categoryId: informatics.id },
     },
     update: { currentStage: "PAPER" },
     create: {
-      juriId: juri1.id,
+      juriId: judge1.id,
       eventId: event.id,
-      categoryId: informatika.id,
+      categoryId: informatics.id,
       currentStage: "PAPER",
     },
   });
@@ -279,8 +283,8 @@ async function main() {
       recipientId: siswa.id,
       eventId: event.id,
       type: "PARTICIPANT",
-      award: "Peserta Olimpiade 2024",
-      issuedBy: "Admin GIVA",
+      award: "Certificate of Participation - GIVA 2024",
+      issuedBy: "GIVA Global",
     },
   });
 

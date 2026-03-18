@@ -40,17 +40,17 @@ export const adminApi = {
     api.get(`/api/admin/reports/event/${eventId}`),
 
   // Superadmin — Users
-  getAdminJuriUsers: (params?: Record<string, any>) =>
+  getAdminJudgeUsers: (params?: Record<string, any>) =>
     api.get("/api/superadmin/users", { params }),
-  createAdminOrJuri: (data: Record<string, any>) =>
+  createAdminOrJudge: (data: Record<string, any>) =>
     api.post("/api/superadmin/users", data),
-  updateAdminOrJuri: (id: string, data: Record<string, any>) =>
+  updateAdminOrJudge: (id: string, data: Record<string, any>) =>
     api.put(`/api/superadmin/users/${id}`, data),
   toggleUserActive: (id: string) =>
     api.patch(`/api/superadmin/users/${id}/toggle-active`),
-  deleteAdminOrJuri: (id: string) => api.delete(`/api/superadmin/users/${id}`),
+  deleteAdminOrJudge: (id: string) => api.delete(`/api/superadmin/users/${id}`),
 
-  // Superadmin — Juri Assignments
-  createJuriAssignment: (data: Record<string, any>) =>
-    api.post("/api/superadmin/juri-assignments", data),
+  // Superadmin — Judge Assignments
+  createJudgeAssignment: (data: Record<string, any>) =>
+    api.post("/api/superadmin/judge-assignments", data),
 };

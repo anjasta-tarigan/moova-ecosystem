@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { error, success } from "../../utils/response";
-import * as juriService from "./juri.service";
+import * as judgeService from "./judge.service";
 
 const mapError = (err: any, res: Response) => {
   if (err?.code === "P2025") return error(res, "Data not found", 404);
@@ -15,7 +15,7 @@ const mapError = (err: any, res: Response) => {
 
 export const getAssignments = async (req: Request, res: Response) => {
   try {
-    const assignments = await juriService.getAssignments(req.user!.id);
+    const assignments = await judgeService.getAssignments(req.user!.id);
     return success(res, assignments);
   } catch (err) {
     return mapError(err, res);
@@ -26,7 +26,7 @@ export const listSubmissions = async (req: Request, res: Response) => {
   try {
     const stage = (req.query.stage as string) || "ABSTRACT";
     const status = (req.query.status as string) || "all";
-    const submissions = await juriService.listSubmissions(
+    const submissions = await judgeService.listSubmissions(
       req.user!.id,
       req.params.categoryId,
       stage,
@@ -41,7 +41,7 @@ export const listSubmissions = async (req: Request, res: Response) => {
 export const getSubmissionDetail = async (req: Request, res: Response) => {
   try {
     const stage = (req.query.stage as string) || "ABSTRACT";
-    const data = await juriService.getSubmissionDetail(
+    const data = await judgeService.getSubmissionDetail(
       req.user!.id,
       req.params.submissionId,
       stage,
@@ -61,7 +61,7 @@ export const upsertScore = async (req: Request, res: Response) => {
       comment: req.body.comment,
       status: req.body.status,
     };
-    const score = await juriService.upsertScore(req.user!.id, payload);
+    const score = await judgeService.upsertScore(req.user!.id, payload);
     return success(res, score, "Score saved");
   } catch (err) {
     return mapError(err, res);

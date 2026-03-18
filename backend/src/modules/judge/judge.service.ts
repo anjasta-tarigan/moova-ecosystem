@@ -7,15 +7,15 @@ const stageMaxScores: Record<string, number> = {
 };
 
 const isAssignedToCategory = async (userId: string, categoryId: string) => {
-  const assignment = await prisma.juriAssignment.findFirst({
-    where: { juriId: userId, categoryId },
+  const assignment = await prisma.judgeAssignment.findFirst({
+    where: { judgeId: userId, categoryId },
   });
   return assignment;
 };
 
-export const getAssignments = async (juriId: string) => {
-  const assignments = await prisma.juriAssignment.findMany({
-    where: { juriId },
+export const getAssignments = async (judgeId: string) => {
+  const assignments = await prisma.judgeAssignment.findMany({
+    where: { judgeId },
     include: {
       category: true,
       event: true,
@@ -33,7 +33,7 @@ export const getAssignments = async (juriId: string) => {
       const total = submissions.length;
       const submittedScores = await prisma.score.count({
         where: {
-          juriId,
+          judgeId,
           stage: assign.currentStage,
           submissionId: { in: submissions.map((s) => s.id) },
           status: "SUBMITTED" as any,
@@ -54,19 +54,19 @@ export const getAssignments = async (juriId: string) => {
 };
 
 export const listSubmissions = async (
-  juriId: string,
+  judgeId: string,
   categoryId: string,
   stage: string,
   statusFilter: string,
 ) => {
-  const assignment = await isAssignedToCategory(juriId, categoryId);
+  const assignment = await isAssignedToCategory(judgeId, categoryId);
   if (!assignment) throw new Error("Not assigned");
 
   const submissions = (await prisma.submission.findMany({
     where: { categoryId, currentStage: stage as any },
     include: {
       team: true,
-      scores: { where: { juriId, stage: stage as any } },
+      scores: { where: { judgeId, stage: stage as any } },
     },
   })) as any[];
 
@@ -79,7 +79,7 @@ export const listSubmissions = async (
 };
 
 export const getSubmissionDetail = async (
-  juriId: string,
+  judgeId: string,
   submissionId: string,
   stage: string,
 ) => {
@@ -89,7 +89,7 @@ export const getSubmissionDetail = async (
       category: true,
       team: { include: { members: { include: { user: true } } } },
       files: true,
-      scores: { where: { juriId, stage: stage as any } },
+      scores: { where: { judgeId, stage: stage as any } },
     },
   })) as any;
   if (!submission) {
@@ -98,7 +98,7 @@ export const getSubmissionDetail = async (
     throw err;
   }
 
-  const assigned = await isAssignedToCategory(juriId, submission.categoryId!);
+  const assigned = await isAssignedToCategory(judgeId, submission.categoryId!);
   if (!assigned) throw new Error("Not assigned");
 
   const rubric: Record<string, number> =
@@ -123,7 +123,7 @@ const calculateTotal = (
 };
 
 export const upsertScore = async (
-  juriId: string,
+  judgeId: string,
   data: {
     submissionId: string;
     stage: string;
@@ -143,15 +143,15 @@ export const upsertScore = async (
   }
   if (submission.status === "DRAFT") throw new Error("Cannot score draft");
 
-  const assigned = await isAssignedToCategory(juriId, submission.categoryId!);
+  const assigned = await isAssignedToCategory(judgeId, submission.categoryId!);
   if (!assigned) throw new Error("Not assigned");
 
   const totalScore = calculateTotal(data.stage, data.criteriaScores);
 
   const existing = await prisma.score.findUnique({
     where: {
-      juriId_submissionId_stage: {
-        juriId,
+      judgeId_submissionId_stage: {
+        judgeId,
         submissionId: data.submissionId,
         stage: data.stage as any,
       },
@@ -163,14 +163,14 @@ export const upsertScore = async (
 
   return prisma.score.upsert({
     where: {
-      juriId_submissionId_stage: {
-        juriId,
+      judgeId_submissionId_stage: {
+        judgeId,
         submissionId: data.submissionId,
         stage: data.stage as any,
       },
     },
     create: {
-      juriId,
+      judgeId,
       submissionId: data.submissionId,
       stage: data.stage as any,
       criteriaScores: data.criteriaScores,
@@ -179,6 +179,7 @@ export const upsertScore = async (
       status: (data.status === "submitted" ? "SUBMITTED" : "DRAFT") as any,
     },
     update: {
+      judgeId,
       criteriaScores: data.criteriaScores,
       comment: data.comment || "",
       totalScore,

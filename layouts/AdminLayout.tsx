@@ -18,7 +18,7 @@ const adminNavItems = [
   { to: "/admin/dashboard", icon: LayoutDashboard, label: "Dashboard" },
   { to: "/admin/events", icon: Calendar, label: "Events" },
   { to: "/admin/submissions", icon: FileText, label: "Submissions" },
-  { to: "/admin/siswa", icon: Users, label: "Siswa" },
+  { to: "/admin/siswa", icon: Users, label: "Students" },
   { to: "/admin/certificates", icon: Award, label: "Certificates" },
   { to: "/admin/reports", icon: BarChart, label: "Reports" },
 ];
@@ -27,9 +27,9 @@ const superAdminNavItems = [
   { to: "/superadmin/dashboard", icon: LayoutDashboard, label: "Dashboard" },
   { to: "/superadmin/users", icon: Users, label: "Users" },
   {
-    to: "/superadmin/juri-assignments",
+    to: "/superadmin/assignments",
     icon: Award,
-    label: "Juri Assignments",
+    label: "Judge Assignments",
   },
 ];
 
