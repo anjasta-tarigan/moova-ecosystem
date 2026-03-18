@@ -153,9 +153,7 @@ const App: React.FC = () => {
             <Route
               index
               element={
-                <RoleGuard
-                  allowedRoles={["SISWA"]}
-                >
+                <RoleGuard allowedRoles={["SISWA"]}>
                   <DashboardPage />
                 </RoleGuard>
               }
@@ -165,9 +163,7 @@ const App: React.FC = () => {
             <Route
               path="event/:id"
               element={
-                <RoleGuard
-                  allowedRoles={["SISWA"]}
-                >
+                <RoleGuard allowedRoles={["SISWA"]}>
                   <DashboardEventHub />
                 </RoleGuard>
               }
@@ -175,9 +171,7 @@ const App: React.FC = () => {
             <Route
               path="team/:id"
               element={
-                <RoleGuard
-                  allowedRoles={["SISWA"]}
-                >
+                <RoleGuard allowedRoles={["SISWA"]}>
                   <DashboardTeam />
                 </RoleGuard>
               }
@@ -185,9 +179,7 @@ const App: React.FC = () => {
             <Route
               path="submission/:id"
               element={
-                <RoleGuard
-                  allowedRoles={["SISWA"]}
-                >
+                <RoleGuard allowedRoles={["SISWA"]}>
                   <DashboardSubmission />
                 </RoleGuard>
               }
