@@ -1,7 +1,13 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { Plus } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { adminApi } from "../../services/api/adminApi";
 import Button from "../../components/Button";
+import AdminSelect from "../../components/admin/AdminSelect";
+import AdminInput from "../../components/admin/AdminInput";
+import Modal from "../../components/admin/Modal";
 
 const formatDate = (dateStr?: string) => {
   if (!dateStr) return "-";
@@ -12,6 +18,19 @@ const formatDate = (dateStr?: string) => {
   });
 };
 
+const certificateSchema = z.object({
+  eventId: z.string().min(1, "Event is required"),
+  recipientId: z.string().min(1, "Recipient is required"),
+  type: z.enum(["WINNER", "PARTICIPANT", "JUDGE"]),
+  award: z.string().min(2, "Award is required"),
+  issuedBy: z.string().min(2, "Issuer is required"),
+});
+
+type CertificateForm = z.infer<typeof certificateSchema>;
+
+type UserOption = { id: string; label: string };
+type EventOption = { id: string; label: string };
+
 const AdminCertificates: React.FC = () => {
   const [certificates, setCertificates] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -20,6 +39,28 @@ const AdminCertificates: React.FC = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [typeFilter, setTypeFilter] = useState("");
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [eventsOptions, setEventsOptions] = useState<EventOption[]>([]);
+  const [userOptions, setUserOptions] = useState<UserOption[]>([]);
+  const [isMetaLoading, setIsMetaLoading] = useState(false);
+  const [actionMessage, setActionMessage] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [revokingId, setRevokingId] = useState<string | null>(null);
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<CertificateForm>({
+    resolver: zodResolver(certificateSchema),
+    defaultValues: {
+      eventId: "",
+      recipientId: "",
+      type: "PARTICIPANT",
+      award: "",
+      issuedBy: "Admin Panel",
+    },
+  });
 
   const fetchCertificates = useCallback(async () => {
     try {
@@ -39,12 +80,88 @@ const AdminCertificates: React.FC = () => {
     }
   }, [typeFilter, page]);
 
+  const fetchMeta = useCallback(async () => {
+    setIsMetaLoading(true);
+    setActionError(null);
+    try {
+      const [eventsRes, usersRes] = await Promise.all([
+        adminApi.getEvents({ limit: 50 }),
+        adminApi.getSiswaList({ limit: 50 }),
+      ]);
+      const eventsPayload = eventsRes.data?.data || eventsRes.data || [];
+      const usersPayload = usersRes.data?.data || usersRes.data || [];
+      setEventsOptions(
+        Array.isArray(eventsPayload)
+          ? eventsPayload.map((evt: any) => ({
+              id: evt.id,
+              label: evt.title ?? evt.name ?? "Untitled Event",
+            }))
+          : [],
+      );
+      setUserOptions(
+        Array.isArray(usersPayload)
+          ? usersPayload.map((user: any) => ({
+              id: user.id,
+              label: user.fullName ?? user.email ?? "User",
+            }))
+          : [],
+      );
+    } catch (err) {
+      setActionError("Failed to load event or user options");
+    } finally {
+      setIsMetaLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     fetchCertificates();
   }, [fetchCertificates]);
 
   const openCreateModal = () => {
     setShowCreateModal(true);
+    reset({
+      eventId: "",
+      recipientId: "",
+      type: "PARTICIPANT",
+      award: "",
+      issuedBy: "Admin Panel",
+    });
+    fetchMeta();
+  };
+
+  const onCreate = async (formData: CertificateForm) => {
+    setActionMessage(null);
+    setActionError(null);
+    try {
+      await adminApi.createCertificate(formData);
+      setShowCreateModal(false);
+      fetchCertificates();
+      setActionMessage("Certificate issued successfully");
+    } catch (err) {
+      setActionError("Failed to issue certificate. Please try again.");
+    }
+  };
+
+  const onRevoke = async (cert: any) => {
+    if (!window.confirm("Are you sure you want to revoke this certificate?")) {
+      return;
+    }
+    const reasonInput =
+      window.prompt("Please provide a revocation reason", "Revoked by admin") ||
+      "Revoked by admin";
+
+    setActionMessage(null);
+    setActionError(null);
+    setRevokingId(cert.id);
+    try {
+      await adminApi.revokeCertificate(cert.id, reasonInput.trim());
+      fetchCertificates();
+      setActionMessage("Certificate revoked");
+    } catch (err) {
+      setActionError("Failed to revoke certificate. Please try again.");
+    } finally {
+      setRevokingId(null);
+    }
   };
 
   if (error) {
@@ -71,6 +188,17 @@ const AdminCertificates: React.FC = () => {
         </button>
       </div>
 
+      {actionMessage && (
+        <div className="rounded-md bg-emerald-50 border border-emerald-100 text-emerald-700 px-4 py-3 text-sm">
+          {actionMessage}
+        </div>
+      )}
+      {actionError && (
+        <div className="rounded-md bg-red-50 border border-red-100 text-red-700 px-4 py-3 text-sm">
+          {actionError}
+        </div>
+      )}
+
       {/* Filter bar */}
       <div className="flex gap-3">
         <select
@@ -81,7 +209,6 @@ const AdminCertificates: React.FC = () => {
           <option value="">All Status</option>
           <option value="PARTICIPANT">Participant</option>
           <option value="WINNER">Winner</option>
-          <option value="COMMITTEE">Committee</option>
           <option value="JUDGE">Judge</option>
         </select>
       </div>
@@ -170,27 +297,11 @@ const AdminCertificates: React.FC = () => {
                           cert.status === "VALID" ||
                           cert.status === "Active") && (
                           <button
-                            onClick={() => {
-                              if (
-                                window.confirm(
-                                  "Are you sure you want to revoke this certificate?",
-                                )
-                              ) {
-                                const reason =
-                                  window.prompt(
-                                    "Please provide a revocation reason",
-                                    "Revoked by admin",
-                                  ) || "Revoked by admin";
-                                adminApi.revokeCertificate
-                                  ? adminApi
-                                      .revokeCertificate(cert.id, reason)
-                                      .then(() => fetchCertificates())
-                                  : console.log("Mock Revoke Certificate");
-                              }
-                            }}
+                            onClick={() => onRevoke(cert)}
+                            disabled={revokingId === cert.id}
                             className="text-xs font-bold text-red-600 hover:underline"
                           >
-                            Revoke
+                            {revokingId === cert.id ? "Revoking..." : "Revoke"}
                           </button>
                         )}
                       </div>
@@ -227,6 +338,91 @@ const AdminCertificates: React.FC = () => {
           </div>
         </div>
       )}
+
+      <Modal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        title="Issue Certificate"
+        footer={
+          <>
+            <Button
+              type="button"
+              onClick={() => setShowCreateModal(false)}
+              className="bg-gray-200 text-gray-800"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              disabled={isSubmitting}
+              onClick={handleSubmit(onCreate)}
+            >
+              {isSubmitting ? "Issuing..." : "Issue"}
+            </Button>
+          </>
+        }
+      >
+        {isMetaLoading ? (
+          <p className="text-sm text-slate-600">Loading options...</p>
+        ) : (
+          <div className="space-y-4">
+            <AdminSelect
+              label="Event"
+              id="eventId"
+              {...register("eventId")}
+              error={errors.eventId?.message}
+            >
+              <option value="">Select event</option>
+              {eventsOptions.map((evt) => (
+                <option key={evt.id} value={evt.id}>
+                  {evt.label}
+                </option>
+              ))}
+            </AdminSelect>
+
+            <AdminSelect
+              label="Recipient"
+              id="recipientId"
+              {...register("recipientId")}
+              error={errors.recipientId?.message}
+            >
+              <option value="">Select recipient</option>
+              {userOptions.map((user) => (
+                <option key={user.id} value={user.id}>
+                  {user.label}
+                </option>
+              ))}
+            </AdminSelect>
+
+            <AdminSelect
+              label="Type"
+              id="type"
+              {...register("type")}
+              error={errors.type?.message}
+            >
+              <option value="PARTICIPANT">Participant</option>
+              <option value="WINNER">Winner</option>
+              <option value="JUDGE">Judge</option>
+            </AdminSelect>
+
+            <AdminInput
+              label="Award"
+              id="award"
+              placeholder="1st Place"
+              {...register("award")}
+              error={errors.award?.message}
+            />
+
+            <AdminInput
+              label="Issued By"
+              id="issuedBy"
+              placeholder="GIVA Admin"
+              {...register("issuedBy")}
+              error={errors.issuedBy?.message}
+            />
+          </div>
+        )}
+      </Modal>
     </div>
   );
 };

@@ -3,6 +3,7 @@ import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { adminApi } from "../../services/api/adminApi";
 import Button from "../../components/Button";
+import Modal from "../../components/admin/Modal";
 
 const formatDate = (dateStr?: string) => {
   if (!dateStr) return "-";
@@ -21,6 +22,10 @@ const AdminEvents: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState("");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [actionMessage, setActionMessage] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const fetchEvents = useCallback(async () => {
@@ -48,6 +53,23 @@ const AdminEvents: React.FC = () => {
     fetchEvents();
   }, [fetchEvents]); // use callback fn as dep
 
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    setIsDeleting(true);
+    setDeleteError(null);
+    try {
+      await adminApi.deleteEvent(deleteTarget.id);
+      setDeleteTarget(null);
+      setActionMessage("Event deleted successfully");
+      fetchEvents();
+    } catch (err: any) {
+      const message = err?.response?.data?.message || "Failed to delete event";
+      setDeleteError(message);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   if (error) {
     return (
       <div className="p-8 text-center">
@@ -71,6 +93,12 @@ const AdminEvents: React.FC = () => {
           Add Event
         </button>
       </div>
+
+      {actionMessage && (
+        <div className="rounded-md bg-emerald-50 border border-emerald-100 text-emerald-700 px-4 py-3 text-sm">
+          {actionMessage}
+        </div>
+      )}
 
       {/* Filter bar */}
       <div className="flex gap-3">
@@ -139,9 +167,7 @@ const AdminEvents: React.FC = () => {
                     <td className="px-6 py-4">
                       <span
                         className="font-medium text-slate-900 cursor-pointer hover:underline"
-                        onClick={() =>
-                          navigate(`/admin/events/${event.id}/edit`)
-                        }
+                        onClick={() => navigate(`/admin/events/${event.id}`)}
                       >
                         {event?.title || "-"}
                       </span>
@@ -180,21 +206,15 @@ const AdminEvents: React.FC = () => {
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
                         <button
-                          onClick={() =>
-                            navigate(`/admin/events/${event.id}/edit`)
-                          }
+                          onClick={() => navigate(`/admin/events/${event.id}`)}
                           className="text-xs font-bold text-blue-600 hover:underline"
                         >
                           Edit
                         </button>
                         <button
                           onClick={() => {
-                            if (window.confirm("Delete this event?")) {
-                              adminApi
-                                .deleteEvent(event.id)
-                                .then(() => fetchEvents())
-                                .catch((err: any) => console.error(err));
-                            }
+                            setDeleteTarget(event);
+                            setDeleteError(null);
                           }}
                           className="text-xs font-bold text-red-600 hover:underline"
                         >
@@ -234,6 +254,45 @@ const AdminEvents: React.FC = () => {
           </div>
         </div>
       )}
+
+      <Modal
+        isOpen={Boolean(deleteTarget)}
+        onClose={() => setDeleteTarget(null)}
+        title="Delete Event"
+        footer={
+          <>
+            <Button
+              type="button"
+              onClick={() => setDeleteTarget(null)}
+              className="bg-gray-200 text-gray-800"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={confirmDelete}
+              disabled={isDeleting}
+            >
+              {isDeleting ? "Deleting..." : "Delete"}
+            </Button>
+          </>
+        }
+      >
+        <div className="space-y-3">
+          <p className="text-sm text-slate-700">
+            {`This will permanently remove "${deleteTarget?.title || "this event"}".`}
+          </p>
+          <p className="text-sm text-slate-600">
+            Deleting is blocked if the event already has registrations.
+          </p>
+          {deleteError && (
+            <div className="rounded-md bg-red-50 border border-red-100 text-red-700 px-3 py-2 text-sm">
+              {deleteError}
+            </div>
+          )}
+        </div>
+      </Modal>
     </div>
   );
 };
