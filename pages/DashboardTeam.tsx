@@ -1,22 +1,20 @@
 import React, { useEffect, useMemo, useState } from "react";
 import {
-  AlertCircle,
   ChevronRight,
   Filter,
-  GraduationCap,
-  MapPin,
   Plus,
   Search,
   Shield,
   Users,
 } from "lucide-react";
 import Button from "../components/Button";
+import { useAuthContext } from "../contexts/AuthContext";
 import { teamsApi } from "../services/api/teamsApi";
 
 interface TeamMember {
   id: string;
   role: string;
-  user?: { fullName?: string; email?: string };
+  user?: { id?: string; fullName?: string; email?: string };
 }
 
 interface Team {
@@ -28,6 +26,7 @@ interface Team {
 }
 
 const DashboardTeam: React.FC = () => {
+  const { user } = useAuthContext();
   const [activeTab, setActiveTab] = useState<"my-teams" | "discover">(
     "my-teams",
   );
@@ -95,6 +94,42 @@ const DashboardTeam: React.FC = () => {
     }
   };
 
+  const handleLeaveTeam = async (teamId: string) => {
+    try {
+      await teamsApi.leaveTeam(teamId);
+      await refresh();
+    } catch (err) {
+      console.error(err);
+      setError("Failed to leave the team.");
+    }
+  };
+
+  const handleRemoveMember = async (teamId: string, memberId?: string) => {
+    if (!memberId) return;
+    try {
+      await teamsApi.removeMember(teamId, memberId);
+      await refresh();
+    } catch (err) {
+      console.error(err);
+      setError("Unable to remove this member.");
+    }
+  };
+
+  const handleUpdateRole = async (
+    teamId: string,
+    memberId: string | undefined,
+    role: string,
+  ) => {
+    if (!memberId) return;
+    try {
+      await teamsApi.updateMemberRole(teamId, memberId, role);
+      await refresh();
+    } catch (err) {
+      console.error(err);
+      setError("Unable to update member role.");
+    }
+  };
+
   const filteredTeams = useMemo(() => {
     if (!searchTerm) return teams;
     const term = searchTerm.toLowerCase();
@@ -111,6 +146,11 @@ const DashboardTeam: React.FC = () => {
     const leader = team.members.find((m) => m.role === "LEADER");
     return leader?.user?.fullName || "Leader";
   };
+
+  const isLeader = (team: Team) =>
+    team.members.some(
+      (member) => member.role === "LEADER" && member.user?.id === user?.id,
+    );
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -149,8 +189,14 @@ const DashboardTeam: React.FC = () => {
       </div>
 
       {error && (
-        <div className="flex items-center gap-2 p-3 rounded-lg border border-red-200 bg-red-50 text-red-700 text-sm">
-          <AlertCircle size={16} /> {error}
+        <div className="bg-red-50 border border-red-100 rounded-xl p-6 text-center">
+          <p className="text-red-600 font-medium">{error}</p>
+          <button
+            onClick={refresh}
+            className="mt-3 text-sm text-red-600 hover:underline font-bold"
+          >
+            Try Again
+          </button>
         </div>
       )}
 
@@ -235,10 +281,12 @@ const DashboardTeam: React.FC = () => {
           </div>
 
           {loading ? (
-            <div className="p-6 text-slate-500">Loading teams...</div>
+            <div className="flex items-center justify-center min-h-64">
+              <div className="w-8 h-8 border-2 border-slate-900 border-t-transparent rounded-full animate-spin" />
+            </div>
           ) : filteredTeams.length === 0 ? (
-            <div className="p-8 rounded-xl border border-dashed border-slate-300 text-center text-slate-500 bg-slate-50">
-              No teams yet. Create one or join with a code.
+            <div className="text-center py-12">
+              <p className="text-slate-400 text-sm">No data available yet</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -279,21 +327,47 @@ const DashboardTeam: React.FC = () => {
                       {team.members.map((member) => (
                         <div
                           key={member.id}
-                          className="flex items-center gap-3"
+                          className="flex items-center gap-3 justify-between"
                         >
-                          <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-600 border border-slate-200">
-                            {(member.user?.fullName || "?")
-                              .slice(0, 2)
-                              .toUpperCase()}
-                          </div>
-                          <div className="flex-1 text-sm font-medium text-slate-700">
-                            {member.user?.fullName || "Member"}
-                            <div className="text-[11px] text-slate-400">
-                              {member.user?.email}
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-600 border border-slate-200">
+                              {(member.user?.fullName || "?")
+                                .slice(0, 2)
+                                .toUpperCase()}
                             </div>
+                            <div className="flex-1 text-sm font-medium text-slate-700">
+                              {member.user?.fullName || "Member"}
+                              <div className="text-[11px] text-slate-400">
+                                {member.user?.email}
+                              </div>
+                            </div>
+                            {member.role === "LEADER" && (
+                              <Shield size={14} className="text-amber-500" />
+                            )}
                           </div>
-                          {member.role === "LEADER" && (
-                            <Shield size={14} className="text-amber-500" />
+                          {isLeader(team) && member.user?.id !== user?.id && (
+                            <div className="flex items-center gap-2 text-xs text-slate-500">
+                              <button
+                                onClick={() =>
+                                  handleUpdateRole(
+                                    team.id,
+                                    member.user?.id,
+                                    "LEADER",
+                                  )
+                                }
+                                className="hover:text-slate-800 font-bold"
+                              >
+                                Make Leader
+                              </button>
+                              <button
+                                onClick={() =>
+                                  handleRemoveMember(team.id, member.user?.id)
+                                }
+                                className="text-red-600 hover:underline font-bold"
+                              >
+                                Remove
+                              </button>
+                            </div>
                           )}
                         </div>
                       ))}
@@ -307,9 +381,17 @@ const DashboardTeam: React.FC = () => {
                         {team.code}
                       </strong>
                     </span>
-                    <span className="flex items-center gap-1">
-                      <Users size={14} /> {team.members.length} members
-                    </span>
+                    <div className="flex items-center gap-3">
+                      <span className="flex items-center gap-1">
+                        <Users size={14} /> {team.members.length} members
+                      </span>
+                      <button
+                        onClick={() => handleLeaveTeam(team.id)}
+                        className="text-red-600 font-bold hover:underline"
+                      >
+                        Leave
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -320,9 +402,10 @@ const DashboardTeam: React.FC = () => {
 
       {activeTab === "discover" && (
         <div className="space-y-6">
-          <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm text-center text-slate-500">
-            Talent search is coming soon. For now, invite teammates using the
-            team code.
+          <div className="text-center py-12">
+            <p className="text-slate-400 text-sm">
+              Member discovery coming soon
+            </p>
           </div>
         </div>
       )}

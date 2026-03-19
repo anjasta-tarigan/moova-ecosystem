@@ -55,7 +55,13 @@ interface SubmissionData {
   event?: { id: string; title: string; deadline?: string };
   team?: { id: string; name: string; members: TeamMember[] };
   files: SubmissionFile[];
-  scores?: Array<{ totalScore?: number }>;
+  scores?: Array<{
+    totalScore?: number;
+    status?: string;
+    comment?: string;
+    criteriaScores?: Record<string, number>;
+    scores?: Record<string, number>;
+  }>;
 }
 
 const statusBadge = (status?: SubmissionStatus) => {
@@ -77,16 +83,26 @@ const DashboardSubmission: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const autoSaveTimeout = useRef<number | null>(null);
 
   const [submission, setSubmission] = useState<SubmissionData | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [autoSaving, setAutoSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     refresh();
   }, [id]);
+
+  useEffect(() => {
+    return () => {
+      if (autoSaveTimeout.current) {
+        window.clearTimeout(autoSaveTimeout.current);
+      }
+    };
+  }, []);
 
   const refresh = async () => {
     if (!id) return;
@@ -105,43 +121,59 @@ const DashboardSubmission: React.FC = () => {
 
   const isDraft = submission?.status === "DRAFT";
 
-  const handleChange = (field: keyof SubmissionData, value: any) => {
-    if (!submission) return;
-    setSubmission({ ...submission, [field]: value });
-  };
-
-  const handleSave = async () => {
-    if (!submission) return;
-    setSaving(true);
+  const persistDraft = async (draft: SubmissionData) => {
+    setError(null);
+    setAutoSaving(true);
     try {
       const payload = {
-        projectTitle: submission.projectTitle,
-        tagline: submission.tagline,
-        description: submission.description,
-        techStack: submission.techStack,
-        githubLink: submission.githubLink,
-        demoLink: submission.demoLink,
+        projectTitle: draft.projectTitle,
+        tagline: draft.tagline,
+        description: draft.description,
+        techStack: draft.techStack,
+        githubLink: draft.githubLink,
+        demoLink: draft.demoLink,
       };
-      const res = await submissionsApi.updateSubmission(submission.id, payload);
+      const res = await submissionsApi.updateSubmission(draft.id, payload);
       setSubmission(res.data.data);
     } catch (err) {
       console.error(err);
       setError("Failed to save changes.");
     } finally {
-      setSaving(false);
+      setAutoSaving(false);
     }
+  };
+
+  const scheduleAutoSave = (draft: SubmissionData) => {
+    if (draft.status !== "DRAFT") return;
+    if (autoSaveTimeout.current) {
+      window.clearTimeout(autoSaveTimeout.current);
+    }
+    autoSaveTimeout.current = window.setTimeout(() => {
+      persistDraft(draft);
+    }, 600);
+  };
+
+  const handleChange = (field: keyof SubmissionData, value: any) => {
+    if (!submission) return;
+    const updated = { ...submission, [field]: value };
+    setSubmission(updated);
+    scheduleAutoSave(updated);
+  };
+
+  const handleSave = async () => {
+    if (!submission) return;
+    setSaving(true);
+    await persistDraft(submission);
+    setSaving(false);
   };
 
   const handleUpload = async (file?: File) => {
     if (!submission || !file) return;
     setUploading(true);
+    setError(null);
     try {
-      const res = await submissionsApi.uploadFile(submission.id, file);
-      const uploaded = res.data.data;
-      setSubmission({
-        ...submission,
-        files: [...(submission.files || []), uploaded],
-      });
+      await submissionsApi.uploadFile(submission.id, file);
+      await refresh();
     } catch (err) {
       console.error(err);
       setError("Upload failed. Ensure the format and size are correct.");
@@ -152,6 +184,7 @@ const DashboardSubmission: React.FC = () => {
 
   const handleDeleteFile = async (fileId: string) => {
     if (!submission) return;
+    setError(null);
     try {
       await submissionsApi.deleteFile(submission.id, fileId);
       setSubmission({
@@ -167,6 +200,7 @@ const DashboardSubmission: React.FC = () => {
   const handleSubmit = async () => {
     if (!submission) return;
     setSaving(true);
+    setError(null);
     try {
       await submissionsApi.submitSubmission(submission.id);
       await refresh();
@@ -181,6 +215,7 @@ const DashboardSubmission: React.FC = () => {
   const handleWithdraw = async () => {
     if (!submission) return;
     setSaving(true);
+    setError(null);
     try {
       await submissionsApi.withdrawSubmission(submission.id);
       await refresh();
@@ -192,22 +227,60 @@ const DashboardSubmission: React.FC = () => {
     }
   };
 
-  const totalScore = useMemo(
-    () => submission?.scores?.[0]?.totalScore,
-    [submission],
-  );
+  const latestScore = useMemo(() => {
+    if (!submission?.scores || submission.scores.length === 0) return null;
+    const scores = [...submission.scores].reverse();
+    return (
+      scores.find((score: any) => score.status === "SUBMITTED") || scores[0]
+    );
+  }, [submission]);
+
+  const totalScore = latestScore?.totalScore;
+  const criteriaEntries = useMemo(() => {
+    if (!latestScore) return [] as Array<[string, any]>;
+    if (
+      latestScore.criteriaScores &&
+      typeof latestScore.criteriaScores === "object"
+    ) {
+      return Object.entries(latestScore.criteriaScores);
+    }
+    if (latestScore.scores && typeof latestScore.scores === "object") {
+      return Object.entries(latestScore.scores);
+    }
+    return [] as Array<[string, any]>;
+  }, [latestScore]);
 
   if (!id) {
     return <div className="p-8 text-slate-500">Submission ID not found.</div>;
   }
 
   if (loading) {
-    return <div className="p-8 text-slate-500">Loading submission...</div>;
+    return (
+      <div className="flex items-center justify-center min-h-64">
+        <div className="w-8 h-8 border-2 border-slate-900 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (error && !submission) {
+    return (
+      <div className="bg-red-50 border border-red-100 rounded-xl p-6 text-center">
+        <p className="text-red-600 font-medium">Failed to load data</p>
+        <button
+          onClick={refresh}
+          className="mt-3 text-sm text-red-600 hover:underline font-bold"
+        >
+          Try Again
+        </button>
+      </div>
+    );
   }
 
   if (!submission) {
     return (
-      <div className="p-8 text-slate-500">Submission is not available.</div>
+      <div className="text-center py-12">
+        <p className="text-slate-400 text-sm">No data available yet</p>
+      </div>
     );
   }
 
@@ -351,15 +424,15 @@ const DashboardSubmission: React.FC = () => {
                 </Button>
                 <Button
                   onClick={handleSave}
-                  disabled={saving}
+                  disabled={saving || autoSaving}
                   className="gap-2"
                 >
-                  {saving ? (
+                  {saving || autoSaving ? (
                     <RefreshCw size={16} className="animate-spin" />
                   ) : (
                     <Save size={16} />
                   )}
-                  Save Draft
+                  {saving || autoSaving ? "Saving..." : "Save Draft"}
                 </Button>
                 <Button
                   onClick={handleSubmit}
@@ -442,14 +515,41 @@ const DashboardSubmission: React.FC = () => {
             )}
           </div>
 
-          {totalScore !== undefined && (
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
-              <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                <Award size={18} className="text-emerald-600" /> Score
-              </h3>
-              <p className="text-3xl font-bold text-emerald-600 mt-2">
-                {totalScore}
+          {latestScore && (
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                  <Award size={18} className="text-emerald-600" /> Score
+                </h3>
+                {latestScore.status && (
+                  <span className="px-2 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wide bg-slate-100 text-slate-700 border border-slate-200">
+                    {latestScore.status}
+                  </span>
+                )}
+              </div>
+              <p className="text-3xl font-bold text-emerald-600">
+                {totalScore ?? "Pending"}
               </p>
+              {criteriaEntries.length > 0 && (
+                <div className="space-y-2 text-sm text-slate-700">
+                  {criteriaEntries.map(([key, value]) => (
+                    <div
+                      key={key}
+                      className="flex items-center justify-between bg-slate-50 border border-slate-100 px-3 py-2 rounded-lg"
+                    >
+                      <span className="capitalize">
+                        {key.replace(/_/g, " ")}
+                      </span>
+                      <span className="font-bold">{value}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {latestScore.comment && (
+                <p className="text-sm text-slate-600">
+                  Feedback: {latestScore.comment}
+                </p>
+              )}
             </div>
           )}
         </div>

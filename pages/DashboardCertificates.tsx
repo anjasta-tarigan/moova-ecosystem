@@ -19,20 +19,22 @@ const DashboardCertificates: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const fetchCertificates = async () => {
+    setError(null);
+    setLoading(true);
+    try {
+      const res = await profileApi.getMyCertificates();
+      setCerts(res.data.data || []);
+    } catch (err) {
+      console.error(err);
+      setError("Failed to load certificates.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const load = async () => {
-      setError(null);
-      try {
-        const res = await profileApi.getMyCertificates();
-        setCerts(res.data.data || []);
-      } catch (err) {
-        console.error(err);
-        setError("Failed to load certificates.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
+    fetchCertificates();
   }, []);
 
   const handleCopyLink = async (id: string) => {
@@ -57,16 +59,24 @@ const DashboardCertificates: React.FC = () => {
       </div>
 
       {error && (
-        <div className="p-3 rounded-lg border border-red-200 bg-red-50 text-red-700 text-sm">
-          {error}
+        <div className="bg-red-50 border border-red-100 rounded-xl p-6 text-center">
+          <p className="text-red-600 font-medium">{error}</p>
+          <button
+            onClick={fetchCertificates}
+            className="mt-3 text-sm text-red-600 hover:underline font-bold"
+          >
+            Try Again
+          </button>
         </div>
       )}
 
       {loading ? (
-        <div className="p-6 text-slate-500">Loading certificates...</div>
+        <div className="flex items-center justify-center min-h-64">
+          <div className="w-8 h-8 border-2 border-slate-900 border-t-transparent rounded-full animate-spin" />
+        </div>
       ) : certs.length === 0 ? (
-        <div className="p-6 rounded-xl border border-dashed border-slate-300 text-center text-slate-500 bg-slate-50">
-          No certificates yet.
+        <div className="text-center py-12">
+          <p className="text-slate-400 text-sm">No data available yet</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">

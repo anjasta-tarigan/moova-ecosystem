@@ -1,3 +1,4 @@
+// @deprecated Use services/api/profileApi.ts instead
 import { profileApi } from "./api/profileApi";
 
 export interface UserProfile {

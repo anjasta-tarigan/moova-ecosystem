@@ -10,15 +10,10 @@ import {
 } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Button from "../components/Button";
+import { useAuthContext } from "../contexts/AuthContext";
 import { profileApi } from "../services/api/profileApi";
+import { eventsApi } from "../services/api/eventsApi";
 import DashboardProfile from "./DashboardProfile";
-
-interface DashboardStats {
-  activeCompetitions: number;
-  upcomingDeadlines: number;
-  totalSubmissions: number;
-  name: string;
-}
 
 interface RegistrationItem {
   id: string;
@@ -36,48 +31,45 @@ interface RegistrationItem {
 
 const OverviewView = () => {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [registrations, setRegistrations] = useState<RegistrationItem[]>([]);
+  const { user } = useAuthContext();
+  const [myEvents, setMyEvents] = useState<RegistrationItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchData = async () => {
+    setError(null);
+    setIsLoading(true);
+    try {
+      const res = await profileApi.getMyEvents();
+      setMyEvents(res.data.data || []);
+    } catch (err) {
+      console.error("Failed to fetch events:", err);
+      setError("Failed to load data");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [eventsRes, submissionsRes, profileRes] = await Promise.all([
-          profileApi.getMyEvents(),
-          profileApi.getMySubmissions(),
-          profileApi.getProfile(),
-        ]);
-
-        const events: RegistrationItem[] = eventsRes.data.data || [];
-        setRegistrations(events);
-
-        const submissions = submissionsRes.data.data || [];
-        const name = profileRes.data.data?.user?.fullName || "Student";
-
-        const upcomingDeadlines = events.filter((reg) =>
-          Boolean(reg.event?.deadline),
-        ).length;
-        setStats({
-          activeCompetitions: events.length,
-          upcomingDeadlines,
-          totalSubmissions: submissions.length,
-          name,
-        });
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchData();
   }, []);
 
-  const headline = useMemo(() => {
-    if (!stats) return "Dashboard";
-    return `Welcome back, ${stats.name.split(" ")[0] || "Student"}`;
-  }, [stats]);
+  const firstName = useMemo(
+    () => (user?.fullName || "Student").split(" ")[0],
+    [user?.fullName],
+  );
+
+  const activeCompetitions = useMemo(
+    () => myEvents.filter((event) => event.event?.status === "ACTIVE").length,
+    [myEvents],
+  );
+
+  const upcomingDeadlines = useMemo(
+    () => myEvents.filter((event) => Boolean(event.event?.deadline)).length,
+    [myEvents],
+  );
+
+  const headline = `Welcome back, ${firstName}`;
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -98,7 +90,7 @@ const OverviewView = () => {
             </div>
             <div>
               <p className="text-2xl font-bold text-slate-900 leading-none">
-                {stats?.activeCompetitions ?? 0}
+                {activeCompetitions}
               </p>
               <p className="text-xs text-slate-500 font-medium uppercase tracking-wide mt-1">
                 Active Events
@@ -112,7 +104,7 @@ const OverviewView = () => {
             </div>
             <div>
               <p className="text-2xl font-bold text-slate-900 leading-none">
-                {stats?.upcomingDeadlines ?? 0}
+                {upcomingDeadlines}
               </p>
               <p className="text-xs text-slate-500 font-medium uppercase tracking-wide mt-1">
                 Deadlines
@@ -126,7 +118,7 @@ const OverviewView = () => {
             </div>
             <div>
               <p className="text-2xl font-bold text-slate-900 leading-none">
-                {stats?.totalSubmissions ?? 0}
+                {myEvents.length}
               </p>
               <p className="text-xs text-slate-500 font-medium uppercase tracking-wide mt-1">
                 Submissions
@@ -149,15 +141,27 @@ const OverviewView = () => {
           </button>
         </div>
 
-        {loading ? (
-          <div className="text-slate-500">Loading events...</div>
-        ) : registrations.length === 0 ? (
-          <div className="p-6 rounded-xl border border-dashed border-slate-300 text-center text-slate-500 bg-slate-50">
-            No events joined yet.
+        {isLoading ? (
+          <div className="flex items-center justify-center min-h-64">
+            <div className="w-8 h-8 border-2 border-slate-900 border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : error ? (
+          <div className="bg-red-50 border border-red-100 rounded-xl p-6 text-center">
+            <p className="text-red-600 font-medium">Failed to load data</p>
+            <button
+              onClick={fetchData}
+              className="mt-3 text-sm text-red-600 hover:underline font-bold"
+            >
+              Try Again
+            </button>
+          </div>
+        ) : myEvents.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-slate-400 text-sm">No data available yet</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-            {registrations.map((reg) => (
+            {myEvents.map((reg) => (
               <div
                 key={reg.id}
                 className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col"

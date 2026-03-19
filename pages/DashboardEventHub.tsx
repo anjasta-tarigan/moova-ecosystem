@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   Calendar,
@@ -11,6 +11,7 @@ import {
 import Button from "../components/Button";
 import { profileApi } from "../services/api/profileApi";
 import { eventsApi } from "../services/api/eventsApi";
+import { submissionsApi } from "../services/api/submissionsApi";
 
 interface EventRegistration {
   id: string;
@@ -48,19 +49,24 @@ const EventListView = () => {
   const navigate = useNavigate();
   const [events, setEvents] = useState<EventRegistration[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchEvents = async () => {
+    setError(null);
+    setLoading(true);
+    try {
+      const res = await profileApi.getMyEvents();
+      setEvents(res.data.data || []);
+    } catch (err) {
+      console.error(err);
+      setError("Failed to load data");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const load = async () => {
-      try {
-        const res = await profileApi.getMyEvents();
-        setEvents(res.data.data || []);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
+    fetchEvents();
   }, []);
 
   return (
@@ -76,10 +82,22 @@ const EventListView = () => {
       </div>
 
       {loading ? (
-        <div className="text-slate-500">Loading events...</div>
+        <div className="flex items-center justify-center min-h-64">
+          <div className="w-8 h-8 border-2 border-slate-900 border-t-transparent rounded-full animate-spin" />
+        </div>
+      ) : error ? (
+        <div className="bg-red-50 border border-red-100 rounded-xl p-6 text-center">
+          <p className="text-red-600 font-medium">Failed to load data</p>
+          <button
+            onClick={fetchEvents}
+            className="mt-3 text-sm text-red-600 hover:underline font-bold"
+          >
+            Try Again
+          </button>
+        </div>
       ) : events.length === 0 ? (
-        <div className="p-6 rounded-xl border border-dashed border-slate-300 text-center text-slate-500 bg-slate-50">
-          No events joined yet.
+        <div className="text-center py-12">
+          <p className="text-slate-400 text-sm">No data available yet</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-6">
@@ -142,25 +160,127 @@ const EventDetailView = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [event, setEvent] = useState<EventDetail | null>(null);
+  const [submission, setSubmission] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const fetchDetail = async () => {
+    setError(null);
+    setLoading(true);
+    try {
+      if (!id) return;
+      const [eventRes, submissionsRes] = await Promise.all([
+        eventsApi.getEvent(id),
+        submissionsApi.getMySubmissions(),
+      ]);
+
+      setEvent(eventRes.data.data);
+      const submissions = submissionsRes.data.data || [];
+      const found = submissions.find(
+        (item: any) => item.eventId === id || item.event?.id === id,
+      );
+      setSubmission(found || null);
+    } catch (err) {
+      console.error(err);
+      setError("Failed to load data");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const load = async () => {
-      try {
-        if (!id) return;
-        const res = await eventsApi.getEvent(id);
-        setEvent(res.data.data);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
+    fetchDetail();
   }, [id]);
 
-  if (loading) return <div className="text-slate-500">Loading event...</div>;
-  if (!event) return <div className="text-slate-500">Event not found.</div>;
+  const stageState = (stage: "ABSTRACT" | "PAPER" | "FINAL") => {
+    const current = (submission?.currentStage || "").toUpperCase();
+    if (stage === "ABSTRACT") {
+      if (current === "ABSTRACT") return "active" as const;
+      if (current === "PAPER" || current === "FINAL")
+        return "completed" as const;
+      return "locked" as const;
+    }
+    if (stage === "PAPER") {
+      if (current === "PAPER") return "active" as const;
+      if (current === "FINAL") return "completed" as const;
+      return "locked" as const;
+    }
+    if (stage === "FINAL") {
+      if (current === "FINAL") return "active" as const;
+      return "locked" as const;
+    }
+    return "locked" as const;
+  };
+
+  const stageChipClass = (state: "active" | "completed" | "locked") => {
+    if (state === "active")
+      return "bg-blue-50 text-blue-700 border border-blue-200";
+    if (state === "completed")
+      return "bg-emerald-50 text-emerald-700 border border-emerald-200";
+    return "bg-slate-100 text-slate-500 border border-slate-200";
+  };
+
+  const handleUpload = async (file?: File) => {
+    if (!submission || !file) return;
+    setUploading(true);
+    try {
+      const res = await submissionsApi.uploadFile(submission.id, file);
+      const uploaded = res.data.data;
+      setSubmission({
+        ...submission,
+        files: [...(submission.files || []), uploaded],
+      });
+    } catch (err) {
+      console.error(err);
+      setError("Failed to load data");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!submission) return;
+    setSubmitting(true);
+    try {
+      await submissionsApi.submitSubmission(submission.id);
+      await fetchDetail();
+    } catch (err) {
+      console.error(err);
+      setError("Failed to load data");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (loading)
+    return (
+      <div className="flex items-center justify-center min-h-64">
+        <div className="w-8 h-8 border-2 border-slate-900 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+
+  if (error)
+    return (
+      <div className="bg-red-50 border border-red-100 rounded-xl p-6 text-center">
+        <p className="text-red-600 font-medium">Failed to load data</p>
+        <button
+          onClick={fetchDetail}
+          className="mt-3 text-sm text-red-600 hover:underline font-bold"
+        >
+          Try Again
+        </button>
+      </div>
+    );
+
+  if (!event)
+    return (
+      <div className="text-center py-12">
+        <p className="text-slate-400 text-sm">No data available yet</p>
+      </div>
+    );
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
@@ -218,6 +338,103 @@ const EventDetailView = () => {
               Manage Team
             </Button>
           </div>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+        <div className="flex flex-col md:flex-row justify-between gap-4">
+          <div>
+            <h3 className="text-lg font-bold text-slate-900">
+              Submission Progress
+            </h3>
+            <p className="text-sm text-slate-500">
+              Track your current stage and upload required files.
+            </p>
+          </div>
+          {submission?.status && (
+            <span className="px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wide bg-slate-100 text-slate-700 border border-slate-200 self-start">
+              {submission.status}
+            </span>
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4">
+          {["ABSTRACT", "PAPER", "FINAL"].map((stage) => {
+            const state = stageState(stage as "ABSTRACT" | "PAPER" | "FINAL");
+            return (
+              <div
+                key={stage}
+                className={`flex items-center justify-between px-4 py-3 rounded-lg ${stageChipClass(state)}`}
+              >
+                <div className="font-bold text-sm">{stage}</div>
+                <div className="text-[11px] uppercase font-bold">
+                  {state === "active"
+                    ? "In Progress"
+                    : state === "completed"
+                      ? "Completed"
+                      : "Locked"}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="mt-6 space-y-3">
+          <div className="flex items-center justify-between">
+            <h4 className="font-bold text-slate-900">Files</h4>
+            {submission && (
+              <div>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  className="hidden"
+                  onChange={(e) => handleUpload(e.target.files?.[0])}
+                />
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                >
+                  {uploading ? "Uploading..." : "Upload"}
+                </Button>
+              </div>
+            )}
+          </div>
+
+          {submission?.files?.length ? (
+            <div className="space-y-2">
+              {submission.files.map((file: any) => (
+                <div
+                  key={file.id}
+                  className="flex items-center justify-between px-4 py-2 bg-slate-50 rounded-lg border border-slate-100 text-sm"
+                >
+                  <span className="text-slate-700">{file.name}</span>
+                  <span className="text-slate-400 text-xs">
+                    {file.size || ""}
+                  </span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-sm text-slate-500">No files uploaded yet.</div>
+          )}
+
+          {submission && (
+            <div className="flex justify-end gap-3 pt-3">
+              <Button onClick={handleSubmit} disabled={submitting}>
+                {submitting ? "Submitting..." : "Submit"}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() =>
+                  navigate(`/dashboard/submission/${submission.id}`)
+                }
+              >
+                Open Submission
+              </Button>
+            </div>
+          )}
         </div>
       </div>
 

@@ -17,12 +17,66 @@ import {
   User,
 } from "lucide-react";
 import Button from "../components/Button";
-import { UserProfile, userService } from "../services/userService";
+import { useAuthContext } from "../contexts/AuthContext";
+import { profileApi } from "../services/api/profileApi";
+
+interface SiswaProfile {
+  id: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  birthDate?: string;
+  gender: string;
+  province: string;
+  city: string;
+  avatar?: string;
+  schoolName: string;
+  schoolLevel: string;
+  major: string;
+  studentId: string;
+  grade: string;
+  bio: string;
+  skills: string[];
+  linkedin: string;
+  github: string;
+  completeness: number;
+}
+
+const mapProfile = (payload: any, fallbackUser?: any): SiswaProfile => {
+  const userData = payload?.user || fallbackUser || {};
+  const profileData = payload?.profile || payload || {};
+
+  return {
+    id: profileData.id || userData.id || "",
+    fullName: userData.fullName || profileData.fullName || "",
+    email: userData.email || profileData.email || "",
+    phone: profileData.phone || "",
+    birthDate: profileData.birthDate
+      ? new Date(profileData.birthDate).toISOString().slice(0, 10)
+      : "",
+    gender: profileData.gender || "",
+    province: profileData.province || "",
+    city: profileData.city || "",
+    avatar: profileData.avatar || userData.avatar || "",
+    schoolName: profileData.schoolName || "",
+    schoolLevel: profileData.schoolLevel || "",
+    major: profileData.major || "",
+    studentId: profileData.studentId || "",
+    grade: profileData.grade || "",
+    bio: profileData.bio || "",
+    skills: profileData.skills || [],
+    linkedin: profileData.linkedin || "",
+    github: profileData.github || "",
+    completeness: profileData.completeness || 0,
+  };
+};
 
 const DashboardProfile: React.FC = () => {
-  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const { user } = useAuthContext();
+  const [profile, setProfile] = useState<SiswaProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"general" | "academic" | "public">(
     "general",
   );
@@ -40,12 +94,16 @@ const DashboardProfile: React.FC = () => {
   }, []);
 
   const loadProfile = async () => {
+    setLoadError(null);
+    setLoading(true);
     try {
-      const data = await userService.getProfile();
-      setProfile(data);
-      if ((data.completeness || 0) < 80) setActiveTab("academic");
+      const res = await profileApi.getProfile();
+      const mapped = mapProfile(res.data.data, user);
+      setProfile(mapped);
+      if ((mapped.completeness || 0) < 80) setActiveTab("academic");
     } catch (e) {
       console.error(e);
+      setLoadError("Failed to load data");
     } finally {
       setLoading(false);
     }
@@ -60,8 +118,25 @@ const DashboardProfile: React.FC = () => {
     if (!profile) return;
     setSaving(true);
     try {
-      const updated = await userService.updateProfile(profile);
-      setProfile(updated);
+      const payload = {
+        fullName: profile.fullName,
+        phone: profile.phone,
+        birthDate: profile.birthDate,
+        gender: profile.gender,
+        province: profile.province,
+        city: profile.city,
+        schoolName: profile.schoolName,
+        schoolLevel: profile.schoolLevel,
+        major: profile.major,
+        studentId: profile.studentId,
+        grade: profile.grade,
+        bio: profile.bio,
+        skills: profile.skills,
+        linkedin: profile.linkedin,
+        github: profile.github,
+      };
+      const res = await profileApi.updateProfile(payload);
+      setProfile(mapProfile(res.data.data, user));
       showNotification("success", "Profile updated successfully.");
     } catch (e) {
       showNotification("error", "Failed to save changes.");
@@ -70,7 +145,7 @@ const DashboardProfile: React.FC = () => {
     }
   };
 
-  const handleChange = (field: keyof UserProfile, value: any) => {
+  const handleChange = (field: keyof SiswaProfile, value: any) => {
     if (!profile) return;
     setProfile({ ...profile, [field]: value });
   };
@@ -79,13 +154,11 @@ const DashboardProfile: React.FC = () => {
     if (e.target.files && e.target.files[0]) {
       setUploadingAvatar(true);
       try {
-        const url = await userService.uploadAvatar(e.target.files[0]);
+        const res = await profileApi.uploadAvatar(e.target.files[0]);
+        const url =
+          res.data?.data?.avatarUrl || res.data?.data?.avatar || res.data?.data;
         if (profile) {
-          const updated = await userService.updateProfile({
-            ...profile,
-            avatar: url,
-          });
-          setProfile(updated);
+          setProfile({ ...profile, avatar: url || profile.avatar });
           showNotification("success", "Profile photo updated.");
         }
       } catch (err) {
@@ -120,10 +193,24 @@ const DashboardProfile: React.FC = () => {
 
   if (loading)
     return (
-      <div className="p-12 text-center text-slate-500">
-        Loading profile data...
+      <div className="flex items-center justify-center min-h-64">
+        <div className="w-8 h-8 border-2 border-slate-900 border-t-transparent rounded-full animate-spin" />
       </div>
     );
+
+  if (loadError)
+    return (
+      <div className="bg-red-50 border border-red-100 rounded-xl p-6 text-center">
+        <p className="text-red-600 font-medium">{loadError}</p>
+        <button
+          onClick={loadProfile}
+          className="mt-3 text-sm text-red-600 hover:underline font-bold"
+        >
+          Try Again
+        </button>
+      </div>
+    );
+
   if (!profile) return null;
 
   return (
@@ -153,8 +240,8 @@ const DashboardProfile: React.FC = () => {
               Profile & Affiliation
             </h1>
             <p className="text-slate-500 mt-1">
-              Data is pulled directly from the server; please keep your school
-              or student identity complete.
+              Data is pulled directly from the server; please keep your student
+              identity complete and up to date.
             </p>
           </div>
           <Button
@@ -246,7 +333,7 @@ const DashboardProfile: React.FC = () => {
             </div>
 
             <h2 className="text-xl font-bold text-slate-900">
-              {profile.fullName || "Pengguna"}
+              {profile.fullName || "Student"}
             </h2>
             <p className="text-sm text-slate-500 mt-2 mb-6 font-medium">
               {profile.schoolName || "No school provided"}
@@ -285,14 +372,14 @@ const DashboardProfile: React.FC = () => {
             {/* Tabs */}
             <div className="flex border-b border-slate-200 overflow-x-auto">
               {[
-                { id: "general", label: "Identitas Dasar", icon: User },
+                { id: "general", label: "General Info", icon: User },
                 {
                   id: "academic",
-                  label: "Data Akademik",
+                  label: "Academic Data",
                   icon: GraduationCap,
                   alert: !isComplete,
                 },
-                { id: "public", label: "Profil Publik", icon: Linkedin },
+                { id: "public", label: "Public Profile", icon: Linkedin },
               ].map((tab) => (
                 <button
                   key={tab.id}
@@ -320,7 +407,7 @@ const DashboardProfile: React.FC = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label className="block text-xs font-bold uppercase text-slate-500 mb-1.5">
-                        Nama Lengkap <span className="text-red-500">*</span>
+                        Full Name <span className="text-red-500">*</span>
                       </label>
                       <div className="relative">
                         <User
@@ -359,7 +446,7 @@ const DashboardProfile: React.FC = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label className="block text-xs font-bold uppercase text-slate-500 mb-1.5">
-                        Nomor Telepon <span className="text-red-500">*</span>
+                        Phone Number <span className="text-red-500">*</span>
                       </label>
                       <div className="relative">
                         <Phone
@@ -373,13 +460,13 @@ const DashboardProfile: React.FC = () => {
                             handleChange("phone", e.target.value)
                           }
                           className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary-100 focus:border-primary-500 outline-none transition-all text-sm font-medium"
-                          placeholder="08xxxxxxxx"
+                          placeholder="e.g., +62 812xxxx"
                         />
                       </div>
                     </div>
                     <div>
                       <label className="block text-xs font-bold uppercase text-slate-500 mb-1.5">
-                        Tanggal Lahir
+                        Birth Date
                       </label>
                       <div className="relative">
                         <Calendar
@@ -401,14 +488,14 @@ const DashboardProfile: React.FC = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label className="block text-xs font-bold uppercase text-slate-500 mb-1.5">
-                        Jenis Kelamin
+                        Gender
                       </label>
                       <select
                         value={profile.gender}
                         onChange={(e) => handleChange("gender", e.target.value)}
                         className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary-100 focus:border-primary-500 outline-none transition-all text-sm font-medium"
                       >
-                        <option value="">Pilih</option>
+                        <option value="">Select</option>
                         <option value="Male">Male</option>
                         <option value="Female">Female</option>
                         <option value="Other">Other</option>
@@ -416,18 +503,31 @@ const DashboardProfile: React.FC = () => {
                     </div>
                     <div>
                       <label className="block text-xs font-bold uppercase text-slate-500 mb-1.5">
-                        Alamat
+                        Province / State
                       </label>
                       <input
                         type="text"
-                        value={profile.address}
+                        value={profile.province}
                         onChange={(e) =>
-                          handleChange("address", e.target.value)
+                          handleChange("province", e.target.value)
                         }
                         className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary-100 focus:border-primary-500 outline-none transition-all text-sm font-medium"
-                        placeholder="Alamat domisili"
+                        placeholder="e.g., West Java"
                       />
                     </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold uppercase text-slate-500 mb-1.5">
+                      City / District
+                    </label>
+                    <input
+                      type="text"
+                      value={profile.city}
+                      onChange={(e) => handleChange("city", e.target.value)}
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary-100 focus:border-primary-500 outline-none transition-all text-sm font-medium"
+                      placeholder="e.g., Bandung"
+                    />
                   </div>
                 </div>
               )}
@@ -446,7 +546,7 @@ const DashboardProfile: React.FC = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="md:col-span-2">
                       <label className="block text-xs font-bold uppercase text-slate-500 mb-1.5">
-                        Nama Sekolah / Kampus{" "}
+                        Institution
                         <span className="text-red-500">*</span>
                       </label>
                       <div className="relative">
@@ -461,14 +561,14 @@ const DashboardProfile: React.FC = () => {
                             handleChange("schoolName", e.target.value)
                           }
                           className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary-100 focus:border-primary-500 outline-none transition-all text-sm font-medium"
-                          placeholder="Nama institusi"
+                          placeholder="Institution name"
                         />
                       </div>
                     </div>
 
                     <div>
                       <label className="block text-xs font-bold uppercase text-slate-500 mb-1.5">
-                        Jenjang
+                        Education Level
                       </label>
                       <select
                         value={profile.schoolLevel}
@@ -477,7 +577,7 @@ const DashboardProfile: React.FC = () => {
                         }
                         className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary-100 focus:border-primary-500 outline-none transition-all text-sm font-medium"
                       >
-                        <option value="">Pilih</option>
+                        <option value="">Select</option>
                         <option value="High School">High School</option>
                         <option value="University">University</option>
                         <option value="Research Institution">
@@ -488,7 +588,7 @@ const DashboardProfile: React.FC = () => {
 
                     <div>
                       <label className="block text-xs font-bold uppercase text-slate-500 mb-1.5">
-                        Jurusan / Major
+                        Field of Study
                       </label>
                       <div className="relative">
                         <BookOpen
@@ -502,7 +602,7 @@ const DashboardProfile: React.FC = () => {
                             handleChange("major", e.target.value)
                           }
                           className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary-100 focus:border-primary-500 outline-none transition-all text-sm font-medium"
-                          placeholder="Contoh: Computer Science"
+                          placeholder="e.g., Computer Science"
                         />
                       </div>
                     </div>
@@ -511,19 +611,19 @@ const DashboardProfile: React.FC = () => {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
                       <label className="block text-xs font-bold uppercase text-slate-500 mb-1.5">
-                        Kelas / Grade
+                        Grade / Year
                       </label>
                       <input
                         type="text"
                         value={profile.grade}
                         onChange={(e) => handleChange("grade", e.target.value)}
                         className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary-100 focus:border-primary-500 outline-none transition-all text-sm font-medium"
-                        placeholder="XI / Semester 5"
+                        placeholder="Grade 11 / Semester 5"
                       />
                     </div>
                     <div>
                       <label className="block text-xs font-bold uppercase text-slate-500 mb-1.5">
-                        NIS / Student ID
+                        Student ID
                       </label>
                       <input
                         type="text"
@@ -532,12 +632,12 @@ const DashboardProfile: React.FC = () => {
                           handleChange("studentId", e.target.value)
                         }
                         className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary-100 focus:border-primary-500 outline-none transition-all text-sm font-medium"
-                        placeholder="ID akademik"
+                        placeholder="Student ID"
                       />
                     </div>
                     <div>
                       <label className="block text-xs font-bold uppercase text-slate-500 mb-1.5">
-                        Provinsi
+                        Province / State
                       </label>
                       <input
                         type="text"
@@ -546,21 +646,21 @@ const DashboardProfile: React.FC = () => {
                           handleChange("province", e.target.value)
                         }
                         className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary-100 focus:border-primary-500 outline-none transition-all text-sm font-medium"
-                        placeholder="Contoh: Jawa Barat"
+                        placeholder="e.g., West Java"
                       />
                     </div>
                   </div>
 
                   <div>
                     <label className="block text-xs font-bold uppercase text-slate-500 mb-1.5">
-                      Kota / Kabupaten
+                      City / District
                     </label>
                     <input
                       type="text"
                       value={profile.city}
                       onChange={(e) => handleChange("city", e.target.value)}
                       className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary-100 focus:border-primary-500 outline-none transition-all text-sm font-medium"
-                      placeholder="Contoh: Bandung"
+                      placeholder="e.g., Bandung"
                     />
                   </div>
                 </div>
@@ -571,7 +671,7 @@ const DashboardProfile: React.FC = () => {
                 <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
                   <div>
                     <label className="block text-xs font-bold uppercase text-slate-500 mb-1.5">
-                      Bio Singkat
+                      Short Bio
                     </label>
                     <textarea
                       value={profile.bio}
@@ -586,7 +686,7 @@ const DashboardProfile: React.FC = () => {
 
                   <div>
                     <label className="block text-xs font-bold uppercase text-slate-500 mb-2">
-                      Keahlian
+                      Skills
                     </label>
                     <div className="flex flex-wrap gap-2 mb-3">
                       {profile.skills.map((skill, i) => (
@@ -611,7 +711,7 @@ const DashboardProfile: React.FC = () => {
                         onChange={(e) => setNewSkill(e.target.value)}
                         onKeyDown={(e) => e.key === "Enter" && addSkill()}
                         className="flex-1 px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary-100 outline-none text-sm"
-                        placeholder="Tambah skill (ex: React, Data Science)"
+                        placeholder="Add skill (e.g., React, Data Science)"
                       />
                       <Button
                         size="sm"
@@ -626,7 +726,7 @@ const DashboardProfile: React.FC = () => {
 
                   <div className="space-y-4 pt-4 border-t border-slate-100">
                     <h4 className="text-sm font-bold text-slate-900">
-                      Tautan Publik
+                      Public Links
                     </h4>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

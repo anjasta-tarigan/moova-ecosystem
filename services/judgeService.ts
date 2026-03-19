@@ -1,3 +1,4 @@
+// @deprecated Use services/api/judgeApi.ts instead
 import { judgeApi } from "./api/judgeApi";
 
 export type JudgingStage = "abstract" | "paper" | "final";
