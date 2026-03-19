@@ -79,7 +79,7 @@ const AuthPage: React.FC = () => {
       role: "participant" as UserRole,
       organization: formData.institution || "New Member",
     };
-    localStorage.setItem("moova_user", JSON.stringify(mockUser));
+    localStorage.setItem("giva_user", JSON.stringify(mockUser));
     navigate("/dashboard");
   };
 
@@ -138,9 +138,9 @@ const AuthPage: React.FC = () => {
         <div className="relative z-10">
           <Link to="/" className="flex items-center gap-3 w-fit group">
             <div className="w-10 h-10 bg-white/10 backdrop-blur-sm border border-white/10 rounded-xl flex items-center justify-center font-bold text-white group-hover:bg-white/20 transition-colors">
-              M
+              G
             </div>
-            <span className="font-bold text-xl tracking-tight">moova</span>
+            <span className="font-bold text-xl tracking-tight">GIVA</span>
           </Link>
         </div>
 
@@ -187,7 +187,7 @@ const AuthPage: React.FC = () => {
           {/* Mobile Brand */}
           <div className="lg:hidden pointer-events-auto flex items-center gap-2">
             <div className="w-8 h-8 bg-brand-gradient rounded-lg flex items-center justify-center text-white font-bold text-sm">
-              M
+              G
             </div>
           </div>
         </div>
@@ -245,9 +245,9 @@ const AuthPage: React.FC = () => {
                 <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 text-xs text-slate-500">
                   <strong>Test Accounts:</strong>
                   <br />
-                  user@moova.test / user123 (Participant)
+                  siswa@giva.test / siswa123 (Student)
                   <br />
-                  judge@moova.test / judge123 (Judge)
+                  juri1@giva.test / juri123 (Judge)
                 </div>
 
                 {error && (
@@ -498,7 +498,7 @@ const AuthPage: React.FC = () => {
             >
               Terms of Service
             </Link>
-            <span>© {new Date().getFullYear()} moova Ecosystem</span>
+            <span>© {new Date().getFullYear()} GIVA Ecosystem</span>
           </div>
         </div>
       </div>

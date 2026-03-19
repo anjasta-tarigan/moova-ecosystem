@@ -1,20 +1,76 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# GIVA - Science & Innovation Ecosystem
 
-# Run and deploy your AI Studio app
+## Overview
 
-This contains everything you need to run your app locally.
+GIVA is a global platform connecting students, researchers, and organizations through science and innovation competitions.
 
-View your app in AI Studio: https://ai.studio/apps/drive/1L2OPI3kkbYLbIkW5z0vvyyLBuowuz05L
+## Tech Stack
 
-## Run Locally
+- Frontend: React 19, TypeScript, Vite 6, Tailwind v4
+- Backend: Express, TypeScript, Prisma, PostgreSQL
+- Auth: JWT (access + refresh tokens)
 
-**Prerequisites:**  Node.js
+## Prerequisites
 
+- Node.js >= 20
+- PostgreSQL >= 14
+- pnpm >= 10
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+## Setup
+
+### Backend
+
+```bash
+cd backend
+pnpm install
+cp .env.example .env
+# Edit .env with your database credentials
+pnpm prisma db push
+pnpm prisma db seed
+pnpm dev
+```
+
+### Frontend
+
+```bash
+# At workspace root
+pnpm install
+cp .env.example .env.local
+# Edit .env.local with your API URL
+pnpm dev
+```
+
+## Default Accounts
+
+| Role        | Email                | Password      |
+| ----------- | -------------------- | ------------- |
+| Super Admin | superadmin@giva.test | superadmin123 |
+| Admin       | admin@giva.test      | admin123      |
+| Judge       | juri1@giva.test      | juri123       |
+| Student     | siswa@giva.test      | siswa123      |
+
+## Available Routes
+
+| Path             | Access     | Description              |
+| ---------------- | ---------- | ------------------------ |
+| /                | Public     | Landing page             |
+| /events          | Public     | Events listing           |
+| /login           | Public     | Login                    |
+| /join            | Public     | Register (students only) |
+| /dashboard       | Student    | Student dashboard        |
+| /dashboard/judge | Judge      | Judge workspace          |
+| /admin           | Admin      | Admin panel              |
+| /superadmin      | SuperAdmin | System management        |
+
+## Build for Production
+
+```bash
+# Frontend
+pnpm build
+pnpm preview
+
+# Backend
+cd backend
+pnpm build
+pnpm start
+```

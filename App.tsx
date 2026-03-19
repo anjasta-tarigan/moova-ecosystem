@@ -1,46 +1,61 @@
-import React from "react";
+import React, { lazy, Suspense } from "react";
 import { HashRouter, Routes, Route, Outlet, Navigate } from "react-router-dom";
 import { AuthProvider, useAuthContext } from "./contexts/AuthContext";
+import LoadingSpinner from "./components/LoadingSpinner";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import LandingPage from "./pages/LandingPage";
-import AboutPage from "./pages/AboutPage";
-import ProgramsPage from "./pages/ProgramsPage";
-import ProgramDetailPage from "./pages/ProgramDetailPage";
-import PartnersPage from "./pages/PartnersPage";
-import EventsPage from "./pages/EventsPage";
-import EventDetailPage from "./pages/EventDetailPage";
-import CalendarPage from "./pages/CalendarPage";
-import CommunityPage from "./pages/CommunityPage";
 import AuthPage from "./pages/AuthPage";
-import PrivacyPage from "./pages/PrivacyPage";
-import TermsPage from "./pages/TermsPage";
-import CookiesPage from "./pages/CookiesPage";
-import DashboardLayout from "./layouts/DashboardLayout";
-import DashboardPage from "./pages/DashboardPage";
-import DashboardEventHub from "./pages/DashboardEventHub";
-import DashboardTeam from "./pages/DashboardTeam";
-import DashboardSubmission from "./pages/DashboardSubmission";
-import DashboardCertificates from "./pages/DashboardCertificates";
-import DashboardProfile from "./pages/DashboardProfile"; // Ensure this is imported
-import CertificateVerificationPage from "./pages/CertificateVerificationPage";
-import JudgeHome from "./pages/JudgeHome";
-import JudgeDashboard from "./pages/JudgeDashboard";
-import JudgeEventView from "./pages/JudgeEventView";
-import JudgeScoringView from "./pages/JudgeScoringView";
-import JudgeCertificates from "./pages/JudgeCertificates";
-import AdminLayout from "./layouts/AdminLayout";
-import AdminDashboard from "./pages/admin/AdminDashboard";
-import AdminEvents from "./pages/admin/AdminEvents";
-import AdminEventForm from "./pages/admin/AdminEventForm";
-import AdminSubmissions from "./pages/admin/AdminSubmissions";
-import AdminSiswa from "./pages/admin/AdminSiswa";
-import AdminCertificates from "./pages/admin/AdminCertificates";
-import AdminReports from "./pages/admin/AdminReports";
-import SuperAdminDashboard from "./pages/superadmin/SuperAdminDashboard";
-import SuperAdminUsers from "./pages/superadmin/SuperAdminUsers";
-import SuperAdminJudgeAssignments from "./pages/superadmin/SuperAdminJudgeAssignments.tsx";
-import LoadingSpinner from "./components/LoadingSpinner";
+
+const AboutPage = lazy(() => import("./pages/AboutPage"));
+const ProgramsPage = lazy(() => import("./pages/ProgramsPage"));
+const ProgramDetailPage = lazy(() => import("./pages/ProgramDetailPage"));
+const PartnersPage = lazy(() => import("./pages/PartnersPage"));
+const EventsPage = lazy(() => import("./pages/EventsPage"));
+const EventDetailPage = lazy(() => import("./pages/EventDetailPage"));
+const CalendarPage = lazy(() => import("./pages/CalendarPage"));
+const CommunityPage = lazy(() => import("./pages/CommunityPage"));
+const PrivacyPage = lazy(() => import("./pages/PrivacyPage"));
+const TermsPage = lazy(() => import("./pages/TermsPage"));
+const CookiesPage = lazy(() => import("./pages/CookiesPage"));
+const CertificateVerificationPage = lazy(
+  () => import("./pages/CertificateVerificationPage"),
+);
+
+const DashboardLayout = lazy(() => import("./layouts/DashboardLayout"));
+const DashboardPage = lazy(() => import("./pages/DashboardPage"));
+const DashboardEventHub = lazy(() => import("./pages/DashboardEventHub"));
+const DashboardTeam = lazy(() => import("./pages/DashboardTeam"));
+const DashboardSubmission = lazy(() => import("./pages/DashboardSubmission"));
+const DashboardCertificates = lazy(
+  () => import("./pages/DashboardCertificates"),
+);
+const DashboardProfile = lazy(() => import("./pages/DashboardProfile"));
+
+const JudgeHome = lazy(() => import("./pages/JudgeHome"));
+const JudgeDashboard = lazy(() => import("./pages/JudgeDashboard"));
+const JudgeEventView = lazy(() => import("./pages/JudgeEventView"));
+const JudgeScoringView = lazy(() => import("./pages/JudgeScoringView"));
+const JudgeCertificates = lazy(() => import("./pages/JudgeCertificates"));
+
+const AdminLayout = lazy(() => import("./layouts/AdminLayout"));
+const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
+const AdminEvents = lazy(() => import("./pages/admin/AdminEvents"));
+const AdminEventForm = lazy(() => import("./pages/admin/AdminEventForm"));
+const AdminSubmissions = lazy(() => import("./pages/admin/AdminSubmissions"));
+const AdminSiswa = lazy(() => import("./pages/admin/AdminSiswa"));
+const AdminCertificates = lazy(() => import("./pages/admin/AdminCertificates"));
+const AdminReports = lazy(() => import("./pages/admin/AdminReports"));
+
+const SuperAdminDashboard = lazy(
+  () => import("./pages/superadmin/SuperAdminDashboard"),
+);
+const SuperAdminUsers = lazy(
+  () => import("./pages/superadmin/SuperAdminUsers"),
+);
+const SuperAdminJudgeAssignments = lazy(
+  () => import("./pages/superadmin/SuperAdminJudgeAssignments"),
+);
 
 // Helper to scroll to top on route change
 const ScrollToTop = () => {
@@ -50,6 +65,20 @@ const ScrollToTop = () => {
   }, [pathname]);
   return null;
 };
+
+const SuspenseWrapper: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => (
+  <Suspense
+    fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <LoadingSpinner size="lg" />
+      </div>
+    }
+  >
+    {children}
+  </Suspense>
+);
 
 // Layout for main pages (includes Navbar and Footer)
 const MainLayout = () => {
@@ -129,141 +158,143 @@ const App: React.FC = () => {
     <AuthProvider>
       <HashRouter>
         <ScrollToTop />
-        <Routes>
-          {/* Main Application Routes (Public) */}
-          <Route element={<MainLayout />}>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/about" element={<AboutPage />} />
-            <Route path="/programs" element={<ProgramsPage />} />
-            <Route path="/programs/:id" element={<ProgramDetailPage />} />
-            <Route path="/partners" element={<PartnersPage />} />
-            <Route
-              path="/ecosystem"
-              element={<Navigate to="/programs" replace />}
-            />
-            <Route path="/events" element={<EventsPage />} />
-            <Route path="/events/:id" element={<EventDetailPage />} />
-            <Route path="/calendar" element={<CalendarPage />} />
-            <Route path="/community" element={<CommunityPage />} />
-            <Route path="/privacy" element={<PrivacyPage />} />
-            <Route path="/terms" element={<TermsPage />} />
-            <Route path="/cookies" element={<CookiesPage />} />
-            <Route
-              path="/verify/:id"
-              element={<CertificateVerificationPage />}
-            />
-          </Route>
-
-          {/* Auth Routes */}
-          <Route path="/join" element={<AuthPage />} />
-          <Route path="/login" element={<AuthPage />} />
-
-          {/* Dashboard Routes - Protected */}
-          <Route path="/dashboard" element={<AuthGuard />}>
-            {/* Participant / User Dashboard */}
-            <Route
-              index
-              element={
-                <RoleGuard allowedRoles={["SISWA"]}>
-                  <DashboardPage />
-                </RoleGuard>
-              }
-            />
-
-            {/* Participant Specific Routes */}
-            <Route
-              path="event/:id"
-              element={
-                <RoleGuard allowedRoles={["SISWA"]}>
-                  <DashboardEventHub />
-                </RoleGuard>
-              }
-            />
-            <Route
-              path="team/:id"
-              element={
-                <RoleGuard allowedRoles={["SISWA"]}>
-                  <DashboardTeam />
-                </RoleGuard>
-              }
-            />
-            <Route
-              path="submission/:id"
-              element={
-                <RoleGuard allowedRoles={["SISWA"]}>
-                  <DashboardSubmission />
-                </RoleGuard>
-              }
-            />
-            <Route
-              path="certificates"
-              element={
-                <RoleGuard
-                  allowedRoles={[
-                    "participant",
-                    "team_leader",
-                    "team_member",
-                    "guest",
-                    "partner",
-                    "mentor",
-                  ]}
-                >
-                  <DashboardCertificates />
-                </RoleGuard>
-              }
-            />
-
-            {/* Shared Profile Route */}
-            <Route path="profile" element={<DashboardProfile />} />
-
-            {/* Judge Module Routes */}
-            <Route
-              path="judge"
-              element={
-                <RoleGuard allowedRoles={["JURI"]}>
-                  <Outlet />
-                </RoleGuard>
-              }
-            >
-              <Route index element={<JudgeHome />} />
-              <Route path="events" element={<JudgeDashboard />} />
-              {/* New Route Structure: Event -> Category Workspace */}
+        <SuspenseWrapper>
+          <Routes>
+            {/* Main Application Routes (Public) */}
+            <Route element={<MainLayout />}>
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/about" element={<AboutPage />} />
+              <Route path="/programs" element={<ProgramsPage />} />
+              <Route path="/programs/:id" element={<ProgramDetailPage />} />
+              <Route path="/partners" element={<PartnersPage />} />
               <Route
-                path="events/:eventId/category/:categoryId"
-                element={<JudgeEventView />}
+                path="/ecosystem"
+                element={<Navigate to="/programs" replace />}
               />
-              {/* Scoring Route: Event -> Round -> Submission */}
+              <Route path="/events" element={<EventsPage />} />
+              <Route path="/events/:id" element={<EventDetailPage />} />
+              <Route path="/calendar" element={<CalendarPage />} />
+              <Route path="/community" element={<CommunityPage />} />
+              <Route path="/privacy" element={<PrivacyPage />} />
+              <Route path="/terms" element={<TermsPage />} />
+              <Route path="/cookies" element={<CookiesPage />} />
               <Route
-                path="events/:eventId/round/:roundId/submission/:submissionId"
-                element={<JudgeScoringView />}
+                path="/verify/:id"
+                element={<CertificateVerificationPage />}
               />
-              <Route path="certificates" element={<JudgeCertificates />} />
-              <Route path="profile" element={<DashboardProfile />} />
             </Route>
-            <Route path="*" element={<DashboardPage />} />
-          </Route>
 
-          {/* Admin Routes */}
-          <Route path="/admin" element={<AdminGuard />}>
-            <Route index element={<AdminDashboard />} />
-            <Route path="events" element={<AdminEvents />} />
-            <Route path="events/new" element={<AdminEventForm />} />
-            <Route path="events/:id/edit" element={<AdminEventForm />} />
-            <Route path="submissions" element={<AdminSubmissions />} />
-            <Route path="siswa" element={<AdminSiswa />} />
-            <Route path="certificates" element={<AdminCertificates />} />
-            <Route path="reports" element={<AdminReports />} />
-          </Route>
+            {/* Auth Routes */}
+            <Route path="/join" element={<AuthPage />} />
+            <Route path="/login" element={<AuthPage />} />
 
-          <Route path="/superadmin" element={<SuperAdminGuard />}>
-            <Route index element={<SuperAdminDashboard />} />
-            <Route path="users" element={<SuperAdminUsers />} />
-            <Route
-              path="assignments"
-              element={<SuperAdminJudgeAssignments />}
-            />
-          </Route>
-        </Routes>
+            {/* Dashboard Routes - Protected */}
+            <Route path="/dashboard" element={<AuthGuard />}>
+              {/* Participant / User Dashboard */}
+              <Route
+                index
+                element={
+                  <RoleGuard allowedRoles={["SISWA"]}>
+                    <DashboardPage />
+                  </RoleGuard>
+                }
+              />
+
+              {/* Participant Specific Routes */}
+              <Route
+                path="event/:id"
+                element={
+                  <RoleGuard allowedRoles={["SISWA"]}>
+                    <DashboardEventHub />
+                  </RoleGuard>
+                }
+              />
+              <Route
+                path="team/:id"
+                element={
+                  <RoleGuard allowedRoles={["SISWA"]}>
+                    <DashboardTeam />
+                  </RoleGuard>
+                }
+              />
+              <Route
+                path="submission/:id"
+                element={
+                  <RoleGuard allowedRoles={["SISWA"]}>
+                    <DashboardSubmission />
+                  </RoleGuard>
+                }
+              />
+              <Route
+                path="certificates"
+                element={
+                  <RoleGuard
+                    allowedRoles={[
+                      "participant",
+                      "team_leader",
+                      "team_member",
+                      "guest",
+                      "partner",
+                      "mentor",
+                    ]}
+                  >
+                    <DashboardCertificates />
+                  </RoleGuard>
+                }
+              />
+
+              {/* Shared Profile Route */}
+              <Route path="profile" element={<DashboardProfile />} />
+
+              {/* Judge Module Routes */}
+              <Route
+                path="judge"
+                element={
+                  <RoleGuard allowedRoles={["JURI"]}>
+                    <Outlet />
+                  </RoleGuard>
+                }
+              >
+                <Route index element={<JudgeHome />} />
+                <Route path="events" element={<JudgeDashboard />} />
+                {/* New Route Structure: Event -> Category Workspace */}
+                <Route
+                  path="events/:eventId/category/:categoryId"
+                  element={<JudgeEventView />}
+                />
+                {/* Scoring Route: Event -> Round -> Submission */}
+                <Route
+                  path="events/:eventId/round/:roundId/submission/:submissionId"
+                  element={<JudgeScoringView />}
+                />
+                <Route path="certificates" element={<JudgeCertificates />} />
+                <Route path="profile" element={<DashboardProfile />} />
+              </Route>
+              <Route path="*" element={<DashboardPage />} />
+            </Route>
+
+            {/* Admin Routes */}
+            <Route path="/admin" element={<AdminGuard />}>
+              <Route index element={<AdminDashboard />} />
+              <Route path="events" element={<AdminEvents />} />
+              <Route path="events/new" element={<AdminEventForm />} />
+              <Route path="events/:id/edit" element={<AdminEventForm />} />
+              <Route path="submissions" element={<AdminSubmissions />} />
+              <Route path="siswa" element={<AdminSiswa />} />
+              <Route path="certificates" element={<AdminCertificates />} />
+              <Route path="reports" element={<AdminReports />} />
+            </Route>
+
+            <Route path="/superadmin" element={<SuperAdminGuard />}>
+              <Route index element={<SuperAdminDashboard />} />
+              <Route path="users" element={<SuperAdminUsers />} />
+              <Route
+                path="assignments"
+                element={<SuperAdminJudgeAssignments />}
+              />
+            </Route>
+          </Routes>
+        </SuspenseWrapper>
       </HashRouter>
     </AuthProvider>
   );
