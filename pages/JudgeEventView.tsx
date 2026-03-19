@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   ChevronLeft,
@@ -10,45 +10,50 @@ import {
   BarChart,
   ChevronRight,
 } from "lucide-react";
-import {
-  judgeService,
-  JudgingStage,
-  JudgeSubmissionSummary,
-} from "../services/judgeService";
+import LoadingSpinner from "../components/LoadingSpinner";
+import { judgeApi } from "../services/api/judgeApi";
 
 const JudgeEventView: React.FC = () => {
   const { eventId, categoryId } = useParams(); // Now uses categoryId in route
   const navigate = useNavigate();
 
   // State
-  const [activeStage, setActiveStage] = useState<JudgingStage>("paper");
-  const [submissions, setSubmissions] = useState<JudgeSubmissionSummary[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [filterStatus, setFilterStatus] = useState<
-    "all" | "pending" | "submitted"
-  >("all");
+  const [submissions, setSubmissions] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [activeStage, setActiveStage] = useState<string>("ABSTRACT");
+  const [filterStatus, setFilterStatus] = useState<string>("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [progress, setProgress] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadData = useCallback(async () => {
+    if (!categoryId) return;
+    setIsLoading(true);
+    try {
+      const res = await judgeApi.getCategorySubmissions(categoryId, {
+        stage: activeStage,
+      });
+      const data = res.data.data || [];
+      setSubmissions(data);
+
+      const scored = data.filter(
+        (s: any) => s.scoringStatus === "submitted",
+      ).length;
+      setProgress(
+        data.length > 0 ? Math.round((scored / data.length) * 100) : 0,
+      );
+    } catch (error) {
+      console.error(error);
+      setError("Failed to load data");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [categoryId, activeStage]);
 
   // Fetch submissions for this specific category
   useEffect(() => {
     loadData();
-  }, [categoryId, activeStage]); // Reload when stage changes
-
-  const loadData = async () => {
-    if (!categoryId) return;
-    setLoading(true);
-    try {
-      const data = await judgeService.getCategorySubmissions(
-        categoryId,
-        activeStage,
-      );
-      setSubmissions(data);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [loadData]); // Reload when stage changes
 
   const filteredSubmissions = submissions.filter((sub) => {
     const matchesStatus =
@@ -88,21 +93,29 @@ const JudgeEventView: React.FC = () => {
     }
   };
 
-  const stages: { id: JudgingStage; label: string; active: boolean }[] = [
-    { id: "abstract", label: "1. Abstract", active: true },
-    { id: "paper", label: "2. Full Paper & Poster", active: true },
-    { id: "final", label: "3. Final Presentation", active: true }, // In real app, check date to disable future stages
+  const stages: { id: string; label: string; active: boolean }[] = [
+    { id: "ABSTRACT", label: "1. Abstract", active: true },
+    { id: "PAPER", label: "2. Full Paper & Poster", active: true },
+    { id: "FINAL", label: "3. Final Presentation", active: true }, // In real app, check date to disable future stages
   ];
 
-  // Calculate Progress for Current Stage
-  const progress =
-    submissions.length > 0
-      ? Math.round(
-          (submissions.filter((s) => s.scoringStatus === "submitted").length /
-            submissions.length) *
-            100,
-        )
-      : 0;
+  if (isLoading) return <LoadingSpinner />;
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-64">
+        <div className="text-center">
+          <p className="text-red-600 font-medium mb-2">Failed to load data</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="text-sm text-slate-600 hover:underline"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto space-y-6 animate-in fade-in duration-500 p-6">
@@ -202,14 +215,9 @@ const JudgeEventView: React.FC = () => {
 
         {/* List View */}
         <div className="flex-1 bg-slate-50 p-6 overflow-y-auto">
-          {loading ? (
-            <div className="flex items-center justify-center h-64 text-slate-500">
-              Loading submissions...
-            </div>
-          ) : filteredSubmissions.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-64 text-slate-500 border-2 border-dashed border-slate-200 rounded-xl">
-              <Search size={32} className="mb-2 opacity-50" />
-              <p>No submissions found for this filter.</p>
+          {filteredSubmissions.length === 0 ? (
+            <div className="flex items-center justify-center min-h-64 border-2 border-dashed border-slate-200 rounded-xl">
+              <p className="text-slate-400 text-sm">No data available</p>
             </div>
           ) : (
             <div className="space-y-3">

@@ -13,68 +13,62 @@ import {
   Maximize2,
 } from "lucide-react";
 import Button from "../components/Button";
-import {
-  judgeService,
-  JudgingStage,
-  Criterion,
-  JudgeSubmissionDetail,
-} from "../services/judgeService";
+import LoadingSpinner from "../components/LoadingSpinner";
+import { judgeApi } from "../services/api/judgeApi";
 
 const JudgeScoringView: React.FC = () => {
   const { eventId, roundId, submissionId } = useParams(); // roundId = stage (abstract/paper/final)
   const navigate = useNavigate();
 
   // State
-  const [submission, setSubmission] = useState<JudgeSubmissionDetail | null>(
-    null,
-  );
-  const [rubric, setRubric] = useState<Criterion[]>([]);
+  const [submission, setSubmission] = useState<any>(null);
+  const [rubric, setRubric] = useState<any[]>([]);
   const [scores, setScores] = useState<Record<string, number>>({});
   const [comment, setComment] = useState("");
   const [status, setStatus] = useState<"draft" | "submitted">("draft");
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState<"doc" | "poster" | "video">("doc");
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const init = async () => {
       if (!submissionId || !roundId) return;
       try {
-        const data = await judgeService.getSubmissionDetails(
-          submissionId,
-          roundId as JudgingStage,
-        );
-        setSubmission(data.submission);
-        setRubric(data.rubric);
+        const res = await judgeApi.getSubmissionDetail(submissionId, roundId);
+        const { submission, rubric, scoreRecord } = res.data.data;
 
-        // Default tab based on stage
-        if (roundId === "paper") setActiveTab("doc");
-        if (roundId === "final") setActiveTab("video");
+        setSubmission(submission);
+        setRubric(rubric);
 
-        // Hydrate scores
-        if (data.scoreRecord) {
-          setScores(data.scoreRecord.criteriaScores);
-          setComment(data.scoreRecord.comment);
-          setStatus(
-            data.scoreRecord.status === "submitted" ? "submitted" : "draft",
-          );
+        const upperStage = roundId.toUpperCase();
+        if (upperStage === "PAPER") setActiveTab("doc");
+        if (upperStage === "FINAL") setActiveTab("video");
+
+        if (scoreRecord) {
+          setScores(scoreRecord.criteriaScores || {});
+          setComment(scoreRecord.comment || "");
+          setStatus(scoreRecord.status);
         } else {
-          const initial: any = {};
-          data.rubric.forEach((c) => (initial[c.id] = 0));
+          const initial: Record<string, number> = {};
+          rubric.forEach((c: any) => (initial[c.id] = 0));
           setScores(initial);
         }
       } catch (err) {
         console.error(err);
+        setError("Failed to load data");
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
     init();
   }, [submissionId, roundId]);
 
   const totalScore = useMemo(() => {
-    return Object.values(scores).reduce((a: number, b: number) => a + b, 0);
-  }, [scores]);
+    return rubric.reduce((sum: number, c: any) => {
+      return sum + (scores[c.id] || 0);
+    }, 0);
+  }, [scores, rubric]);
 
   const maxScore = useMemo(() => {
     return rubric.reduce((a: number, b) => a + b.max, 0);
@@ -89,9 +83,9 @@ const JudgeScoringView: React.FC = () => {
 
     setSaving(true);
     try {
-      await judgeService.saveScore({
+      await judgeApi.saveScore({
         submissionId,
-        stage: roundId as JudgingStage,
+        stage: roundId,
         criteriaScores: scores,
         comment,
         status: newStatus,
@@ -100,27 +94,47 @@ const JudgeScoringView: React.FC = () => {
       if (newStatus === "submitted") {
         alert("Score submitted successfully.");
         navigate(-1);
+      } else {
+        alert("Draft saved.");
       }
-    } catch (e) {
-      alert("Failed to save.");
+    } catch (err: any) {
+      alert(err?.response?.data?.message || "Failed to save score");
     } finally {
       setSaving(false);
     }
   };
 
-  if (loading)
+  if (isLoading) return <LoadingSpinner />;
+
+  if (error || !submission) {
     return (
-      <div className="p-12 text-center text-slate-500">
-        Loading evaluation console...
+      <div className="flex items-center justify-center min-h-64">
+        <div className="text-center">
+          <p className="text-red-600 font-medium mb-2">Failed to load data</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="text-sm text-slate-600 hover:underline"
+          >
+            Try Again
+          </button>
+        </div>
       </div>
     );
-  if (!submission) return <div>Error loading submission.</div>;
+  }
 
   const isLocked = status === "submitted";
 
+  const stageLabelMap: Record<string, string> = {
+    ABSTRACT: "Abstract Review",
+    PAPER: "Full Paper & Poster",
+    FINAL: "Final Presentation",
+  };
+
   // Determine which tabs to show based on available assets & stage
-  const showPoster = roundId === "paper" || roundId === "final";
-  const showVideo = roundId === "final" || submission.presentationUrl;
+  const showPoster =
+    roundId?.toUpperCase() === "PAPER" || roundId?.toUpperCase() === "FINAL";
+  const showVideo =
+    roundId?.toUpperCase() === "FINAL" || submission.presentationUrl;
 
   return (
     <div className="flex flex-col h-[calc(100vh-64px)] overflow-hidden bg-slate-100">
@@ -140,7 +154,9 @@ const JudgeScoringView: React.FC = () => {
             </h2>
             <p className="text-xs text-slate-500">
               {submission.team} •{" "}
-              <span className="uppercase">{roundId} Stage</span>
+              <span className="uppercase">
+                {stageLabelMap[roundId?.toUpperCase() || ""] || roundId}
+              </span>
             </p>
           </div>
         </div>
