@@ -1,25 +1,33 @@
 import prisma from "../../config/database";
 
-const calculateCompleteness = (user: { fullName?: string }, profile: any) => {
+const calculateCompleteness = (
+  user: { fullName?: string },
+  profile: any,
+): number => {
   const requiredFields = [
     Boolean(user.fullName),
     Boolean(profile.phone),
     Boolean(profile.country),
-    Boolean(profile.affiliationType),
+    Boolean(
+      profile.affiliationType && profile.affiliationType !== "University"
+        ? profile.affiliationType
+        : profile.schoolName || profile.affiliationType,
+    ),
     Boolean(profile.schoolName),
-    Boolean(profile.schoolLevel),
-    Boolean(profile.faculty),
+    Boolean(profile.schoolLevel || profile.educationLevel),
+    Boolean(profile.faculty || profile.major),
     Boolean(profile.fieldOfStudy || profile.major),
-    Boolean(profile.educationLevel),
     Boolean(profile.grade || profile.graduationYear),
-    Boolean(profile.province),
-    Boolean(profile.city),
+    Boolean(profile.province || profile.city),
   ];
+
+  // Each required field = 8% (10 fields × 8 = 80%)
   const perField = 80 / requiredFields.length;
   let score = requiredFields.reduce((acc, ok) => acc + (ok ? perField : 0), 0);
 
+  // Bonus fields (up to 20%)
   if (profile.avatar) score += 5;
-  if (profile.bio) score += 5;
+  if (profile.bio && profile.bio.length > 10) score += 5;
   if (profile.skills && profile.skills.length > 0) score += 5;
   if (profile.github || profile.linkedin || profile.googleScholar) score += 5;
 
@@ -49,63 +57,61 @@ export const getProfile = async (userId: string) => {
 };
 
 export const updateProfile = async (userId: string, data: any) => {
+  // Get current user for completeness calc
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    include: { profile: true },
   });
+
   if (!user) {
-    const err: any = new Error("Data not found");
+    const err: any = new Error("User not found");
     err.code = "P2025";
     throw err;
   }
 
-  const { fullName, birthDate, ...profileData } = data;
-  const updatedUser = fullName
-    ? await prisma.user.update({ where: { id: userId }, data: { fullName } })
-    : user;
+  // Remove fields that shouldn't be in profile table
+  const { fullName, email, ...profileData } = data;
 
-  const profilePayload = {
-    ...profileData,
-    birthDate: birthDate ? new Date(birthDate) : undefined,
-  };
+  // Update fullName on user if provided
+  if (fullName) {
+    await prisma.user.update({
+      where: { id: userId },
+      data: { fullName },
+    });
+  }
 
-  const completeness = calculateCompleteness(updatedUser, profilePayload);
-
-  const savedProfile = await prisma.siswaProfile.upsert({
+  // Upsert profile
+  const profile = await prisma.siswaProfile.upsert({
     where: { userId },
-    update: { ...profilePayload, completeness },
-    create: { userId, ...profilePayload, completeness },
+    update: profileData,
+    create: { userId, ...profileData },
   });
 
-  return {
-    user: { ...updatedUser, password: undefined },
-    profile: savedProfile,
-  };
-};
+  // Recalculate completeness with updated data
+  const updatedUser = await prisma.user.findUnique({ where: { id: userId } });
+  const completeness = calculateCompleteness(updatedUser!, profile);
 
-export const setAvatar = async (userId: string, avatarPath: string) => {
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    include: { profile: true },
-  });
-  if (!user || !user.profile) {
-    const err: any = new Error("Data not found");
-    err.code = "P2025";
-    throw err;
-  }
-
-  const updatedProfile = await prisma.siswaProfile.update({
-    where: { id: user.profile.id },
-    data: { avatar: avatarPath },
-  });
-
-  const completeness = calculateCompleteness(user, updatedProfile);
-  const savedProfile = await prisma.siswaProfile.update({
-    where: { id: updatedProfile.id },
+  // Save completeness
+  const saved = await prisma.siswaProfile.update({
+    where: { userId },
     data: { completeness },
   });
 
-  return savedProfile;
+  return {
+    user: {
+      ...updatedUser,
+      password: undefined,
+    },
+    profile: { ...saved, completeness },
+  };
+};
+
+export const setAvatar = async (userId: string, avatarUrl: string) => {
+  const profile = await prisma.siswaProfile.upsert({
+    where: { userId },
+    update: { avatar: avatarUrl },
+    create: { userId, avatar: avatarUrl },
+  });
+  return profile;
 };
 
 export const myEvents = async (userId: string) => {

@@ -238,29 +238,34 @@ const DashboardProfile: React.FC = () => {
   };
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setUploadingAvatar(true);
-      try {
-        const res = await profileApi.uploadAvatar(e.target.files[0]);
-        const url =
-          res.data?.data?.avatarUrl || res.data?.data?.avatar || res.data?.data;
-        setProfile((prev) =>
-          prev
-            ? {
-                ...prev,
-                profile: {
-                  ...prev.profile,
-                  avatar: url || prev.profile.avatar,
-                },
-              }
-            : prev,
-        );
-        showNotification("success", "Profile photo updated.");
-      } catch (err) {
-        console.error(err);
-        showNotification("error", "Failed to upload photo.");
-      } finally {
-        setUploadingAvatar(false);
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingAvatar(true);
+    try {
+      const res = await profileApi.uploadAvatar(file);
+      const { avatarUrl } = res.data.data;
+
+      // Update local state immediately (optimistic)
+      setProfile((prev) =>
+        prev
+          ? {
+              ...prev,
+              profile: { ...prev.profile, avatar: avatarUrl },
+            }
+          : prev,
+      );
+
+      showNotification("success", "Profile photo updated.");
+    } catch (err: any) {
+      showNotification(
+        "error",
+        err.response?.data?.message || "Failed to upload photo.",
+      );
+    } finally {
+      setUploadingAvatar(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
       }
     }
   };
@@ -391,6 +396,15 @@ const DashboardProfile: React.FC = () => {
 
   const { firstName, lastName } = getNameParts(profile.user.fullName);
 
+  const apiBase =
+    (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
+
+  const avatarSrc = profile.profile?.avatar
+    ? profile.profile.avatar.startsWith("http")
+      ? profile.profile.avatar
+      : `${apiBase}${profile.profile.avatar}`
+    : `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.user.fullName || "User")}&background=random`;
+
   return (
     <div className="max-w-5xl mx-auto space-y-8 pb-20">
       {notification && (
@@ -444,11 +458,7 @@ const DashboardProfile: React.FC = () => {
               <div className="relative">
                 <div className="w-32 h-32 rounded-full bg-white p-1.5 shadow-xl relative group cursor-pointer">
                   <img
-                    src={
-                      profile.profile.avatar ||
-                      profile.user.avatar ||
-                      `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.user.fullName || "GIVA User")}`
-                    }
+                    src={avatarSrc}
                     alt="Profile avatar"
                     className="w-full h-full rounded-full object-cover border border-slate-100"
                   />
