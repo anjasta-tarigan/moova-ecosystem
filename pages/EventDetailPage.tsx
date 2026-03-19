@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Button from "../components/Button";
 import {
@@ -30,28 +30,8 @@ import {
 } from "lucide-react";
 import { eventsApi } from "../services/api/eventsApi";
 import { formatDate } from "../lib/utils";
-
-// --- Types for Richer Data (Local Mock Extension) ---
-interface Judge {
-  id: string;
-  name: string;
-  role: string;
-  org: string;
-  img: string;
-  bio: string;
-  expertise: string[];
-  socials: { linkedin?: string; twitter?: string; website?: string };
-}
-
-interface Question {
-  id: number;
-  user: string;
-  avatar: string;
-  text: string;
-  time: string;
-  upvotes: number;
-  replies: { user: string; text: string; time: string }[];
-}
+import LoadingSpinner from "../components/LoadingSpinner";
+import { useAuthContext } from "../contexts/AuthContext";
 
 type ApiTimeline = {
   id: string;
@@ -83,203 +63,42 @@ type ApiEvent = {
   sdgs: number[];
   prizePool: string;
   organizer: string;
-  registrationCount?: number;
+  categories?: ApiCategory[];
   timeline?: ApiTimeline[];
   faqs?: ApiFaq[];
-  categories?: ApiCategory[];
+  _count?: { registrations?: number };
 };
 
-interface RichEventData {
-  organizer: string;
-  deadline: string;
-  fee: string;
-  teamSize: string;
-  eligibilityLevel: string; // Replaced Duration
-  stats: {
-    registered: number;
-    saved: number;
-    capacity: number;
-  };
-  hasAwards: boolean;
-  poster: string; // Poster Image URL
-  theme: string;
-  subThemes: { title: string; desc: string; icon: React.ReactNode }[];
-  judgingCriteria: { category: string; weight: number; desc: string }[];
-  requirements: string[];
-  rules: { title: string; content: string }[];
-  judges: Judge[];
-  resources: { name: string; type: string; size: string }[];
-  qa: Question[];
-}
-
-// --- Mock Data Helper ---
-const getRichEventData = (id: string): RichEventData => {
-  return {
-    organizer: "GIVA Global",
-    deadline: "Oct 10, 2024",
-    fee: "Free Entry",
-    teamSize: "1-5 Members",
-    eligibilityLevel: "University Students & Researchers",
-    stats: {
-      registered: 482,
-      saved: 1250,
-      capacity: 1000,
-    },
-    hasAwards: true,
-    poster: "https://picsum.photos/600/800?random=poster",
-    theme: "Resilient Infrastructure for a Changing Climate",
-    subThemes: [
-      {
-        title: "Smart Grid Adaptation",
-        desc: "Hardware/Software for unstable energy grids.",
-        icon: <Globe size={20} />,
-      },
-      {
-        title: "Flood Defense Systems",
-        desc: "Civil engineering and IoT monitoring.",
-        icon: <Target size={20} />,
-      },
-      {
-        title: "Emergency Response AI",
-        desc: "Predictive modeling for disaster relief.",
-        icon: <Users size={20} />,
-      },
-    ],
-    judgingCriteria: [
-      {
-        category: "Innovation & Originality",
-        weight: 30,
-        desc: "Is the solution novel and distinct from existing approaches?",
-      },
-      {
-        category: "Technical Feasibility",
-        weight: 25,
-        desc: "Can it be built and scaled with current technology?",
-      },
-      {
-        category: "Impact Potential",
-        weight: 25,
-        desc: "Does it significantly address the SDG targets?",
-      },
-      {
-        category: "Business Model",
-        weight: 10,
-        desc: "Is there a viable path to market or sustainability?",
-      },
-      {
-        category: "Presentation",
-        weight: 10,
-        desc: "Clarity of the pitch and prototype demo.",
-      },
-    ],
-    requirements: [
-      "Project Abstract (500 words max)",
-      "Technical Feasibility Report",
-      "Demo Video (3 mins max)",
-      "Open Source Repository Link",
-    ],
-    rules: [
-      {
-        title: "Team Composition",
-        content:
-          "Teams must consist of 1 to 5 members. Interdisciplinary teams are encouraged.",
-      },
-      {
-        title: "Originality",
-        content:
-          "All work must be original. Pre-existing projects must disclose previous development.",
-      },
-      {
-        title: "IP Rights",
-        content: "Teams retain 100% ownership of their Intellectual Property.",
-      },
-    ],
-    judges: [
-      {
-        id: "j1",
-        name: "Dr. A. Wright",
-        role: "Chief Scientist",
-        org: "BioGen",
-        img: "https://picsum.photos/100/100?random=1",
-        bio: "Dr. Wright leads global R&D at BioGen, focusing on synthetic biology and sustainable materials. She holds 15 patents and has served on the board of the Global Climate Fund.",
-        expertise: ["Biotech", "Material Science", "Sustainability"],
-        socials: { linkedin: "#", twitter: "#" },
-      },
-      {
-        id: "j2",
-        name: "Sarah Chen",
-        role: "Partner",
-        org: "Future Ventures",
-        img: "https://picsum.photos/100/100?random=2",
-        bio: "Sarah is a deep tech investor with a portfolio of 30+ unicorns in AI and robotics. She was previously a founder of a sensor fusion startup acquired by Tesla.",
-        expertise: ["Venture Capital", "Robotics", "Go-to-Market"],
-        socials: { linkedin: "#" },
-      },
-      {
-        id: "j3",
-        name: "Marcus T.",
-        role: "Lead Engineer",
-        org: "SpaceX",
-        img: "https://picsum.photos/100/100?random=3",
-        bio: "Marcus oversees propulsion systems engineering. He is passionate about dual-use technologies that solve problems both in space and on Earth.",
-        expertise: ["Aerospace", "Propulsion", "Hardware"],
-        socials: { twitter: "#" },
-      },
-    ],
-    resources: [
-      { name: "Event_Guidebook.pdf", type: "PDF", size: "2.5 MB" },
-      { name: "Submission_Template.docx", type: "DOCX", size: "1.2 MB" },
-      { name: "Judging_Rubric.pdf", type: "PDF", size: "0.8 MB" },
-    ],
-    qa: [
-      {
-        id: 1,
-        user: "James Wu",
-        avatar: "JW",
-        text: "Is there a strict requirement for the prototype fidelity? Does it need to be hardware or is a simulation enough?",
-        time: "2 days ago",
-        upvotes: 12,
-        replies: [
-          {
-            user: "Event Admin",
-            text: "For the prelim round, a high-fidelity simulation is acceptable. Finals require a physical MVP.",
-            time: "1 day ago",
-          },
-        ],
-      },
-      {
-        id: 2,
-        user: "Elena R.",
-        avatar: "ER",
-        text: "Can we add team members after the initial registration deadline?",
-        time: "5 hours ago",
-        upvotes: 5,
-        replies: [],
-      },
-    ],
-  };
+type Judge = {
+  id: string;
+  name: string;
+  role?: string;
+  org?: string;
+  img?: string;
+  bio?: string;
+  expertise?: string[];
+  socials?: { linkedin?: string; twitter?: string };
 };
 
-// --- Icons Helper ---
-const ZapIcon = ({ size }: { size: number }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-  </svg>
-);
+type Question = {
+  id: string;
+  text?: string;
+  question?: string;
+  upvotes?: number;
+  replies?: {
+    id?: string;
+    text?: string;
+    answer?: string;
+    user?: { fullName?: string };
+  }[];
+  user?: { fullName?: string };
+  createdAt?: string;
+};
 
 const EventDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user } = useAuthContext();
   const [event, setEvent] = useState<ApiEvent | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -294,9 +113,9 @@ const EventDetailPage: React.FC = () => {
 
   // Q&A State
   const [newQuestion, setNewQuestion] = useState("");
-
-  // Check login status
-  const isLoggedIn = !!localStorage.getItem("GIVA_user");
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [isSubmittingQuestion, setIsSubmittingQuestion] = useState(false);
+  const [isTogglingUpvote, setIsTogglingUpvote] = useState<string | null>(null);
 
   const formatStatusLabel = (status: string) => {
     const normalized = status.toUpperCase();
@@ -313,6 +132,15 @@ const EventDetailPage: React.FC = () => {
     if (normalized === "IN_PERSON") return "In-Person";
     return format;
   };
+  const fetchQuestions = useCallback(async () => {
+    if (!id) return;
+    try {
+      const res = await eventsApi.getQa(id);
+      setQuestions(res.data?.data || []);
+    } catch (err) {
+      console.error(err);
+    }
+  }, [id]);
 
   useEffect(() => {
     if (!id) return;
@@ -322,40 +150,179 @@ const EventDetailPage: React.FC = () => {
       try {
         const res = await eventsApi.getEvent(id);
         setEvent(res.data?.data);
-      } catch (err) {
-        setError("Failed to load event details. Please try again.");
+      } catch (err: any) {
+        if (err?.response?.status === 404) {
+          setError("Event not found");
+        } else {
+          setError("Failed to load event");
+        }
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchEvent();
-  }, [id]);
+    fetchQuestions();
+  }, [id, fetchQuestions]);
 
-  const richData = useMemo(() => {
-    const base = getRichEventData(id || "");
-    if (!event) return base;
-    return {
-      ...base,
-      organizer: event.organizer || base.organizer,
-      deadline: event.deadline ? formatDate(event.deadline) : base.deadline,
-      fee: event.fee || base.fee,
-      teamSize: `${event.teamSizeMin}-${event.teamSizeMax} Members`,
-      eligibilityLevel: event.eligibility?.join(", ") || base.eligibilityLevel,
-      stats: {
-        ...base.stats,
-        registered: event.registrationCount ?? base.stats.registered,
+  const registrations = event?._count?.registrations ?? 0;
+  const deadlineLabel = event?.deadline ? formatDate(event.deadline) : "TBD";
+  const dateLabel = event?.date ? formatDate(event.date) : "-";
+  const eligibilityLabel = event?.eligibility?.length
+    ? event.eligibility.join(", ")
+    : "Open to all participants";
+  const teamSizeLabel = event
+    ? `${event.teamSizeMin}-${event.teamSizeMax} Members`
+    : "-";
+  const organizerLabel = event?.organizer || "Organizer to be announced";
+  const feeLabel = event?.fee || "Free Entry";
+  const themeLabel = event?.theme || event?.category || "Theme to be announced";
+  const posterImage =
+    event?.image ||
+    "https://images.unsplash.com/photo-1522199710521-72d69614c702?auto=format&fit=crop&w=1600&q=80";
+
+  const subThemes =
+    event?.categories?.map((cat) => ({
+      title: cat.name,
+      desc: cat.description || "Category track",
+      icon: <Layers size={20} />,
+    })) || [];
+
+  const judgingCriteria = useMemo(() => {
+    if (event?.categories?.length) {
+      const weight = Math.max(10, Math.floor(100 / event.categories.length));
+      return event.categories.map((cat) => ({
+        category: cat.name,
+        weight,
+        desc: cat.description || "Evaluation focus",
+      }));
+    }
+    return [
+      {
+        category: "Impact",
+        weight: 40,
+        desc: "Impact potential of the solution.",
       },
-      poster: event.image || base.poster,
-      theme: event.theme || base.theme,
-      subThemes:
-        event.categories?.map((cat) => ({
-          title: cat.name,
-          desc: cat.description || "Category track",
-          icon: <Layers size={20} />,
-        })) || base.subThemes,
-    };
-  }, [event, id]);
+      {
+        category: "Feasibility",
+        weight: 30,
+        desc: "Technical and operational feasibility.",
+      },
+      {
+        category: "Innovation",
+        weight: 30,
+        desc: "Originality and differentiation.",
+      },
+    ];
+  }, [event?.categories]);
+
+  const requirements = useMemo(() => {
+    if (!event) return [] as string[];
+    const reqs: string[] = [
+      `Team size: ${teamSizeLabel}`,
+      `Eligibility: ${eligibilityLabel}`,
+    ];
+    if (event.prizePool) {
+      reqs.push(`Prize pool: ${event.prizePool}`);
+    } else {
+      reqs.push("Submission requirements will be announced.");
+    }
+    return reqs;
+  }, [eligibilityLabel, event, teamSizeLabel]);
+
+  const rules = useMemo(() => {
+    if (event?.faqs?.length) {
+      return event.faqs.map((faq) => ({
+        title: faq.question,
+        content: faq.answer || "Details will be shared soon.",
+      }));
+    }
+    return [
+      {
+        title: "Team Composition",
+        content: "Ensure your team respects the stated size limits.",
+      },
+      {
+        title: "Originality",
+        content:
+          "All submissions must be original and comply with event guidelines.",
+      },
+      {
+        title: "Conduct",
+        content: "Follow the code of conduct throughout the program.",
+      },
+    ];
+  }, [event?.faqs]);
+
+  const resources = [
+    { name: "Event_Guidebook.pdf", type: "PDF", size: "2.5 MB" },
+    { name: "Submission_Template.docx", type: "DOCX", size: "1.2 MB" },
+    { name: "Judging_Rubric.pdf", type: "PDF", size: "0.8 MB" },
+  ];
+
+  const judges: Judge[] = [];
+
+  const timelineItems = useMemo(() => {
+    if (!event?.timeline) return [] as ApiTimeline[];
+    return [...event.timeline].sort((a, b) => (a.order || 0) - (b.order || 0));
+  }, [event?.timeline]);
+
+  const handleRegister = async () => {
+    if (!id) return;
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+    if (user.role !== "SISWA") {
+      setError("Please log in as a Student to register.");
+      return;
+    }
+    try {
+      await eventsApi.registerToEvent(id, {});
+      setIsRegistered(true);
+    } catch (err) {
+      setError("Failed to register for event");
+    }
+  };
+
+  const handlePostQuestion = async () => {
+    if (!id || !newQuestion.trim()) return;
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+    try {
+      setIsSubmittingQuestion(true);
+      await eventsApi.postQuestion(id, newQuestion.trim());
+      setNewQuestion("");
+      await fetchQuestions();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsSubmittingQuestion(false);
+    }
+  };
+
+  const handleToggleUpvote = async (questionId: string) => {
+    if (!id) return;
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+    try {
+      setIsTogglingUpvote(questionId);
+      await eventsApi.toggleUpvote(id, questionId);
+      setQuestions((prev) =>
+        prev.map((q) =>
+          q.id === questionId ? { ...q, upvotes: (q.upvotes || 0) + 1 } : q,
+        ),
+      );
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsTogglingUpvote(null);
+    }
+  };
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href);
@@ -367,57 +334,6 @@ const EventDetailPage: React.FC = () => {
     setIsSaved(!isSaved);
     // In real app, API call here
   };
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <div className="flex flex-col items-center gap-3 text-slate-500">
-          <div className="w-10 h-10 border-2 border-slate-300 border-t-primary-600 rounded-full animate-spin" />
-          <p className="text-sm font-medium">Loading event details...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center shadow-sm space-y-3">
-          <p className="text-lg font-bold text-slate-900">{error}</p>
-          <p className="text-sm text-slate-500">
-            Make sure the event exists and the server is running.
-          </p>
-          <div className="flex justify-center gap-3">
-            <Button variant="white" onClick={() => navigate("/events")}>
-              Back to Events
-            </Button>
-            <Button onClick={() => window.location.reload()}>Try Again</Button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!event) {
-    return (
-      <div className="min-h-screen flex items-center justify-center flex-col gap-4 bg-slate-50">
-        <h2 className="text-2xl font-bold text-slate-900">Event not found</h2>
-        <Button onClick={() => navigate("/events")}>Back to Events</Button>
-      </div>
-    );
-  }
-
-  const timelineItems = useMemo(() => {
-    if (!event.timeline) return [] as ApiTimeline[];
-    return [...event.timeline].sort((a, b) => (a.order || 0) - (b.order || 0));
-  }, [event.timeline]);
-
-  const dateLabel = formatDate(event.date);
-  const eligibilityLabel =
-    event.eligibility?.join(", ") || richData.eligibilityLevel;
-  const teamSizeLabel = `${event.teamSizeMin}-${event.teamSizeMax} Members`;
-
-  // --- Components ---
 
   const QuickInfoCard = ({
     icon,
@@ -458,6 +374,38 @@ const EventDetailPage: React.FC = () => {
       {subtitle && <p className="text-slate-500 mt-2">{subtitle}</p>}
     </div>
   );
+
+  if (isLoading) {
+    return <LoadingSpinner fullScreen />;
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center flex-col gap-4 bg-slate-50">
+        <h2 className="text-2xl font-bold text-slate-900">{error}</h2>
+        <button
+          onClick={() => navigate("/events")}
+          className="px-6 py-3 bg-slate-900 text-white rounded-xl font-bold hover:bg-black"
+        >
+          Back to Events
+        </button>
+      </div>
+    );
+  }
+
+  if (!event) {
+    return (
+      <div className="min-h-screen flex items-center justify-center flex-col gap-4 bg-slate-50">
+        <h2 className="text-2xl font-bold text-slate-900">Event not found</h2>
+        <button
+          onClick={() => navigate("/events")}
+          className="px-6 py-3 bg-slate-900 text-white rounded-xl font-bold hover:bg-black"
+        >
+          Back to Events
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-slate-50 min-h-screen pb-24 lg:pb-0 font-sans text-slate-900">
@@ -515,11 +463,11 @@ const EventDetailPage: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <Clock size={18} className="text-secondary-400" />
-                  <span>Deadline: {richData.deadline}</span>
+                  <span>Deadline: {deadlineLabel}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Users size={18} className="text-secondary-400" />
-                  <span>By {richData.organizer}</span>
+                  <span>By {organizerLabel}</span>
                 </div>
               </div>
             </div>
@@ -558,20 +506,14 @@ const EventDetailPage: React.FC = () => {
               <QuickInfoCard
                 icon={<Users />}
                 label="Registered"
-                value={
-                  isRegistered
-                    ? richData.stats.registered + 1
-                    : richData.stats.registered
-                }
+                value={isRegistered ? registrations + 1 : registrations}
                 subValue="Participants"
               />
               {/* Counter 2 */}
               <QuickInfoCard
                 icon={<Bookmark />}
                 label="Interested"
-                value={
-                  isSaved ? richData.stats.saved + 1 : richData.stats.saved
-                }
+                value={isSaved ? registrations + 1 : registrations}
                 subValue="Saves"
               />
               {/* Eligibility */}
@@ -589,7 +531,7 @@ const EventDetailPage: React.FC = () => {
               <QuickInfoCard
                 icon={<Target />}
                 label="Entry Fee"
-                value={richData.fee}
+                value={feeLabel}
               />
               <QuickInfoCard
                 icon={<Globe />}
@@ -617,7 +559,7 @@ const EventDetailPage: React.FC = () => {
                 </h3>
                 <div className="bg-primary-50 p-6 rounded-2xl border border-primary-100">
                   <h4 className="text-2xl font-bold text-primary-700 mb-2">
-                    "{richData.theme}"
+                    "{themeLabel}"
                   </h4>
                   <p className="text-primary-800/70 text-sm">
                     All submissions must align with this central theme to be
@@ -631,28 +573,34 @@ const EventDetailPage: React.FC = () => {
                 <h3 className="text-xl font-bold text-slate-900 mb-6">
                   Sub-Themes & Tracks
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {richData.subThemes.map((track, i) => (
-                    <div
-                      key={i}
-                      className="bg-slate-50 p-5 rounded-xl border border-slate-100 hover:border-primary-300 transition-colors group"
-                    >
-                      <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center text-primary-600 shadow-sm group-hover:scale-110 transition-transform">
-                          {track.icon}
-                        </div>
-                        <div>
-                          <h4 className="font-bold text-slate-900 text-sm mb-1">
-                            {track.title}
-                          </h4>
-                          <p className="text-xs text-slate-500 leading-relaxed">
-                            {track.desc}
-                          </p>
+                {subThemes.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {subThemes.map((track, i) => (
+                      <div
+                        key={i}
+                        className="bg-slate-50 p-5 rounded-xl border border-slate-100 hover:border-primary-300 transition-colors group"
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center text-primary-600 shadow-sm group-hover:scale-110 transition-transform">
+                            {track.icon}
+                          </div>
+                          <div>
+                            <h4 className="font-bold text-slate-900 text-sm mb-1">
+                              {track.title}
+                            </h4>
+                            <p className="text-xs text-slate-500 leading-relaxed">
+                              {track.desc}
+                            </p>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 text-sm text-slate-600">
+                    Tracks will be announced soon.
+                  </div>
+                )}
               </div>
             </section>
 
@@ -663,31 +611,37 @@ const EventDetailPage: React.FC = () => {
                 subtitle="How your submission will be evaluated."
               />
               <div className="bg-white rounded-3xl border border-slate-200 p-8">
-                <div className="space-y-6">
-                  {richData.judgingCriteria.map((crit, i) => (
-                    <div key={i}>
-                      <div className="flex justify-between items-end mb-2">
-                        <div>
-                          <div className="font-bold text-slate-900">
-                            {crit.category}
+                {judgingCriteria.length > 0 ? (
+                  <div className="space-y-6">
+                    {judgingCriteria.map((crit, i) => (
+                      <div key={i}>
+                        <div className="flex justify-between items-end mb-2">
+                          <div>
+                            <div className="font-bold text-slate-900">
+                              {crit.category}
+                            </div>
+                            <div className="text-xs text-slate-500">
+                              {crit.desc}
+                            </div>
                           </div>
-                          <div className="text-xs text-slate-500">
-                            {crit.desc}
+                          <div className="font-bold text-primary-600 text-lg">
+                            {crit.weight}%
                           </div>
                         </div>
-                        <div className="font-bold text-primary-600 text-lg">
-                          {crit.weight}%
+                        <div className="w-full bg-slate-100 rounded-full h-2">
+                          <div
+                            className="bg-brand-gradient h-2 rounded-full"
+                            style={{ width: `${crit.weight}%` }}
+                          ></div>
                         </div>
                       </div>
-                      <div className="w-full bg-slate-100 rounded-full h-2">
-                        <div
-                          className="bg-brand-gradient h-2 rounded-full"
-                          style={{ width: `${crit.weight}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-slate-500">
+                    Judging criteria will be published soon.
+                  </p>
+                )}
               </div>
             </section>
 
@@ -722,7 +676,7 @@ const EventDetailPage: React.FC = () => {
             </section>
 
             {/* 6. AWARDS (Conditional) */}
-            {richData.hasAwards && (
+            {event.prizePool && (
               <section className="bg-gradient-to-br from-slate-900 to-primary-900 rounded-3xl p-8 md:p-12 text-white relative overflow-hidden">
                 <div className="absolute inset-0 bg-grid-pattern-dark opacity-10 pointer-events-none"></div>
                 <div className="relative z-10 text-center">
@@ -731,8 +685,9 @@ const EventDetailPage: React.FC = () => {
                     Awards & Recognition
                   </h3>
                   <p className="text-primary-200 mb-10 max-w-lg mx-auto">
-                    Top performing teams will receive non-dilutive grant
-                    funding, incubation support, and global media coverage.
+                    Prize pool: {event.prizePool}. Top performing teams will
+                    receive funding, incubation support, and global media
+                    coverage.
                   </p>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
                     <div className="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/10">
@@ -771,7 +726,7 @@ const EventDetailPage: React.FC = () => {
             <section>
               <SectionHeading title="Submission Requirements" />
               <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-                {richData.requirements.map((req, i) => (
+                {requirements.map((req, i) => (
                   <div
                     key={i}
                     className="flex items-center gap-4 p-4 border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors"
@@ -791,7 +746,7 @@ const EventDetailPage: React.FC = () => {
               <SectionHeading title="Rules & Eligibility" />
               <div className="flex flex-col md:flex-row gap-6">
                 <div className="w-full md:w-1/3 flex flex-col gap-2">
-                  {richData.rules.map((rule, idx) => (
+                  {rules.map((rule, idx) => (
                     <button
                       key={idx}
                       onClick={() => setActiveRuleTab(idx)}
@@ -810,10 +765,10 @@ const EventDetailPage: React.FC = () => {
                 </div>
                 <div className="flex-1 bg-white p-8 rounded-2xl border border-slate-200 min-h-[200px]">
                   <h4 className="text-xl font-bold text-slate-900 mb-4">
-                    {richData.rules[activeRuleTab].title}
+                    {rules[activeRuleTab].title}
                   </h4>
                   <p className="text-slate-600 leading-relaxed">
-                    {richData.rules[activeRuleTab].content}
+                    {rules[activeRuleTab].content}
                   </p>
                 </div>
               </div>
@@ -823,7 +778,7 @@ const EventDetailPage: React.FC = () => {
             <section>
               <SectionHeading title="Resources & Downloads" />
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {richData.resources.map((res, i) => (
+                {resources.map((res, i) => (
                   <div
                     key={i}
                     className="flex items-center justify-between p-4 bg-white border border-slate-200 rounded-xl hover:border-primary-400 hover:shadow-sm transition-all cursor-pointer group"
@@ -860,10 +815,10 @@ const EventDetailPage: React.FC = () => {
               <div className="bg-white rounded-2xl border border-slate-200 p-6">
                 {/* Ask Box */}
                 <div className="mb-8">
-                  {isLoggedIn ? (
+                  {user ? (
                     <div className="flex gap-4">
                       <div className="w-10 h-10 rounded-full bg-brand-gradient flex items-center justify-center text-white font-bold text-sm shrink-0">
-                        ME
+                        {(user?.fullName || "ME").slice(0, 2).toUpperCase()}
                       </div>
                       <div className="flex-1">
                         <textarea
@@ -877,10 +832,15 @@ const EventDetailPage: React.FC = () => {
                           <Button
                             size="sm"
                             className="gap-2"
-                            onClick={() => setNewQuestion("")}
-                            disabled={!newQuestion.trim()}
+                            onClick={handlePostQuestion}
+                            disabled={
+                              !newQuestion.trim() || isSubmittingQuestion
+                            }
                           >
-                            <Send size={14} /> Post Question
+                            <Send size={14} />
+                            {isSubmittingQuestion
+                              ? "Posting..."
+                              : "Post Question"}
                           </Button>
                         </div>
                       </div>
@@ -907,66 +867,83 @@ const EventDetailPage: React.FC = () => {
 
                 {/* Question List */}
                 <div className="space-y-6">
-                  {richData.qa.map((q) => (
-                    <div key={q.id} className="group">
-                      <div className="flex gap-4">
-                        <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-bold text-sm shrink-0">
-                          {q.avatar}
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-bold text-slate-900 text-sm">
-                              {q.user}
-                            </span>
-                            <span className="text-xs text-slate-400">
-                              • {q.time}
-                            </span>
-                          </div>
-                          <p className="text-slate-700 text-sm mb-3">
-                            {q.text}
-                          </p>
-
-                          <div className="flex items-center gap-4 mb-4">
-                            <button className="flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-primary-600 transition-colors">
-                              <ThumbsUp size={14} /> {q.upvotes}
-                            </button>
-                            <button className="flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-primary-600 transition-colors">
-                              <MessageCircle size={14} /> Reply
-                            </button>
-                          </div>
-
-                          {/* Replies */}
-                          {q.replies.length > 0 && (
-                            <div className="bg-slate-50 rounded-lg p-3 space-y-3">
-                              {q.replies.map((reply, i) => (
-                                <div key={i} className="flex gap-3">
-                                  <div className="w-6 h-6 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-bold text-[10px] shrink-0">
-                                    EA
-                                  </div>
-                                  <div>
-                                    <div className="flex items-center gap-2 mb-0.5">
-                                      <span className="font-bold text-slate-800 text-xs">
-                                        {reply.user}
-                                      </span>
-                                      <span className="px-1.5 py-0.5 bg-primary-600 text-white text-[9px] font-bold uppercase rounded">
-                                        Organizer
-                                      </span>
-                                      <span className="text-[10px] text-slate-400">
-                                        • {reply.time}
-                                      </span>
-                                    </div>
-                                    <p className="text-slate-600 text-xs">
-                                      {reply.text}
-                                    </p>
-                                  </div>
-                                </div>
-                              ))}
+                  {questions.length > 0 ? (
+                    questions.map((q) => {
+                      const questionText = q.question || q.text || "";
+                      const author = q.user?.fullName || "Anonymous";
+                      const replies = q.replies || [];
+                      return (
+                        <div key={q.id} className="group">
+                          <div className="flex gap-4">
+                            <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-bold text-sm shrink-0">
+                              {author.slice(0, 2).toUpperCase()}
                             </div>
-                          )}
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="font-bold text-slate-900 text-sm">
+                                  {author}
+                                </span>
+                                <span className="text-xs text-slate-400">
+                                  {q.createdAt
+                                    ? `• ${formatDate(q.createdAt)}`
+                                    : ""}
+                                </span>
+                              </div>
+                              <p className="text-slate-700 text-sm mb-3">
+                                {questionText}
+                              </p>
+
+                              <div className="flex items-center gap-4 mb-4">
+                                <button
+                                  className="flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-primary-600 transition-colors disabled:opacity-50"
+                                  onClick={() => handleToggleUpvote(q.id)}
+                                  disabled={isTogglingUpvote === q.id}
+                                >
+                                  <ThumbsUp size={14} /> {q.upvotes || 0}
+                                </button>
+                                <button className="flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-primary-600 transition-colors">
+                                  <MessageCircle size={14} /> Reply
+                                </button>
+                              </div>
+
+                              {/* Replies */}
+                              {replies.length > 0 && (
+                                <div className="bg-slate-50 rounded-lg p-3 space-y-3">
+                                  {replies.map((reply, i) => (
+                                    <div key={i} className="flex gap-3">
+                                      <div className="w-6 h-6 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-bold text-[10px] shrink-0">
+                                        {reply.user?.fullName
+                                          ?.slice(0, 2)
+                                          .toUpperCase() || "EA"}
+                                      </div>
+                                      <div>
+                                        <div className="flex items-center gap-2 mb-0.5">
+                                          <span className="font-bold text-slate-800 text-xs">
+                                            {reply.user?.fullName ||
+                                              "Organizer"}
+                                          </span>
+                                          <span className="px-1.5 py-0.5 bg-primary-600 text-white text-[9px] font-bold uppercase rounded">
+                                            Organizer
+                                          </span>
+                                        </div>
+                                        <p className="text-slate-600 text-xs">
+                                          {reply.text || reply.answer || ""}
+                                        </p>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                  ))}
+                      );
+                    })
+                  ) : (
+                    <p className="text-sm text-slate-500">
+                      No questions yet. Be the first to ask.
+                    </p>
+                  )}
                 </div>
               </div>
             </section>
@@ -978,10 +955,10 @@ const EventDetailPage: React.FC = () => {
               </h2>
               <p className="text-slate-600 mb-8 max-w-xl mx-auto">
                 Join hundreds of innovators from around the world. Registration
-                closes on {richData.deadline}.
+                closes on {deadlineLabel}.
               </p>
               <div className="flex justify-center gap-4">
-                <Button size="lg" onClick={() => setIsRegistered(true)}>
+                <Button size="lg" onClick={handleRegister}>
                   Register Now
                 </Button>
                 <Button
@@ -1016,10 +993,10 @@ const EventDetailPage: React.FC = () => {
                   </div>
                   <div className="flex items-center gap-2 mb-4">
                     <div
-                      className={`w-3 h-3 rounded-full ${event.status === "Open" ? "bg-emerald-500 animate-pulse" : "bg-slate-300"}`}
+                      className={`w-3 h-3 rounded-full ${event.status?.toUpperCase() === "OPEN" ? "bg-emerald-500 animate-pulse" : "bg-slate-300"}`}
                     ></div>
                     <span className="font-bold text-xl text-slate-900">
-                      {event.status === "Open"
+                      {event.status?.toUpperCase() === "OPEN"
                         ? "Registration Open"
                         : "Registration Closed"}
                     </span>
@@ -1027,7 +1004,7 @@ const EventDetailPage: React.FC = () => {
                   <p className="text-sm text-slate-500">
                     Closes on{" "}
                     <span className="font-bold text-slate-700">
-                      {richData.deadline}
+                      {deadlineLabel}
                     </span>
                   </p>
                 </div>
@@ -1052,15 +1029,15 @@ const EventDetailPage: React.FC = () => {
                     <Button
                       fullWidth
                       size="lg"
-                      disabled={event.status === "Closed"}
-                      onClick={() => setIsRegistered(true)}
+                      disabled={event.status?.toUpperCase() === "CLOSED"}
+                      onClick={handleRegister}
                     >
-                      {event.status === "Closed"
+                      {event.status?.toUpperCase() === "CLOSED"
                         ? "Closed"
                         : "Register for Event"}
                     </Button>
                     <div className="text-center text-xs text-slate-400 mt-2">
-                      {richData.fee} • Instant Confirmation
+                      {feeLabel} • Instant Confirmation
                     </div>
                   </div>
                 )}
@@ -1099,7 +1076,7 @@ const EventDetailPage: React.FC = () => {
               {/* Poster Space */}
               <div className="bg-slate-900 rounded-2xl overflow-hidden shadow-lg relative group aspect-[3/4]">
                 <img
-                  src={richData.poster}
+                  src={posterImage}
                   alt="Event Poster"
                   className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-500"
                 />
@@ -1122,7 +1099,12 @@ const EventDetailPage: React.FC = () => {
                   Featured Judges
                 </h4>
                 <div className="space-y-3">
-                  {richData.judges.map((judge) => (
+                  {judges.length === 0 && (
+                    <p className="text-sm text-slate-500">
+                      Judges to be announced.
+                    </p>
+                  )}
+                  {judges.map((judge) => (
                     <div
                       key={judge.id}
                       onClick={() => setSelectedJudge(judge)}
@@ -1160,12 +1142,14 @@ const EventDetailPage: React.FC = () => {
           <div className="flex-1">
             <Button
               fullWidth
-              onClick={() => setIsRegistered(true)}
-              disabled={isRegistered || event.status === "Closed"}
+              onClick={handleRegister}
+              disabled={
+                isRegistered || event.status?.toUpperCase() === "CLOSED"
+              }
             >
               {isRegistered
                 ? "Manage"
-                : event.status === "Closed"
+                : event.status?.toUpperCase() === "CLOSED"
                   ? "Closed"
                   : "Register Now"}
             </Button>

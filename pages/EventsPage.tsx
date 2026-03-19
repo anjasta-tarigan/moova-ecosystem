@@ -1,10 +1,4 @@
-import React, {
-  useState,
-  useMemo,
-  useRef,
-  useEffect,
-  useCallback,
-} from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Calendar,
@@ -29,6 +23,7 @@ import Section from "../components/Section";
 import Button from "../components/Button";
 import { eventsApi } from "../services/api/eventsApi";
 import { formatDate } from "../lib/utils";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 // --- Animation Helper (Inlined for standalone usage) ---
 const useOnScreen = (ref: React.RefObject<Element>, rootMargin = "0px") => {
@@ -80,7 +75,9 @@ type EventItem = {
   image: string;
   status: string;
   deadline?: string;
-  registrationCount?: number;
+  teamSizeMin?: number;
+  teamSizeMax?: number;
+  _count?: { registrations?: number };
 };
 
 const statusOptions = [
@@ -93,7 +90,6 @@ const statusOptions = [
 const EventsPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
   const [activeStatus, setActiveStatus] = useState<string>(
     statusOptions[0].value,
@@ -103,29 +99,31 @@ const EventsPage: React.FC = () => {
   const [categories, setCategories] = useState<string[]>(["All"]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   // Calendar Modal State
   const [calendarModalOpen, setCalendarModalOpen] = useState(false);
   const [selectedEventForCalendar, setSelectedEventForCalendar] =
     useState<EventItem | null>(null);
 
-  useEffect(() => {
-    const timer = setTimeout(() => setSearchQuery(searchTerm.trim()), 300);
-    return () => clearTimeout(timer);
-  }, [searchTerm]);
-
   const fetchEvents = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
-      const params: Record<string, any> = { page: 1, limit: 100 };
-      if (searchQuery) params.search = searchQuery;
+      const params: Record<string, any> = { page };
+      if (searchTerm) params.search = searchTerm;
       if (activeCategory !== "All") params.category = activeCategory;
       if (activeStatus !== "All") params.status = activeStatus;
+      if (dateRange.start) params.startDate = dateRange.start;
+      if (dateRange.end) params.endDate = dateRange.end;
 
       const res = await eventsApi.getEvents(params);
       const data: EventItem[] = res.data?.data || [];
       setEvents(data);
+      setTotal(res.data?.pagination?.total || 0);
+      setTotalPages(res.data?.pagination?.totalPages || 1);
 
       const categoryNames = Array.from(
         new Set(
@@ -136,15 +134,19 @@ const EventsPage: React.FC = () => {
       );
       setCategories(["All", ...categoryNames]);
     } catch (err) {
-      setError("Failed to load events. Please try again.");
+      setError("Failed to load events");
     } finally {
       setIsLoading(false);
     }
-  }, [searchQuery, activeCategory, activeStatus]);
+  }, [searchTerm, activeCategory, activeStatus, dateRange, page]);
 
   useEffect(() => {
     fetchEvents();
   }, [fetchEvents]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [searchTerm, activeCategory, activeStatus, dateRange]);
 
   // Helper to parse event date string from API to Date object
   const parseEventDate = (dateStr: string) => {
@@ -227,28 +229,6 @@ const EventsPage: React.FC = () => {
     setCalendarModalOpen(true);
   };
 
-  // Filter Logic
-  const filteredEvents = useMemo(() => {
-    return events.filter((event) => {
-      let inDateRange = true;
-      const eventDate = parseEventDate(event.date);
-
-      if (dateRange.start) {
-        const startDate = new Date(dateRange.start);
-        startDate.setHours(0, 0, 0, 0);
-        if (eventDate < startDate) inDateRange = false;
-      }
-
-      if (dateRange.end && inDateRange) {
-        const endDate = new Date(dateRange.end);
-        endDate.setHours(23, 59, 59, 999);
-        if (eventDate > endDate) inDateRange = false;
-      }
-
-      return inDateRange;
-    });
-  }, [events, dateRange]);
-
   // Status Badge Helper
   const getStatusColor = (status: string) => {
     switch (status.toUpperCase()) {
@@ -276,6 +256,7 @@ const EventsPage: React.FC = () => {
     setActiveCategory("All");
     setActiveStatus("All");
     setDateRange({ start: "", end: "" });
+    setPage(1);
   };
 
   return (
@@ -512,29 +493,42 @@ const EventsPage: React.FC = () => {
       <section className="pb-24 bg-slate-50 pt-12">
         <div className="container mx-auto px-6 md:px-12 lg:px-20 max-w-7xl">
           <div className="grid grid-cols-1 gap-6">
-            {error && (
-              <div className="bg-red-50 text-red-700 border border-red-100 rounded-xl p-4 flex items-center justify-between">
-                <span className="text-sm font-medium">{error}</span>
-                <Button size="sm" variant="white" onClick={fetchEvents}>
-                  Retry
-                </Button>
+            {isLoading && (
+              <div className="grid grid-cols-1 gap-6">
+                {[1, 2, 3].map((i) => (
+                  <div
+                    key={i}
+                    className="bg-white rounded-2xl border border-slate-200 overflow-hidden animate-pulse"
+                  >
+                    <div className="h-48 bg-slate-200" />
+                    <div className="p-6 space-y-3">
+                      <div className="h-4 bg-slate-200 rounded w-3/4" />
+                      <div className="h-3 bg-slate-100 rounded w-full" />
+                      <div className="h-3 bg-slate-100 rounded w-2/3" />
+                    </div>
+                  </div>
+                ))}
+                <div className="flex justify-center">
+                  <LoadingSpinner size="sm" />
+                </div>
               </div>
             )}
 
-            {isLoading && (
-              <div className="bg-white border border-slate-200 rounded-2xl p-10 flex flex-col items-center justify-center gap-3">
-                <div
-                  className="w-8 h-8 border-2 border-slate-300 border-t-primary-600 rounded-full animate-spin"
-                  aria-label="Loading events"
-                />
-                <p className="text-slate-500 text-sm">
-                  Fetching the latest events...
-                </p>
+            {error && (
+              <div className="text-center py-20 bg-white rounded-2xl border border-slate-200">
+                <p className="text-red-600 font-medium">{error}</p>
+                <button
+                  onClick={fetchEvents}
+                  className="mt-4 text-primary-600 hover:underline text-sm font-bold"
+                >
+                  Try Again
+                </button>
               </div>
             )}
 
             {!isLoading &&
-              filteredEvents.map((event) => (
+              !error &&
+              events.map((event) => (
                 <div
                   key={event.id}
                   onClick={() => navigate(`/events/${event.id}`)}
@@ -606,16 +600,11 @@ const EventsPage: React.FC = () => {
 
                     <div className="flex items-center justify-between border-t border-slate-100 pt-6 mt-auto">
                       <div className="flex -space-x-2">
-                        {[1, 2, 3].map((i) => (
-                          <div
-                            key={i}
-                            className="w-8 h-8 rounded-full border-2 border-white bg-slate-200 flex items-center justify-center text-[10px] font-bold text-slate-500"
-                          >
-                            <Users size={12} />
-                          </div>
-                        ))}
-                        <div className="w-8 h-8 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-500 pl-1">
-                          +40
+                        <div className="w-9 h-9 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center text-slate-500">
+                          <Users size={16} />
+                        </div>
+                        <div className="flex items-center text-sm font-semibold text-slate-700 ml-2">
+                          {event._count?.registrations ?? 0} registered
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
@@ -635,7 +624,7 @@ const EventsPage: React.FC = () => {
                 </div>
               ))}
 
-            {!isLoading && filteredEvents.length === 0 && (
+            {!isLoading && !error && events.length === 0 && (
               <div className="text-center py-20 bg-white rounded-2xl border border-slate-200 border-dashed">
                 <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-400">
                   <Search size={24} />
@@ -655,6 +644,28 @@ const EventsPage: React.FC = () => {
               </div>
             )}
           </div>
+
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-4 mt-8">
+              <button
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="px-4 py-2 border border-slate-200 rounded-lg text-sm font-medium disabled:opacity-50 hover:bg-slate-50"
+              >
+                Previous
+              </button>
+              <span className="text-sm text-slate-500">
+                Page {page} of {totalPages}
+              </span>
+              <button
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+                className="px-4 py-2 border border-slate-200 rounded-lg text-sm font-medium disabled:opacity-50 hover:bg-slate-50"
+              >
+                Next
+              </button>
+            </div>
+          )}
         </div>
       </section>
 

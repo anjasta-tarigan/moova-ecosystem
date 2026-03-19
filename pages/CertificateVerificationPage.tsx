@@ -11,6 +11,7 @@ import {
 import Button from "../components/Button";
 import { certificatesApi } from "../services/api/certificatesApi";
 import { formatDate } from "../lib/utils";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 type CertificateResult = {
   id: string;
@@ -30,7 +31,7 @@ const CertificateVerificationPage: React.FC = () => {
   const [certId, setCertId] = useState(id || "");
   const [result, setResult] = useState<CertificateResult | null>(null);
   const [searched, setSearched] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -41,8 +42,9 @@ const CertificateVerificationPage: React.FC = () => {
 
   const handleVerify = async (searchId: string) => {
     if (!searchId) return;
-    setIsLoading(true);
+    setIsVerifying(true);
     setError(null);
+    setResult(null);
     try {
       const res = await certificatesApi.verify(searchId.trim());
       setResult(res.data?.data);
@@ -53,7 +55,7 @@ const CertificateVerificationPage: React.FC = () => {
       }
     } finally {
       setSearched(true);
-      setIsLoading(false);
+      setIsVerifying(false);
     }
   };
 
@@ -121,20 +123,26 @@ const CertificateVerificationPage: React.FC = () => {
               onChange={(e) => setCertId(e.target.value)}
             />
           </div>
-          <Button type="submit">Verify</Button>
+          <Button
+            type="submit"
+            disabled={isVerifying || !certId.trim()}
+            className="min-w-[120px]"
+          >
+            {isVerifying ? "Verifying..." : "Verify"}
+          </Button>
         </form>
 
         {/* Results */}
         {searched && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {error && !isLoading && (
+            {error && !isVerifying && (
               <div className="mb-3 p-3 rounded-xl bg-red-50 border border-red-100 text-sm text-red-700">
                 {error}
               </div>
             )}
-            {isLoading ? (
+            {isVerifying ? (
               <div className="flex items-center justify-center p-10 bg-white rounded-2xl border border-slate-200">
-                <div className="w-8 h-8 border-2 border-slate-300 border-t-primary-600 rounded-full animate-spin" />
+                <LoadingSpinner size="md" />
               </div>
             ) : result ? (
               <div

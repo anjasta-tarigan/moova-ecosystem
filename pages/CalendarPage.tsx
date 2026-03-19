@@ -18,6 +18,7 @@ import {
   MoreHorizontal,
 } from "lucide-react";
 import { eventsApi } from "../services/api/eventsApi";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 // --- Animation Helper (Inlined) ---
 const useOnScreen = (ref: React.RefObject<Element>, rootMargin = "0px") => {
@@ -72,80 +73,18 @@ interface CalendarEvent {
   sdg?: number;
 }
 
-// --- Mock Data Generator ---
-const getMockEvents = (): CalendarEvent[] => {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth();
-
-  return [
-    {
-      id: "1",
-      title: "Global Summit Applications Close",
-      date: new Date(year, month, 5, 23, 59),
-      type: "deadline",
-      description:
-        "Final submission deadline for the 2024 Global Science Summit startup showcase. Ensure all pitch decks and technical validations are uploaded.",
-      status: "open",
-      sdg: 9,
-    },
-    {
-      id: "2",
-      title: "BioTech Innovation Workshop",
-      date: new Date(year, month, 12, 14, 0),
-      type: "workshop",
-      description:
-        "A deep dive into CRISPR applications in sustainable agriculture. Led by Dr. Sarah Chen from BioLabs.",
-      location: "Virtual / Zoom",
-      status: "registered",
-      sdg: 2,
-    },
-    {
-      id: "3",
-      title: "Ecosystem Townhall",
-      date: new Date(year, month, 15, 16, 0),
-      type: "event",
-      description:
-        "Quarterly community updates, new partner announcements, and open Q&A with the GIVA leadership team.",
-      location: "Live Stream",
-      status: "open",
-      sdg: 17,
-    },
-    {
-      id: "4",
-      title: "Mentor Matchmaking",
-      date: new Date(year, month, 22, 10, 0),
-      type: "event",
-      description:
-        "Speed networking session for early-stage founders and industry mentors. Pre-registration required.",
-      location: "London Hub",
-      status: "closed",
-      sdg: 4,
-    },
-    {
-      id: "5",
-      title: "Q4 Grant Cycle Opens",
-      date: new Date(year, month, 28, 9, 0),
-      type: "milestone",
-      description:
-        "Applications open for the Q4 deep tech grant cycle. Focus areas: Clean Energy and AI Safety.",
-      status: "open",
-      sdg: 7,
-    },
-    {
-      id: "6",
-      title: "Climate Tech Hackathon",
-      date: new Date(year, month, 8, 9, 0),
-      type: "event",
-      description: "48-hour hackathon focused on carbon capture solutions.",
-      location: "Berlin Hub",
-      status: "open",
-      sdg: 13,
-    },
-  ];
+const mapCategoryToType = (category?: string): EventType => {
+  if (category === "Competition") return "deadline";
+  if (category === "Workshop") return "workshop";
+  if (category === "Conference") return "event";
+  return "milestone";
 };
 
-const EVENTS = getMockEvents();
+const mapStatus = (status?: string): "open" | "registered" | "closed" => {
+  const normalized = (status || "").toUpperCase();
+  if (normalized === "CLOSED") return "closed";
+  return "open";
+};
 
 // --- Components ---
 
@@ -200,22 +139,22 @@ const CalendarPage: React.FC = () => {
       setIsLoading(true);
       setError(null);
       try {
-        const res = await eventsApi.getEvents({ limit: 100 });
+        const res = await eventsApi.getEvents({ limit: 50 });
         const data = res.data?.data || [];
         const mapped: CalendarEvent[] = data.map((evt: any) => ({
           id: evt.id,
           title: evt.title,
-          date: new Date(evt.date),
-          type: evt.status === "CLOSED" ? "deadline" : "event",
+          date: new Date(evt.deadline),
+          type: mapCategoryToType(evt.category),
           description: evt.shortDescription,
           location: evt.location,
-          status: evt.status?.toLowerCase() === "closed" ? "closed" : "open",
+          status: mapStatus(evt.status),
           sdg: Array.isArray(evt.sdgs) ? evt.sdgs[0] : undefined,
         }));
         setEvents(mapped);
       } catch (err) {
-        setError("Failed to load calendar events. Showing sample data.");
-        setEvents(getMockEvents());
+        setError("Failed to load calendar events.");
+        console.error(err);
       } finally {
         setIsLoading(false);
       }
@@ -487,9 +426,8 @@ const CalendarPage: React.FC = () => {
           </div>
 
           {isLoading ? (
-            <div className="p-12 text-center flex flex-col items-center gap-3">
-              <div className="w-8 h-8 border-2 border-slate-300 border-t-primary-600 rounded-full animate-spin" />
-              <p className="text-sm text-slate-500">Loading calendar...</p>
+            <div className="h-96 flex items-center justify-center">
+              <LoadingSpinner />
             </div>
           ) : (
             <>
