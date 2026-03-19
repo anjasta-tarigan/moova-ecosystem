@@ -153,8 +153,8 @@ const DashboardProfile: React.FC = () => {
               Profile & Affiliation
             </h1>
             <p className="text-slate-500 mt-1">
-              Data diambil langsung dari server, pastikan identitas
-              sekolah/mahasiswa lengkap.
+              Data is pulled directly from the server; please keep your school
+              or student identity complete.
             </p>
           </div>
           <Button
@@ -249,7 +249,7 @@ const DashboardProfile: React.FC = () => {
               {profile.fullName || "Pengguna"}
             </h2>
             <p className="text-sm text-slate-500 mt-2 mb-6 font-medium">
-              {profile.schoolName || "Belum ada sekolah"}
+              {profile.schoolName || "No school provided"}
             </p>
 
             <div className="border-t border-slate-100 pt-6 text-left space-y-4">
@@ -438,8 +438,8 @@ const DashboardProfile: React.FC = () => {
                   <div className="bg-blue-50 border border-blue-100 p-4 rounded-xl mb-6">
                     <p className="text-sm text-blue-800 font-medium flex items-center gap-2">
                       <AlertCircle size={16} />
-                      Data akademik wajib untuk pendaftaran event dan
-                      sertifikat.
+                      Academic data is required for event registration and
+                      certificates.
                     </p>
                   </div>
 
@@ -577,7 +577,7 @@ const DashboardProfile: React.FC = () => {
                       value={profile.bio}
                       onChange={(e) => handleChange("bio", e.target.value)}
                       className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary-100 focus:border-primary-500 outline-none transition-all text-sm font-medium h-32 resize-none"
-                      placeholder="Ceritakan ketertarikan riset / proyek yang sedang dikerjakan"
+                      placeholder="Describe your research interests or current project"
                     />
                     <p className="text-right text-xs text-slate-400 mt-1">
                       {profile.bio.length}/500 chars

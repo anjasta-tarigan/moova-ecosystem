@@ -87,7 +87,7 @@ const OverviewView = () => {
             Dashboard
           </h1>
           <p className="text-slate-500 mt-1">
-            {headline}. Semua data diambil dari API.
+            {headline}. All data is fetched from the API.
           </p>
         </div>
 
@@ -153,7 +153,7 @@ const OverviewView = () => {
           <div className="text-slate-500">Loading events...</div>
         ) : registrations.length === 0 ? (
           <div className="p-6 rounded-xl border border-dashed border-slate-300 text-center text-slate-500 bg-slate-50">
-            Belum ada event yang diikuti.
+            No events joined yet.
           </div>
         ) : (
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
@@ -179,7 +179,7 @@ const OverviewView = () => {
                     </h3>
                     {reg.event?.category && (
                       <p className="text-xs text-slate-500 mt-1">
-                        Kategori: {reg.event.category}
+                        Category: {reg.event.category}
                       </p>
                     )}
                   </div>
@@ -227,10 +227,10 @@ const OverviewView = () => {
                   </div>
                   <div>
                     <p className="text-sm font-bold text-slate-900">
-                      Lihat jadwal & timeline event
+                      View event schedules & timelines
                     </p>
                     <p className="text-xs text-slate-500">
-                      Pastikan deadline submission terbaru.
+                      Stay on top of the latest submission deadlines.
                     </p>
                   </div>
                 </div>
@@ -239,7 +239,7 @@ const OverviewView = () => {
                   variant="outline"
                   onClick={() => navigate("/dashboard/event/list")}
                 >
-                  Buka
+                  Open
                 </Button>
               </div>
               <div className="flex items-center justify-between p-3 rounded-xl border border-slate-100">
@@ -249,10 +249,10 @@ const OverviewView = () => {
                   </div>
                   <div>
                     <p className="text-sm font-bold text-slate-900">
-                      Kelola tim & undangan
+                      Manage teams & invitations
                     </p>
                     <p className="text-xs text-slate-500">
-                      Atur anggota tim dan peran.
+                      Manage team members and roles.
                     </p>
                   </div>
                 </div>
@@ -261,7 +261,7 @@ const OverviewView = () => {
                   variant="outline"
                   onClick={() => navigate("/dashboard/team/manage")}
                 >
-                  Buka
+                  Open
                 </Button>
               </div>
             </div>
@@ -273,7 +273,7 @@ const OverviewView = () => {
             <div className="relative z-10">
               <h3 className="font-bold text-lg mb-2">Need a Team?</h3>
               <p className="text-slate-300 text-sm mb-6">
-                Cari anggota tim baru atau undang teman.
+                Find new teammates or invite friends.
               </p>
               <Button
                 variant="white"

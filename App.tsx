@@ -40,6 +40,7 @@ import AdminReports from "./pages/admin/AdminReports";
 import SuperAdminDashboard from "./pages/superadmin/SuperAdminDashboard";
 import SuperAdminUsers from "./pages/superadmin/SuperAdminUsers";
 import SuperAdminJudgeAssignments from "./pages/superadmin/SuperAdminJudgeAssignments.tsx";
+import LoadingSpinner from "./components/LoadingSpinner";
 
 // Helper to scroll to top on route change
 const ScrollToTop = () => {
@@ -62,8 +63,6 @@ const MainLayout = () => {
     </div>
   );
 };
-
-const LoadingSpinner = () => <div className="p-8 text-center">Loading...</div>;
 
 const AuthGuard = () => {
   const user = localStorage.getItem("giva_user");

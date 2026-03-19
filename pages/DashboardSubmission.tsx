@@ -97,7 +97,7 @@ const DashboardSubmission: React.FC = () => {
       setSubmission(res.data.data);
     } catch (err) {
       console.error(err);
-      setError("Gagal memuat submission.");
+      setError("Failed to load submission.");
     } finally {
       setLoading(false);
     }
@@ -126,7 +126,7 @@ const DashboardSubmission: React.FC = () => {
       setSubmission(res.data.data);
     } catch (err) {
       console.error(err);
-      setError("Gagal menyimpan perubahan.");
+      setError("Failed to save changes.");
     } finally {
       setSaving(false);
     }
@@ -144,7 +144,7 @@ const DashboardSubmission: React.FC = () => {
       });
     } catch (err) {
       console.error(err);
-      setError("Upload gagal. Pastikan format dan ukuran sesuai.");
+      setError("Upload failed. Ensure the format and size are correct.");
     } finally {
       setUploading(false);
     }
@@ -160,7 +160,7 @@ const DashboardSubmission: React.FC = () => {
       });
     } catch (err) {
       console.error(err);
-      setError("Tidak bisa menghapus file.");
+      setError("Unable to delete file.");
     }
   };
 
@@ -172,7 +172,7 @@ const DashboardSubmission: React.FC = () => {
       await refresh();
     } catch (err) {
       console.error(err);
-      setError("Gagal submit. Pastikan minimal satu file terunggah.");
+      setError("Submission failed. Ensure at least one file is uploaded.");
     } finally {
       setSaving(false);
     }
@@ -186,7 +186,7 @@ const DashboardSubmission: React.FC = () => {
       await refresh();
     } catch (err) {
       console.error(err);
-      setError("Tidak bisa menarik submission ini.");
+      setError("Unable to withdraw this submission.");
     } finally {
       setSaving(false);
     }
@@ -198,9 +198,7 @@ const DashboardSubmission: React.FC = () => {
   );
 
   if (!id) {
-    return (
-      <div className="p-8 text-slate-500">Submission ID tidak ditemukan.</div>
-    );
+    return <div className="p-8 text-slate-500">Submission ID not found.</div>;
   }
 
   if (loading) {
@@ -208,7 +206,9 @@ const DashboardSubmission: React.FC = () => {
   }
 
   if (!submission) {
-    return <div className="p-8 text-slate-500">Submission tidak tersedia.</div>;
+    return (
+      <div className="p-8 text-slate-500">Submission is not available.</div>
+    );
   }
 
   return (
@@ -409,7 +409,7 @@ const DashboardSubmission: React.FC = () => {
 
             {submission.files.length === 0 ? (
               <div className="p-4 rounded-lg border border-dashed border-slate-300 text-sm text-slate-500 bg-slate-50">
-                Belum ada file yang diunggah.
+                No files uploaded yet.
               </div>
             ) : (
               <div className="space-y-3">
@@ -467,7 +467,7 @@ const DashboardSubmission: React.FC = () => {
                   </div>
                   <div className="flex-1">
                     <p className="text-sm font-medium text-slate-800">
-                      {member.user?.fullName || "Anggota"}
+                      {member.user?.fullName || "Member"}
                     </p>
                     <p className="text-[11px] text-slate-400">{member.role}</p>
                   </div>
@@ -477,14 +477,16 @@ const DashboardSubmission: React.FC = () => {
           </div>
 
           <div className="bg-slate-900 text-white rounded-2xl p-6 shadow-lg">
-            <h4 className="font-bold text-lg mb-2">Tips Singkat</h4>
+            <h4 className="font-bold text-lg mb-2">Quick Tips</h4>
             <ul className="space-y-2 text-sm text-slate-200">
-              <li>• Lengkapi deskripsi dan tech stack sebelum submit.</li>
-              <li>• Pastikan minimal satu file terunggah untuk submit.</li>
-              <li>• Gunakan link demo yang dapat diakses publik.</li>
+              <li>
+                • Complete the description and tech stack before submitting.
+              </li>
+              <li>• Ensure at least one file is uploaded before submitting.</li>
+              <li>• Use a demo link that is publicly accessible.</li>
             </ul>
             <div className="mt-4 text-xs text-slate-400">
-              Status saat ini: {submission.status}
+              Current status: {submission.status}
             </div>
           </div>
         </div>

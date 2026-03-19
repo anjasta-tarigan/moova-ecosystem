@@ -53,7 +53,7 @@ const DashboardTeam: React.FC = () => {
       setTeams(res.data.data || []);
     } catch (err) {
       console.error(err);
-      setError("Gagal memuat data tim.");
+      setError("Failed to load team data.");
     } finally {
       setLoading(false);
     }
@@ -69,7 +69,7 @@ const DashboardTeam: React.FC = () => {
       setCreateName("");
     } catch (err) {
       console.error(err);
-      setError("Tidak bisa membuat tim baru.");
+      setError("Unable to create a new team.");
     } finally {
       setCreating(false);
     }
@@ -89,7 +89,7 @@ const DashboardTeam: React.FC = () => {
       setJoinCode("");
     } catch (err) {
       console.error(err);
-      setError("Kode tim tidak valid atau tim tidak aktif.");
+      setError("Team code is invalid or the team is inactive.");
     } finally {
       setJoining(false);
     }
@@ -120,7 +120,7 @@ const DashboardTeam: React.FC = () => {
             Team Management
           </h1>
           <p className="text-slate-500 mt-1">
-            Kelola tim yang terdaftar di kompetisi.
+            Manage teams registered in competitions.
           </p>
         </div>
 
@@ -163,12 +163,12 @@ const DashboardTeam: React.FC = () => {
               </div>
               <div className="flex-1">
                 <p className="text-xs font-bold uppercase text-slate-500">
-                  Buat Tim
+                  Create Team
                 </p>
                 <div className="flex gap-2 mt-2">
                   <input
                     type="text"
-                    placeholder="Nama tim"
+                    placeholder="Team name"
                     value={createName}
                     onChange={(e) => setCreateName(e.target.value)}
                     className="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-100 focus:border-primary-500"
@@ -178,7 +178,7 @@ const DashboardTeam: React.FC = () => {
                     onClick={handleCreateTeam}
                     disabled={creating}
                   >
-                    {creating ? "..." : "Buat"}
+                    {creating ? "..." : "Create"}
                   </Button>
                 </div>
               </div>
@@ -190,12 +190,12 @@ const DashboardTeam: React.FC = () => {
               </div>
               <div className="flex-1">
                 <p className="text-xs font-bold uppercase text-slate-500">
-                  Masuk Tim
+                  Join Team
                 </p>
                 <div className="flex gap-2 mt-2">
                   <input
                     type="text"
-                    placeholder="Kode tim"
+                    placeholder="Team code"
                     value={joinCode}
                     onChange={(e) => setJoinCode(e.target.value)}
                     className="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-100 focus:border-primary-500"
@@ -206,7 +206,7 @@ const DashboardTeam: React.FC = () => {
                     onClick={handleJoinTeam}
                     disabled={joining}
                   >
-                    {joining ? "..." : "Gabung"}
+                    {joining ? "..." : "Join"}
                   </Button>
                 </div>
               </div>
@@ -218,13 +218,13 @@ const DashboardTeam: React.FC = () => {
               </div>
               <div className="flex-1">
                 <p className="text-xs font-bold uppercase text-slate-500">
-                  Cari Tim
+                  Find Team
                 </p>
                 <div className="flex gap-2 mt-2 items-center">
                   <Search size={16} className="text-slate-400" />
                   <input
                     type="text"
-                    placeholder="Nama tim atau anggota"
+                    placeholder="Team name or member"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="flex-1 px-2 py-2 text-sm border border-transparent focus:border-primary-300 focus:ring-1 focus:ring-primary-100 rounded"
@@ -238,7 +238,7 @@ const DashboardTeam: React.FC = () => {
             <div className="p-6 text-slate-500">Loading teams...</div>
           ) : filteredTeams.length === 0 ? (
             <div className="p-8 rounded-xl border border-dashed border-slate-300 text-center text-slate-500 bg-slate-50">
-              Belum ada tim terdaftar. Buat atau gabung dengan kode.
+              No teams yet. Create one or join with a code.
             </div>
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -287,7 +287,7 @@ const DashboardTeam: React.FC = () => {
                               .toUpperCase()}
                           </div>
                           <div className="flex-1 text-sm font-medium text-slate-700">
-                            {member.user?.fullName || "Anggota"}
+                            {member.user?.fullName || "Member"}
                             <div className="text-[11px] text-slate-400">
                               {member.user?.email}
                             </div>
@@ -302,13 +302,13 @@ const DashboardTeam: React.FC = () => {
 
                   <div className="p-4 border-t border-slate-100 bg-slate-50 flex items-center justify-between text-xs text-slate-500">
                     <span>
-                      Kode undangan:{" "}
+                      Invite code: {""}
                       <strong className="font-mono text-slate-800">
                         {team.code}
                       </strong>
                     </span>
                     <span className="flex items-center gap-1">
-                      <Users size={14} /> {team.members.length} anggota
+                      <Users size={14} /> {team.members.length} members
                     </span>
                   </div>
                 </div>
@@ -321,8 +321,8 @@ const DashboardTeam: React.FC = () => {
       {activeTab === "discover" && (
         <div className="space-y-6">
           <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm text-center text-slate-500">
-            Fitur pencarian talent akan segera hadir. Untuk sekarang, undang
-            teman melalui kode tim.
+            Talent search is coming soon. For now, invite teammates using the
+            team code.
           </div>
         </div>
       )}

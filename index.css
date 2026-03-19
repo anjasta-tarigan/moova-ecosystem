@@ -1,0 +1,183 @@
+@import "tailwindcss";
+
+@theme {
+  /* Font */
+  --font-sans: "Inter", sans-serif;
+
+  /* Slate scale */
+  --color-slate-50: #f9fafb;
+  --color-slate-100: #f3f4f6;
+  --color-slate-200: #e5e7eb;
+  --color-slate-300: #d1d5db;
+  --color-slate-400: #9ca3af;
+  --color-slate-500: #6b7280;
+  --color-slate-600: #4b5563;
+  --color-slate-700: #374151;
+  --color-slate-800: #1f2937;
+  --color-slate-900: #111827;
+  --color-slate-950: #030712;
+
+  /* Primary monochrome */
+  --color-primary-50: #f3f4f6;
+  --color-primary-100: #e5e7eb;
+  --color-primary-200: #d1d5db;
+  --color-primary-300: #9ca3af;
+  --color-primary-400: #6b7280;
+  --color-primary-500: #111827;
+  --color-primary-600: #000000;
+  --color-primary-700: #374151;
+  --color-primary-800: #1f2937;
+  --color-primary-900: #000000;
+  --color-primary-950: #000000;
+
+  /* Secondary monochrome */
+  --color-secondary-50: #f9fafb;
+  --color-secondary-100: #f3f4f6;
+  --color-secondary-200: #e5e7eb;
+  --color-secondary-500: #6b7280;
+  --color-secondary-600: #4b5563;
+  --color-secondary-700: #374151;
+  --color-secondary-900: #111827;
+
+  /* Semantic mapped to monochrome */
+  --color-emerald-50: #f9fafb;
+  --color-emerald-100: #f3f4f6;
+  --color-emerald-500: #111827;
+  --color-emerald-600: #000000;
+  --color-emerald-700: #374151;
+  --color-emerald-800: #1f2937;
+
+  --color-red-50: #f9fafb;
+  --color-red-100: #f3f4f6;
+  --color-red-500: #111827;
+  --color-red-600: #000000;
+  --color-red-700: #374151;
+  --color-red-800: #1f2937;
+
+  --color-amber-50: #f9fafb;
+  --color-amber-100: #f3f4f6;
+  --color-amber-500: #111827;
+  --color-amber-600: #000000;
+  --color-amber-700: #374151;
+  --color-amber-800: #1f2937;
+
+  --color-blue-50: #f9fafb;
+  --color-blue-100: #f3f4f6;
+  --color-blue-500: #111827;
+  --color-blue-600: #000000;
+  --color-blue-700: #374151;
+
+  /* Brand accents */
+  --color-accent-cyan: #00bbff;
+  --color-accent-green: #00a86b;
+  --color-accent-crimson: #dc143c;
+  --color-accent-amber: #ffbf00;
+  --color-accent-orange: #ff8c00;
+  --color-accent-blue: #0052cc;
+
+  /* Background gradients */
+  --background-image-brand-gradient: linear-gradient(
+    to bottom right,
+    #1f2937,
+    #000000
+  );
+  --background-image-brand-gradient-hover: linear-gradient(
+    to bottom right,
+    #000000,
+    #000000
+  );
+  --background-image-atmosphere-cyan: radial-gradient(
+    circle at center,
+    rgba(0, 187, 255, 0.15) 0%,
+    transparent 70%
+  );
+  --background-image-atmosphere-mix: linear-gradient(
+    120deg,
+    rgba(0, 187, 255, 0.05),
+    rgba(220, 20, 60, 0.05)
+  );
+
+  /* Animations */
+  --animate-float: float 8s ease-in-out infinite;
+  --animate-pulse-slow: pulse 6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-spin-slow: spin 12s linear infinite;
+}
+
+/* Keyframes */
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-20px) scale(1.05);
+  }
+}
+
+body {
+  font-family: "Inter", sans-serif;
+  scroll-behavior: smooth;
+  background-color: #ffffff;
+  color: #111827;
+}
+
+/* Editorial Typography */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  letter-spacing: -0.03em;
+}
+
+/* Premium Textures */
+.bg-grid-pattern {
+  background-size: 60px 60px;
+  background-image:
+    linear-gradient(to right, rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+  mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+}
+
+.bg-grid-pattern-dark {
+  background-size: 60px 60px;
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Atmospheric Glows */
+.glow-cyan {
+  background: radial-gradient(
+    circle,
+    rgba(0, 187, 255, 0.15) 0%,
+    transparent 70%
+  );
+}
+
+.glow-crimson {
+  background: radial-gradient(
+    circle,
+    rgba(220, 20, 60, 0.12) 0%,
+    transparent 70%
+  );
+}
+
+.glow-amber {
+  background: radial-gradient(
+    circle,
+    rgba(255, 191, 0, 0.12) 0%,
+    transparent 70%
+  );
+}

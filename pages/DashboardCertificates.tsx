@@ -27,7 +27,7 @@ const DashboardCertificates: React.FC = () => {
         setCerts(res.data.data || []);
       } catch (err) {
         console.error(err);
-        setError("Gagal memuat sertifikat.");
+        setError("Failed to load certificates.");
       } finally {
         setLoading(false);
       }
@@ -48,7 +48,7 @@ const DashboardCertificates: React.FC = () => {
             My Certificates
           </h1>
           <p className="text-sm text-slate-500 mt-1">
-            Data diambil dari server, siap dibagikan.
+            Data is fetched from the server and ready to share.
           </p>
         </div>
         <div className="bg-blue-50 border border-blue-100 text-blue-700 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wide flex items-center gap-2">
@@ -66,7 +66,7 @@ const DashboardCertificates: React.FC = () => {
         <div className="p-6 text-slate-500">Loading certificates...</div>
       ) : certs.length === 0 ? (
         <div className="p-6 rounded-xl border border-dashed border-slate-300 text-center text-slate-500 bg-slate-50">
-          Belum ada sertifikat.
+          No certificates yet.
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">

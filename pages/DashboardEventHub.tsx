@@ -70,9 +70,7 @@ const EventListView = () => {
           <h1 className="text-3xl font-bold text-slate-900 tracking-tight">
             My Events
           </h1>
-          <p className="text-slate-500 mt-1">
-            Daftar event yang sudah kamu ikuti.
-          </p>
+          <p className="text-slate-500 mt-1">Events you have already joined.</p>
         </div>
         <Button onClick={() => navigate("/events")}>Browse New Events</Button>
       </div>
@@ -81,7 +79,7 @@ const EventListView = () => {
         <div className="text-slate-500">Loading events...</div>
       ) : events.length === 0 ? (
         <div className="p-6 rounded-xl border border-dashed border-slate-300 text-center text-slate-500 bg-slate-50">
-          Belum ada event yang diikuti.
+          No events joined yet.
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-6">
@@ -162,8 +160,7 @@ const EventDetailView = () => {
   }, [id]);
 
   if (loading) return <div className="text-slate-500">Loading event...</div>;
-  if (!event)
-    return <div className="text-slate-500">Event tidak ditemukan.</div>;
+  if (!event) return <div className="text-slate-500">Event not found.</div>;
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
