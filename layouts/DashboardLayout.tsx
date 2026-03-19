@@ -32,8 +32,7 @@ const getCurrentUser = (): User => {
   if (stored) return JSON.parse(stored);
   return {
     id: "guest",
-    firstName: "Guest",
-    lastName: "User",
+    fullName: "Guest User",
     email: "guest@giva.io",
     role: "STUDENT",
   };
@@ -45,6 +44,14 @@ const DashboardLayout: React.FC = () => {
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const user = getCurrentUser();
+  const userInitials =
+    user.fullName
+      ?.split(" ")
+      .filter(Boolean)
+      .map((n: string) => n.charAt(0))
+      .slice(0, 2)
+      .join("") || "U";
+  const userDisplayName = user.fullName || "User";
   const currentView = searchParams.get("view") || "overview";
 
   const handleLogout = () => {
@@ -202,13 +209,12 @@ const DashboardLayout: React.FC = () => {
             className={`flex items-center ${collapsed ? "justify-center" : "gap-3"} p-2 rounded-xl hover:bg-slate-800/50 transition-colors`}
           >
             <div className="w-9 h-9 rounded-full bg-slate-700 flex items-center justify-center text-xs font-bold shrink-0 text-white border border-slate-600">
-              {user.firstName.charAt(0)}
-              {user.lastName.charAt(0)}
+              {userInitials}
             </div>
             {!collapsed && (
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-semibold truncate text-white">
-                  {user.firstName} {user.lastName}
+                  {userDisplayName}
                 </p>
                 <p className="text-[11px] text-slate-500 truncate capitalize">
                   {user.role.replace("_", " ")}
@@ -285,7 +291,7 @@ const DashboardLayout: React.FC = () => {
               <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
             </button>
             <div className="w-8 h-8 rounded-full bg-slate-200 border border-slate-300 flex items-center justify-center text-xs font-bold text-slate-600">
-              {user.firstName.charAt(0)}
+              {userInitials}
             </div>
           </div>
         </header>

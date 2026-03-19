@@ -35,6 +35,7 @@ const JudgeEventView: React.FC = () => {
       });
       const data = res.data.data || [];
       setSubmissions(data);
+      console.log("First submission:", data[0]);
 
       const scored = data.filter(
         (s: any) => s.scoringStatus === "submitted",
@@ -56,6 +57,8 @@ const JudgeEventView: React.FC = () => {
   }, [loadData]); // Reload when stage changes
 
   const filteredSubmissions = submissions.filter((sub) => {
+    if (!sub) return false;
+
     const matchesStatus =
       filterStatus === "all"
         ? true
@@ -63,15 +66,20 @@ const JudgeEventView: React.FC = () => {
           ? sub.scoringStatus !== "submitted"
           : sub.scoringStatus === "submitted";
 
-    const matchesSearch =
-      sub.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      sub.team.toLowerCase().includes(searchTerm.toLowerCase());
+    const titleStr = (sub.projectTitle || sub.title || "").toLowerCase();
+    const teamStr = (sub.team?.name || sub.team || "").toLowerCase();
+    const searchLower = (searchTerm || "").toLowerCase();
+
+    const matchesSearch = searchTerm
+      ? titleStr.includes(searchLower) || teamStr.includes(searchLower)
+      : true;
 
     return matchesStatus && matchesSearch;
   });
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
+  const getStatusBadge = (status: string | undefined) => {
+    const s = status || "pending";
+    switch (s) {
       case "submitted":
         return (
           <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
@@ -221,65 +229,74 @@ const JudgeEventView: React.FC = () => {
             </div>
           ) : (
             <div className="space-y-3">
-              {filteredSubmissions.map((sub) => (
-                <div
-                  key={sub.id}
-                  onClick={() =>
-                    navigate(
-                      `/dashboard/judge/events/${eventId}/round/${activeStage}/submission/${sub.id}`,
-                    )
-                  }
-                  className="bg-white border border-slate-200 rounded-xl p-4 flex flex-col md:flex-row items-center gap-6 hover:shadow-md hover:border-brand-blue transition-all cursor-pointer group"
-                >
-                  {/* Avatar / Team Initials */}
-                  <div className="w-12 h-12 rounded-lg bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-lg shrink-0 border border-slate-200">
-                    {sub.team.substring(0, 2).toUpperCase()}
-                  </div>
+              {filteredSubmissions.map((sub) => {
+                const title = sub.projectTitle || sub.title || "Untitled";
+                const teamName = sub.team?.name || sub.team || "-";
+                const institution = sub.institution || "-";
+                const scoringStatus = sub.scoringStatus || "pending";
+                const totalScore =
+                  sub.totalScore ?? sub.scores?.[0]?.totalScore ?? "-";
 
-                  {/* Info */}
-                  <div className="flex-1 min-w-0 text-center md:text-left">
-                    <h3 className="text-lg font-bold text-slate-900 group-hover:text-brand-blue transition-colors truncate">
-                      {sub.title}
-                    </h3>
-                    <div className="text-sm text-slate-500 flex flex-wrap gap-x-4 justify-center md:justify-start">
-                      <span>{sub.team}</span>
-                      <span className="text-slate-300">|</span>
-                      <span>{sub.institution}</span>
-                      <span className="text-slate-300">|</span>
-                      <span className="font-mono text-xs pt-0.5 opacity-70">
-                        ID: {sub.id}
-                      </span>
+                return (
+                  <div
+                    key={sub.id}
+                    onClick={() =>
+                      navigate(
+                        `/dashboard/judge/events/${eventId}/round/${activeStage}/submission/${sub.id}`,
+                      )
+                    }
+                    className="bg-white border border-slate-200 rounded-xl p-4 flex flex-col md:flex-row items-center gap-6 hover:shadow-md hover:border-brand-blue transition-all cursor-pointer group"
+                  >
+                    {/* Avatar / Team Initials */}
+                    <div className="w-12 h-12 rounded-lg bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-lg shrink-0 border border-slate-200">
+                      {teamName.substring(0, 2).toUpperCase()}
                     </div>
-                  </div>
 
-                  {/* Status & Score */}
-                  <div className="flex items-center gap-6 shrink-0 w-full md:w-auto justify-between md:justify-end border-t md:border-t-0 border-slate-100 pt-3 md:pt-0">
-                    {sub.scoringStatus === "submitted" ? (
-                      <div className="text-right">
-                        <span className="block text-2xl font-black text-slate-900">
-                          {sub.totalScore}
-                        </span>
-                        <span className="text-[10px] font-bold text-slate-400 uppercase">
-                          Score
+                    {/* Info */}
+                    <div className="flex-1 min-w-0 text-center md:text-left">
+                      <h3 className="text-lg font-bold text-slate-900 group-hover:text-brand-blue transition-colors truncate">
+                        {title}
+                      </h3>
+                      <div className="text-sm text-slate-500 flex flex-wrap gap-x-4 justify-center md:justify-start">
+                        <span>{teamName}</span>
+                        <span className="text-slate-300">|</span>
+                        <span>{institution}</span>
+                        <span className="text-slate-300">|</span>
+                        <span className="font-mono text-xs pt-0.5 opacity-70">
+                          ID: {sub.id}
                         </span>
                       </div>
-                    ) : (
-                      <div className="text-right px-4">
-                        <span className="text-slate-300 text-2xl font-bold">
-                          --
+                    </div>
+
+                    {/* Status & Score */}
+                    <div className="flex items-center gap-6 shrink-0 w-full md:w-auto justify-between md:justify-end border-t md:border-t-0 border-slate-100 pt-3 md:pt-0">
+                      {scoringStatus === "submitted" ? (
+                        <div className="text-right">
+                          <span className="block text-2xl font-black text-slate-900">
+                            {totalScore}
+                          </span>
+                          <span className="text-[10px] font-bold text-slate-400 uppercase">
+                            Score
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="text-right px-4">
+                          <span className="text-slate-300 text-2xl font-bold">
+                            --
+                          </span>
+                        </div>
+                      )}
+
+                      <div className="flex flex-col items-end gap-2">
+                        {getStatusBadge(scoringStatus)}
+                        <span className="text-xs font-bold text-brand-blue group-hover:translate-x-1 transition-transform flex items-center gap-1">
+                          Evaluate <ChevronRight size={12} />
                         </span>
                       </div>
-                    )}
-
-                    <div className="flex flex-col items-end gap-2">
-                      {getStatusBadge(sub.scoringStatus)}
-                      <span className="text-xs font-bold text-brand-blue group-hover:translate-x-1 transition-transform flex items-center gap-1">
-                        Evaluate <ChevronRight size={12} />
-                      </span>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Award, Download, ExternalLink } from "lucide-react";
 import Button from "../components/Button";
 import LoadingSpinner from "../components/LoadingSpinner";
-import { profileApi } from "../services/api/profileApi";
+import api from "../lib/axios";
 
 const JudgeCertificates: React.FC = () => {
   const [certificates, setCertificates] = useState<any[]>([]);
@@ -12,11 +12,11 @@ const JudgeCertificates: React.FC = () => {
   useEffect(() => {
     const loadCertificates = async () => {
       try {
-        const res = await profileApi.getMyCertificates();
+        const res = await api.get("/api/certificates");
         const data = res.data.data || [];
         setCertificates(data.filter((c: any) => c.type === "JUDGE"));
       } catch (err) {
-        console.error(err);
+        console.error("Cert error:", (err as any)?.response?.data || err);
         setError("Failed to load data");
       } finally {
         setIsLoading(false);

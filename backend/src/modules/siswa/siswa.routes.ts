@@ -15,13 +15,43 @@ import { updateProfileSchema } from "./siswa.schema";
 
 const router = Router();
 
-router.use(authenticate, requireRole("STUDENT"));
-
-router.get("/profile", getProfile);
-router.put("/profile", validate(updateProfileSchema), updateProfile);
-router.post("/profile/avatar", uploadAvatarMiddleware, uploadAvatar);
-router.get("/my-events", myEvents);
-router.get("/my-submissions", mySubmissions);
-router.get("/my-certificates", myCertificates);
+router.get(
+  "/profile",
+  authenticate,
+  requireRole("STUDENT", "JUDGE"),
+  getProfile,
+);
+router.put(
+  "/profile",
+  authenticate,
+  requireRole("STUDENT", "JUDGE"),
+  validate(updateProfileSchema),
+  updateProfile,
+);
+router.post(
+  "/profile/avatar",
+  authenticate,
+  requireRole("STUDENT", "JUDGE"),
+  uploadAvatarMiddleware,
+  uploadAvatar,
+);
+router.get(
+  "/my-events",
+  authenticate,
+  requireRole("STUDENT", "JUDGE"),
+  myEvents,
+);
+router.get(
+  "/my-submissions",
+  authenticate,
+  requireRole("STUDENT", "JUDGE"),
+  mySubmissions,
+);
+router.get(
+  "/my-certificates",
+  authenticate,
+  requireRole("STUDENT", "JUDGE"),
+  myCertificates,
+);
 
 export default router;

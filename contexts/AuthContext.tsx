@@ -12,6 +12,8 @@ interface User {
   fullName: string;
   email: string;
   role: "SUPERADMIN" | "ADMIN" | "JUDGE" | "STUDENT";
+  avatar?: string;
+  organization?: string;
 }
 
 interface AuthContextType {
@@ -27,6 +29,15 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const mapUser = (payload: any): User => ({
+  id: payload?.id,
+  fullName: payload?.fullName || "User",
+  email: payload?.email || "",
+  role: payload?.role,
+  avatar: payload?.avatar,
+  organization: payload?.organization,
+});
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -37,8 +48,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (token) {
         try {
           const response = await authApi.me();
-          setUser(response.data.data);
-          localStorage.setItem("giva_user", JSON.stringify(response.data.data));
+          const mappedUser = mapUser(response.data.data);
+          setUser(mappedUser);
+          localStorage.setItem("giva_user", JSON.stringify(mappedUser));
         } catch (error) {
           console.error("Token validation failed", error);
           localStorage.removeItem("giva_access_token");
@@ -54,10 +66,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = async (email: string, password: string) => {
     const response = await authApi.login(email, password);
     const { accessToken, refreshToken, user } = response.data.data;
+    const mappedUser = mapUser(user);
     localStorage.setItem("giva_access_token", accessToken);
     localStorage.setItem("giva_refresh_token", refreshToken);
-    localStorage.setItem("giva_user", JSON.stringify(user));
-    setUser(user);
+    localStorage.setItem("giva_user", JSON.stringify(mappedUser));
+    setUser(mappedUser);
   };
 
   const logout = async () => {

@@ -71,10 +71,14 @@ const AuthPage: React.FC = () => {
   const handleComplete = (e: React.FormEvent) => {
     e.preventDefault();
     // For demo purposes, signup defaults to participant view
+    const fullName =
+      [formData.firstName, formData.lastName]
+        .filter(Boolean)
+        .join(" ")
+        .trim() || "New User";
     const mockUser = {
       id: "u-" + Date.now(),
-      firstName: formData.firstName || "New",
-      lastName: formData.lastName || "User",
+      fullName,
       email: formData.email,
       role: "STUDENT" as UserRole,
       organization: formData.institution || "New Member",

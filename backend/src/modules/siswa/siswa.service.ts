@@ -24,17 +24,25 @@ const calculateCompleteness = (user: { fullName?: string }, profile: any) => {
 };
 
 export const getProfile = async (userId: string) => {
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    include: { profile: true },
-  });
-  if (!user || !user.profile) {
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) {
     const err: any = new Error("Data not found");
     err.code = "P2025";
     throw err;
   }
-  const { password, ...rest } = user;
-  return rest;
+
+  let profile = await prisma.siswaProfile.findUnique({ where: { userId } });
+
+  if (!profile) {
+    profile = await prisma.siswaProfile.create({ data: { userId } });
+  }
+
+  const completeness = calculateCompleteness(user, profile);
+
+  return {
+    user: { ...user, password: undefined },
+    profile: { ...profile, completeness },
+  };
 };
 
 export const updateProfile = async (userId: string, data: any) => {
@@ -42,7 +50,7 @@ export const updateProfile = async (userId: string, data: any) => {
     where: { id: userId },
     include: { profile: true },
   });
-  if (!user || !user.profile) {
+  if (!user) {
     const err: any = new Error("Data not found");
     err.code = "P2025";
     throw err;
@@ -53,18 +61,17 @@ export const updateProfile = async (userId: string, data: any) => {
     ? await prisma.user.update({ where: { id: userId }, data: { fullName } })
     : user;
 
-  const updatedProfile = await prisma.siswaProfile.update({
-    where: { id: user.profile.id },
-    data: {
-      ...profileData,
-      birthDate: birthDate ? new Date(birthDate) : user.profile.birthDate,
-    },
-  });
+  const profilePayload = {
+    ...profileData,
+    birthDate: birthDate ? new Date(birthDate) : undefined,
+  };
 
-  const completeness = calculateCompleteness(updatedUser, updatedProfile);
-  const savedProfile = await prisma.siswaProfile.update({
-    where: { id: updatedProfile.id },
-    data: { completeness },
+  const completeness = calculateCompleteness(updatedUser, profilePayload);
+
+  const savedProfile = await prisma.siswaProfile.upsert({
+    where: { userId },
+    update: { ...profilePayload, completeness },
+    create: { userId, ...profilePayload, completeness },
   });
 
   return {

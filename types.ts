@@ -31,8 +31,7 @@ export type UserRole = "SUPERADMIN" | "ADMIN" | "JUDGE" | "STUDENT";
 
 export interface User {
   id: string;
-  firstName: string;
-  lastName: string;
+  fullName: string;
   email: string;
   role: UserRole;
   avatar?: string;

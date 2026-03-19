@@ -39,11 +39,21 @@ const JudgeDashboard: React.FC = () => {
 
   const filteredAssignments = useMemo(() => {
     return assignments.filter((a: any) => {
+      if (!a) return false;
+
       const matchFilter =
-        filter === "All" ? true : a.status === filter.toUpperCase();
-      const matchSearch =
-        a.categoryName.toLowerCase().includes(search.toLowerCase()) ||
-        a.eventTitle.toLowerCase().includes(search.toLowerCase());
+        filter === "All"
+          ? true
+          : (a.status || "").toUpperCase() === filter.toUpperCase();
+
+      const categoryName = (a.categoryName || "").toLowerCase();
+      const eventTitle = (a.eventTitle || "").toLowerCase();
+      const searchLower = (search || "").toLowerCase();
+
+      const matchSearch = search
+        ? categoryName.includes(searchLower) || eventTitle.includes(searchLower)
+        : true;
+
       return matchFilter && matchSearch;
     });
   }, [assignments, filter, search]);
@@ -51,8 +61,9 @@ const JudgeDashboard: React.FC = () => {
   const groupedAssignments = useMemo(() => {
     return filteredAssignments.reduce(
       (acc: Record<string, any[]>, curr: any) => {
-        if (!acc[curr.eventTitle]) acc[curr.eventTitle] = [];
-        acc[curr.eventTitle].push(curr);
+        const key = curr?.eventTitle || "Unknown Event";
+        if (!acc[key]) acc[key] = [];
+        acc[key].push(curr);
         return acc;
       },
       {} as Record<string, any[]>,
