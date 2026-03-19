@@ -4,11 +4,14 @@ const calculateCompleteness = (user: { fullName?: string }, profile: any) => {
   const requiredFields = [
     Boolean(user.fullName),
     Boolean(profile.phone),
-    Boolean(profile.birthDate),
-    Boolean(profile.gender),
+    Boolean(profile.country),
+    Boolean(profile.affiliationType),
     Boolean(profile.schoolName),
     Boolean(profile.schoolLevel),
-    Boolean(profile.grade),
+    Boolean(profile.faculty),
+    Boolean(profile.fieldOfStudy || profile.major),
+    Boolean(profile.educationLevel),
+    Boolean(profile.grade || profile.graduationYear),
     Boolean(profile.province),
     Boolean(profile.city),
   ];
@@ -18,7 +21,7 @@ const calculateCompleteness = (user: { fullName?: string }, profile: any) => {
   if (profile.avatar) score += 5;
   if (profile.bio) score += 5;
   if (profile.skills && profile.skills.length > 0) score += 5;
-  if (profile.github || profile.linkedin) score += 5;
+  if (profile.github || profile.linkedin || profile.googleScholar) score += 5;
 
   return Math.min(100, Math.round(score));
 };

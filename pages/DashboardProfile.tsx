@@ -7,87 +7,180 @@ import {
   Calendar,
   Camera,
   CheckCircle,
+  FileBadge,
   Github,
+  Globe,
   GraduationCap,
+  Link as LinkIcon,
   Linkedin,
+  Lock,
   Mail,
   MapPin,
   Phone,
   Plus,
+  Save,
+  Shield,
   User,
+  X,
 } from "lucide-react";
+import api from "../lib/axios";
 import Button from "../components/Button";
 import { useAuthContext } from "../contexts/AuthContext";
 import { profileApi } from "../services/api/profileApi";
 
-interface SiswaProfile {
+type Role = "SUPERADMIN" | "ADMIN" | "JUDGE" | "STUDENT" | "";
+
+interface ProfileUser {
   id: string;
   fullName: string;
   email: string;
-  phone: string;
-  birthDate?: string;
-  gender: string;
-  province: string;
-  city: string;
+  role: Role;
   avatar?: string;
-  schoolName: string;
-  schoolLevel: string;
-  major: string;
-  studentId: string;
-  grade: string;
-  bio: string;
-  skills: string[];
-  linkedin: string;
-  github: string;
-  completeness: number;
 }
 
-const mapProfile = (payload: any, fallbackUser?: any): SiswaProfile => {
-  const userData = payload?.user || fallbackUser || {};
-  const profileData = payload?.profile || payload || {};
+interface ProfileData {
+  avatar?: string;
+  phone: string;
+  country: string;
+  province?: string;
+  educationLevel?: string;
+  affiliationType?: string;
+  schoolName?: string;
+  faculty?: string;
+  fieldOfStudy?: string;
+  graduationYear?: string;
+  studentId?: string;
+  bio: string;
+  skills: string[];
+  linkedin?: string;
+  github?: string;
+  website?: string;
+  googleScholar?: string;
+  completeness?: number;
+}
+
+interface ProfileState {
+  user: ProfileUser;
+  profile: ProfileData;
+}
+
+type Notification = { type: "success" | "error"; msg: string } | null;
+
+const inputClass =
+  "w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary-100 focus:border-primary-500 outline-none transition-all text-sm font-medium";
+const selectClass = inputClass;
+const labelClass =
+  "block text-xs font-bold uppercase text-slate-500 mb-1.5 tracking-wide";
+
+const countries = [
+  "Indonesia",
+  "United Kingdom",
+  "United States",
+  "Canada",
+  "Germany",
+  "Singapore",
+  "India",
+  "Nigeria",
+  "Brazil",
+  "Japan",
+  "Malaysia",
+  "Australia",
+  "Other",
+];
+
+const affiliationTypes = [
+  "University",
+  "High School",
+  "Research Institution",
+  "Company",
+  "Independent / Freelance",
+];
+
+const educationLevels = [
+  "High School",
+  "Undergraduate",
+  "Master",
+  "PhD",
+  "Professional",
+  "Other",
+];
+
+const tabs = [
+  { id: "general" as const, label: "Basic Identity", icon: User },
+  {
+    id: "academic" as const,
+    label: "Academic & Affiliation",
+    icon: GraduationCap,
+  },
+  { id: "public" as const, label: "Public Profile", icon: Linkedin },
+  { id: "security" as const, label: "Security", icon: Shield },
+];
+
+const normalizeProfile = (data: any, fallbackUser?: any): ProfileState => {
+  const userData = data?.user || fallbackUser || data || {};
+  const profileData = data?.profile || data || {};
 
   return {
-    id: profileData.id || userData.id || "",
-    fullName: userData.fullName || profileData.fullName || "",
-    email: userData.email || profileData.email || "",
-    phone: profileData.phone || "",
-    birthDate: profileData.birthDate
-      ? new Date(profileData.birthDate).toISOString().slice(0, 10)
-      : "",
-    gender: profileData.gender || "",
-    province: profileData.province || "",
-    city: profileData.city || "",
-    avatar: profileData.avatar || userData.avatar || "",
-    schoolName: profileData.schoolName || "",
-    schoolLevel: profileData.schoolLevel || "",
-    major: profileData.major || "",
-    studentId: profileData.studentId || "",
-    grade: profileData.grade || "",
-    bio: profileData.bio || "",
-    skills: profileData.skills || [],
-    linkedin: profileData.linkedin || "",
-    github: profileData.github || "",
-    completeness: profileData.completeness || 0,
+    user: {
+      id: userData.id || profileData.id || "",
+      fullName: userData.fullName || profileData.fullName || "",
+      email: userData.email || profileData.email || "",
+      role: (userData.role as Role) || "",
+      avatar: userData.avatar || profileData.avatar || "",
+    },
+    profile: {
+      avatar: profileData.avatar || userData.avatar || "",
+      phone: profileData.phone || "",
+      country: profileData.country || profileData.province || "",
+      province: profileData.province || "",
+      educationLevel:
+        profileData.educationLevel || profileData.schoolLevel || "",
+      affiliationType:
+        profileData.affiliationType || profileData.schoolLevel || "",
+      schoolName: profileData.schoolName || profileData.institution || "",
+      faculty: profileData.faculty || "",
+      fieldOfStudy: profileData.fieldOfStudy || profileData.major || "",
+      graduationYear: profileData.graduationYear || profileData.grade || "",
+      studentId: profileData.studentId || "",
+      bio: profileData.bio || "",
+      skills: profileData.skills || [],
+      linkedin: profileData.linkedin || "",
+      github: profileData.github || "",
+      website: profileData.website || "",
+      googleScholar: profileData.googleScholar || "",
+      completeness: profileData.completeness ?? data?.completeness ?? 0,
+    },
+  };
+};
+
+const getNameParts = (fullName: string) => {
+  const parts = fullName?.trim()?.split(/\s+/).filter(Boolean) || [];
+  return {
+    firstName: parts[0] || "",
+    lastName: parts.slice(1).join(" ") || "",
   };
 };
 
 const DashboardProfile: React.FC = () => {
   const { user } = useAuthContext();
-  const [profile, setProfile] = useState<SiswaProfile | null>(null);
+  const [profile, setProfile] = useState<ProfileState | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"general" | "academic" | "public">(
-    "general",
-  );
-  const [notification, setNotification] = useState<{
-    type: "success" | "error";
-    msg: string;
-  } | null>(null);
+  const [activeTab, setActiveTab] = useState<
+    "general" | "academic" | "public" | "security"
+  >("general");
+  const [notification, setNotification] = useState<Notification>(null);
   const [newSkill, setNewSkill] = useState("");
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [passwordSaving, setPasswordSaving] = useState(false);
+  const [passwords, setPasswords] = useState({
+    current: "",
+    next: "",
+    confirm: "",
+  });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
   useEffect(() => {
     loadProfile();
@@ -98,12 +191,14 @@ const DashboardProfile: React.FC = () => {
     setLoading(true);
     try {
       const res = await profileApi.getProfile();
-      const mapped = mapProfile(res.data.data, user);
-      setProfile(mapped);
-      if ((mapped.completeness || 0) < 80) setActiveTab("academic");
-    } catch (e) {
-      console.error(e);
-      setLoadError("Failed to load data");
+      const normalized = normalizeProfile(res.data?.data || res.data, user);
+      setProfile(normalized);
+      if ((normalized.profile.completeness || 0) < 80) {
+        setActiveTab("academic");
+      }
+    } catch (err) {
+      console.error(err);
+      setLoadError("Failed to load profile.");
     } finally {
       setLoading(false);
     }
@@ -114,40 +209,32 @@ const DashboardProfile: React.FC = () => {
     setTimeout(() => setNotification(null), 4000);
   };
 
-  const handleSave = async () => {
-    if (!profile) return;
-    setSaving(true);
-    try {
-      const payload = {
-        fullName: profile.fullName,
-        phone: profile.phone,
-        birthDate: profile.birthDate,
-        gender: profile.gender,
-        province: profile.province,
-        city: profile.city,
-        schoolName: profile.schoolName,
-        schoolLevel: profile.schoolLevel,
-        major: profile.major,
-        studentId: profile.studentId,
-        grade: profile.grade,
-        bio: profile.bio,
-        skills: profile.skills,
-        linkedin: profile.linkedin,
-        github: profile.github,
-      };
-      const res = await profileApi.updateProfile(payload);
-      setProfile(mapProfile(res.data.data, user));
-      showNotification("success", "Profile updated successfully.");
-    } catch (e) {
-      showNotification("error", "Failed to save changes.");
-    } finally {
-      setSaving(false);
-    }
+  const handleChange = (field: keyof ProfileData, value: any) => {
+    setProfile((prev) =>
+      prev
+        ? {
+            ...prev,
+            profile: {
+              ...prev.profile,
+              [field]: value,
+            },
+          }
+        : prev,
+    );
   };
 
-  const handleChange = (field: keyof SiswaProfile, value: any) => {
-    if (!profile) return;
-    setProfile({ ...profile, [field]: value });
+  const handleNameChange = (part: "first" | "last", value: string) => {
+    setProfile((prev) => {
+      if (!prev) return prev;
+      const { firstName, lastName } = getNameParts(prev.user.fullName || "");
+      const nextFirst = part === "first" ? value : firstName;
+      const nextLast = part === "last" ? value : lastName;
+      const nextFullName = [nextFirst, nextLast].filter(Boolean).join(" ");
+      return {
+        ...prev,
+        user: { ...prev.user, fullName: nextFullName },
+      };
+    });
   };
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -157,11 +244,20 @@ const DashboardProfile: React.FC = () => {
         const res = await profileApi.uploadAvatar(e.target.files[0]);
         const url =
           res.data?.data?.avatarUrl || res.data?.data?.avatar || res.data?.data;
-        if (profile) {
-          setProfile({ ...profile, avatar: url || profile.avatar });
-          showNotification("success", "Profile photo updated.");
-        }
+        setProfile((prev) =>
+          prev
+            ? {
+                ...prev,
+                profile: {
+                  ...prev.profile,
+                  avatar: url || prev.profile.avatar,
+                },
+              }
+            : prev,
+        );
+        showNotification("success", "Profile photo updated.");
       } catch (err) {
+        console.error(err);
         showNotification("error", "Failed to upload photo.");
       } finally {
         setUploadingAvatar(false);
@@ -170,35 +266,114 @@ const DashboardProfile: React.FC = () => {
   };
 
   const addSkill = () => {
-    if (
-      newSkill.trim() &&
-      profile &&
-      !profile.skills.includes(newSkill.trim())
-    ) {
-      setProfile({ ...profile, skills: [...profile.skills, newSkill.trim()] });
-      setNewSkill("");
-    }
+    const value = newSkill.trim();
+    if (!value || !profile) return;
+    setProfile({
+      ...profile,
+      profile: {
+        ...profile.profile,
+        skills: Array.from(new Set([...(profile.profile.skills || []), value])),
+      },
+    });
+    setNewSkill("");
   };
 
   const removeSkill = (skillToRemove: string) => {
-    if (profile) {
-      setProfile({
-        ...profile,
-        skills: profile.skills.filter((s) => s !== skillToRemove),
-      });
+    setProfile((prev) =>
+      prev
+        ? {
+            ...prev,
+            profile: {
+              ...prev.profile,
+              skills: (prev.profile.skills || []).filter(
+                (skill) => skill !== skillToRemove,
+              ),
+            },
+          }
+        : prev,
+    );
+  };
+
+  const handleSave = async () => {
+    if (!profile) return;
+    setSaving(true);
+    try {
+      const payload = {
+        fullName: profile.user.fullName,
+        phone: profile.profile.phone,
+        country: profile.profile.country,
+        affiliationType: profile.profile.affiliationType,
+        schoolName: profile.profile.schoolName,
+        faculty: profile.profile.faculty,
+        fieldOfStudy: profile.profile.fieldOfStudy,
+        educationLevel: profile.profile.educationLevel,
+        graduationYear: profile.profile.graduationYear,
+        studentId: profile.profile.studentId,
+        bio: profile.profile.bio,
+        skills: profile.profile.skills,
+        linkedin: profile.profile.linkedin,
+        github: profile.profile.github,
+        website: profile.profile.website,
+        googleScholar: profile.profile.googleScholar,
+      };
+
+      const res = await profileApi.updateProfile(payload);
+      const normalized = normalizeProfile(res.data?.data || res.data, user);
+      setProfile(normalized);
+      showNotification("success", "Profile updated successfully.");
+    } catch (err) {
+      console.error(err);
+      showNotification("error", "Failed to save changes.");
+    } finally {
+      setSaving(false);
     }
   };
 
-  const isComplete = (profile?.completeness || 0) >= 80;
+  const handlePasswordUpdate = async () => {
+    if (!passwords.current || !passwords.next || !passwords.confirm) {
+      showNotification("error", "Please fill all password fields.");
+      return;
+    }
+    if (passwords.next !== passwords.confirm) {
+      showNotification("error", "New passwords do not match.");
+      return;
+    }
 
-  if (loading)
+    setPasswordSaving(true);
+    try {
+      await api.post("/api/auth/change-password", {
+        currentPassword: passwords.current,
+        newPassword: passwords.next,
+        confirmPassword: passwords.confirm,
+      });
+      showNotification("success", "Password updated successfully.");
+      setPasswords({ current: "", next: "", confirm: "" });
+    } catch (err: any) {
+      const status = err?.response?.status;
+      if (status === 404) {
+        showNotification("error", "Change password is coming soon.");
+      } else {
+        showNotification("error", "Failed to update password.");
+      }
+    } finally {
+      setPasswordSaving(false);
+    }
+  };
+
+  const completeness = Math.min(
+    100,
+    Math.max(0, profile?.profile?.completeness ?? 0),
+  );
+
+  if (loading) {
     return (
       <div className="flex items-center justify-center min-h-64">
         <div className="w-8 h-8 border-2 border-slate-900 border-t-transparent rounded-full animate-spin" />
       </div>
     );
+  }
 
-  if (loadError)
+  if (loadError) {
     return (
       <div className="bg-red-50 border border-red-100 rounded-xl p-6 text-center">
         <p className="text-red-600 font-medium">{loadError}</p>
@@ -210,11 +385,14 @@ const DashboardProfile: React.FC = () => {
         </button>
       </div>
     );
+  }
 
   if (!profile) return null;
 
+  const { firstName, lastName } = getNameParts(profile.user.fullName);
+
   return (
-    <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in duration-500 pb-20">
+    <div className="max-w-5xl mx-auto space-y-8 pb-20">
       {notification && (
         <div
           className={`fixed top-4 right-4 z-50 px-6 py-4 rounded-xl shadow-lg border flex items-center gap-3 animate-in slide-in-from-top-2 ${
@@ -224,190 +402,208 @@ const DashboardProfile: React.FC = () => {
           }`}
         >
           {notification.type === "success" ? (
-            <CheckCircle size={20} />
+            <CheckCircle size={18} />
           ) : (
-            <AlertCircle size={20} />
+            <AlertCircle size={18} />
           )}
-          <span className="font-medium">{notification.msg}</span>
+          <span className="font-medium text-sm">{notification.msg}</span>
         </div>
       )}
 
-      {/* Header & Status */}
-      <div className="space-y-6">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-slate-900 tracking-tight">
-              Profile & Affiliation
-            </h1>
-            <p className="text-slate-500 mt-1">
-              Data is pulled directly from the server; please keep your student
-              identity complete and up to date.
-            </p>
-          </div>
-          <Button
-            onClick={handleSave}
-            disabled={saving}
-            className="min-w-[140px] shadow-md"
-          >
-            {saving ? "Saving..." : "Save Changes"}
-          </Button>
+      <div className="flex justify-between items-start gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-slate-900">
+            Profile & Affiliation
+          </h1>
+          <p className="text-slate-500 mt-2 max-w-2xl">
+            Manage your academic identity, affiliations, public presence, and
+            security settings for the GIVA ecosystem.
+          </p>
         </div>
-
-        {/* Completeness Banner */}
-        <div
-          className={`rounded-xl p-4 border flex items-start gap-4 ${
-            isComplete
-              ? "bg-emerald-50 border-emerald-100"
-              : "bg-amber-50 border-amber-100"
-          }`}
+        <Button
+          onClick={handleSave}
+          disabled={saving}
+          className="min-w-[150px] shadow-md"
         >
-          <div
-            className={`p-2 rounded-full shrink-0 ${isComplete ? "bg-emerald-100 text-emerald-600" : "bg-amber-100 text-amber-600"}`}
-          >
-            {isComplete ? (
-              <CheckCircle size={24} />
-            ) : (
-              <AlertTriangle size={24} />
-            )}
-          </div>
-          <div className="flex-1">
-            <h4
-              className={`font-bold text-sm mb-1 ${isComplete ? "text-emerald-900" : "text-amber-900"}`}
-            >
-              {isComplete ? "Profile Complete" : "Profile Incomplete"}
-            </h4>
-            <p
-              className={`text-sm mb-3 ${isComplete ? "text-emerald-700" : "text-amber-700"}`}
-            >
-              {isComplete
-                ? "Your academic profile meets the requirements for international competitions."
-                : "You must complete the Academic & Affiliation section to register for events or join teams."}
-            </p>
-            <div className="w-full bg-white/50 rounded-full h-2 overflow-hidden">
-              <div
-                className={`h-full transition-all duration-1000 ${isComplete ? "bg-emerald-500" : "bg-amber-500"}`}
-                style={{ width: `${profile.completeness}%` }}
-              ></div>
-            </div>
-            <p className="text-xs mt-1 text-slate-500 font-medium text-right">
-              {profile.completeness}% Completed
-            </p>
-          </div>
-        </div>
+          {saving ? (
+            "Saving..."
+          ) : (
+            <span className="inline-flex items-center gap-2">
+              <Save size={16} /> Save Changes
+            </span>
+          )}
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* LEFT COLUMN: ID Card */}
-        <div className="lg:col-span-4 space-y-6">
-          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm text-center relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-r from-primary-600 to-primary-800"></div>
-
-            <div className="relative z-10 mt-8 mb-4">
-              <div className="w-32 h-32 mx-auto rounded-full p-1.5 bg-white shadow-lg relative group cursor-pointer">
-                <img
-                  src={
-                    profile.avatar ||
-                    `https://ui-avatars.com/api/?name=${profile.fullName}&background=random`
-                  }
-                  alt="Avatar"
-                  className="w-full h-full rounded-full object-cover border border-slate-100"
-                />
-                <div
-                  onClick={() => fileInputRef.current?.click()}
-                  className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  {uploadingAvatar ? (
-                    <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  ) : (
-                    <Camera className="text-white" size={24} />
-                  )}
+        {/* Left: Identity Card */}
+        <div className="lg:col-span-4">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden text-center relative">
+            <div className="w-full h-24 bg-gradient-to-r from-primary-600 to-primary-800" />
+            <div className="-mt-16 flex flex-col items-center px-6 pb-6">
+              <div className="relative">
+                <div className="w-32 h-32 rounded-full bg-white p-1.5 shadow-xl relative group cursor-pointer">
+                  <img
+                    src={
+                      profile.profile.avatar ||
+                      profile.user.avatar ||
+                      `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.user.fullName || "GIVA User")}`
+                    }
+                    alt="Profile avatar"
+                    className="w-full h-full rounded-full object-cover border border-slate-100"
+                  />
+                  <div
+                    className="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    {uploadingAvatar ? (
+                      <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <Camera className="text-white" size={22} />
+                    )}
+                  </div>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleAvatarChange}
+                  />
                 </div>
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  className="hidden"
-                  accept="image/*"
-                  onChange={handleAvatarChange}
-                />
               </div>
-            </div>
-
-            <h2 className="text-xl font-bold text-slate-900">
-              {profile.fullName || "Student"}
-            </h2>
-            <p className="text-sm text-slate-500 mt-2 mb-6 font-medium">
-              {profile.schoolName || "No school provided"}
-            </p>
-
-            <div className="border-t border-slate-100 pt-6 text-left space-y-4">
-              <div className="flex items-center gap-3 text-sm text-slate-600">
-                <Mail size={16} className="text-slate-400 shrink-0" />
-                <span className="truncate">{profile.email}</span>
+              <h2 className="text-xl font-bold text-slate-900 mt-4">
+                {profile.user.fullName || "GIVA User"}
+              </h2>
+              <div className="mt-2 flex items-center gap-2">
+                {profile.profile.affiliationType ? (
+                  <span className="px-2 py-0.5 bg-slate-100 text-slate-500 text-[10px] font-semibold uppercase rounded-full">
+                    {profile.profile.affiliationType}
+                  </span>
+                ) : null}
               </div>
-              {(profile.city || profile.province) && (
-                <div className="flex items-center gap-3 text-sm text-slate-600">
-                  <MapPin size={16} className="text-slate-400 shrink-0" />
-                  <span>
-                    {[profile.city, profile.province]
-                      .filter(Boolean)
-                      .join(", ")}
-                  </span>
+              <p className="text-sm text-slate-500 mt-2">
+                {profile.profile.schoolName || "No institution provided"}
+              </p>
+
+              <div className="w-full mt-6 space-y-3">
+                <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                  <div
+                    className="h-full bg-primary-600 transition-all"
+                    style={{ width: `${completeness}%` }}
+                  />
                 </div>
-              )}
-              {profile.studentId && (
-                <div className="flex items-center gap-3 text-sm text-slate-600">
-                  <span className="text-xs font-semibold text-slate-500">
-                    ID
-                  </span>
-                  <span>{profile.studentId}</span>
+                <p className="text-xs text-slate-500 text-right font-medium">
+                  {completeness}% Complete
+                </p>
+                <div className="pt-3 border-t border-slate-100 space-y-3 text-left">
+                  <div className="flex items-center gap-3 text-sm text-slate-700">
+                    <Mail size={16} className="text-slate-400" />
+                    <span className="truncate">{profile.user.email}</span>
+                  </div>
+                  {profile.profile.country || profile.profile.province ? (
+                    <div className="flex items-center gap-3 text-sm text-slate-700">
+                      <MapPin size={16} className="text-slate-400" />
+                      <span>
+                        {[profile.profile.country, profile.profile.province]
+                          .filter(Boolean)
+                          .join(", ")}
+                      </span>
+                    </div>
+                  ) : null}
+                  {profile.profile.educationLevel ? (
+                    <div className="flex items-center gap-3 text-sm text-slate-700">
+                      <GraduationCap size={16} className="text-slate-400" />
+                      <span>{profile.profile.educationLevel}</span>
+                    </div>
+                  ) : null}
+                  {profile.profile.studentId ? (
+                    <div className="flex items-center gap-3 text-sm text-slate-700">
+                      <FileBadge size={16} className="text-slate-400" />
+                      <span>{profile.profile.studentId}</span>
+                    </div>
+                  ) : null}
                 </div>
-              )}
+              </div>
             </div>
           </div>
         </div>
 
-        {/* RIGHT COLUMN: Tabs & Forms */}
+        {/* Right: Tab Panel */}
         <div className="lg:col-span-8">
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden min-h-[600px] flex flex-col">
-            {/* Tabs */}
             <div className="flex border-b border-slate-200 overflow-x-auto">
-              {[
-                { id: "general", label: "General Info", icon: User },
-                {
-                  id: "academic",
-                  label: "Academic Data",
-                  icon: GraduationCap,
-                  alert: !isComplete,
-                },
-                { id: "public", label: "Public Profile", icon: Linkedin },
-              ].map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id as any)}
-                  className={`flex items-center gap-2 px-6 py-4 text-sm font-bold transition-colors border-b-2 whitespace-nowrap relative ${
-                    activeTab === tab.id
-                      ? "border-primary-600 text-primary-700 bg-primary-50/50"
-                      : "border-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-50"
-                  }`}
-                >
-                  <tab.icon size={16} />
-                  {tab.label}
-                  {tab.alert && (
-                    <span className="absolute top-3 right-3 w-2 h-2 bg-amber-500 rounded-full"></span>
-                  )}
-                </button>
-              ))}
+              {tabs.map((tab) => {
+                const isActive = activeTab === tab.id;
+                const showAlert = tab.id === "academic" && completeness < 80;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`flex items-center gap-2 px-6 py-4 text-sm font-bold transition-colors border-b-2 whitespace-nowrap relative ${
+                      isActive
+                        ? "border-primary-600 text-primary-700 bg-primary-50/50"
+                        : "border-transparent text-slate-500 hover:text-slate-800"
+                    }`}
+                  >
+                    <tab.icon size={16} />
+                    {tab.label}
+                    {showAlert && (
+                      <span className="absolute top-3 right-3 w-2 h-2 bg-amber-500 rounded-full" />
+                    )}
+                  </button>
+                );
+              })}
             </div>
 
-            {/* Content Area */}
             <div className="p-8 flex-1">
-              {/* --- GENERAL TAB --- */}
-              {activeTab === "general" && profile && (
-                <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+              {activeTab === "general" && (
+                <div className="space-y-6">
+                  <div
+                    className={`rounded-xl p-4 border flex items-start gap-3 ${
+                      completeness < 80
+                        ? "bg-amber-50 border-amber-100"
+                        : "bg-emerald-50 border-emerald-100"
+                    }`}
+                  >
+                    <div
+                      className={`p-2 rounded-full ${
+                        completeness < 80
+                          ? "bg-amber-100 text-amber-700"
+                          : "bg-emerald-100 text-emerald-700"
+                      }`}
+                    >
+                      {completeness < 80 ? (
+                        <AlertTriangle size={18} />
+                      ) : (
+                        <CheckCircle size={18} />
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold text-slate-900">
+                        {completeness < 80
+                          ? "Profile Incomplete — complete Academic & Affiliation to register for events"
+                          : "Profile Complete"}
+                      </p>
+                      <div className="w-full bg-white/70 rounded-full h-2 overflow-hidden mt-3">
+                        <div
+                          className={`h-full ${
+                            completeness < 80
+                              ? "bg-amber-500"
+                              : "bg-emerald-500"
+                          }`}
+                          style={{ width: `${completeness}%` }}
+                        />
+                      </div>
+                      <p className="text-xs text-slate-500 mt-1 font-medium">
+                        {completeness}% completed
+                      </p>
+                    </div>
+                  </div>
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-xs font-bold uppercase text-slate-500 mb-1.5">
-                        Full Name <span className="text-red-500">*</span>
+                      <label className={labelClass}>
+                        First Name <span className="text-red-500">*</span>
                       </label>
                       <div className="relative">
                         <User
@@ -416,18 +612,34 @@ const DashboardProfile: React.FC = () => {
                         />
                         <input
                           type="text"
-                          value={profile.fullName}
+                          value={firstName}
                           onChange={(e) =>
-                            handleChange("fullName", e.target.value)
+                            handleNameChange("first", e.target.value)
                           }
-                          className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary-100 focus:border-primary-500 outline-none transition-all text-sm font-medium"
+                          className={`${inputClass} pl-10`}
+                          placeholder="First name"
                         />
                       </div>
                     </div>
                     <div>
-                      <label className="block text-xs font-bold uppercase text-slate-500 mb-1.5">
-                        Email
+                      <label className={labelClass}>
+                        Last Name <span className="text-red-500">*</span>
                       </label>
+                      <input
+                        type="text"
+                        value={lastName}
+                        onChange={(e) =>
+                          handleNameChange("last", e.target.value)
+                        }
+                        className={inputClass}
+                        placeholder="Last name"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className={labelClass}>Email Address</label>
                       <div className="relative">
                         <Mail
                           className="absolute left-3 top-2.5 text-slate-400"
@@ -435,17 +647,17 @@ const DashboardProfile: React.FC = () => {
                         />
                         <input
                           type="email"
-                          value={profile.email}
+                          value={profile.user.email}
                           disabled
-                          className="w-full pl-10 pr-4 py-2.5 bg-slate-100 border border-slate-200 rounded-lg text-slate-500 cursor-not-allowed text-sm font-medium"
+                          className={`${inputClass} bg-slate-100 text-slate-500 cursor-not-allowed pl-10`}
                         />
                       </div>
+                      <p className="text-xs text-slate-400 mt-1">
+                        Contact support to change email.
+                      </p>
                     </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-xs font-bold uppercase text-slate-500 mb-1.5">
+                      <label className={labelClass}>
                         Phone Number <span className="text-red-500">*</span>
                       </label>
                       <div className="relative">
@@ -455,98 +667,92 @@ const DashboardProfile: React.FC = () => {
                         />
                         <input
                           type="tel"
-                          value={profile.phone}
+                          value={profile.profile.phone}
                           onChange={(e) =>
                             handleChange("phone", e.target.value)
                           }
-                          className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary-100 focus:border-primary-500 outline-none transition-all text-sm font-medium"
-                          placeholder="e.g., +62 812xxxx"
+                          className={`${inputClass} pl-10`}
+                          placeholder="+1 (555) 000-0000"
                         />
                       </div>
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold uppercase text-slate-500 mb-1.5">
-                        Birth Date
-                      </label>
-                      <div className="relative">
-                        <Calendar
-                          className="absolute left-3 top-2.5 text-slate-400"
-                          size={18}
-                        />
-                        <input
-                          type="date"
-                          value={profile.birthDate || ""}
-                          onChange={(e) =>
-                            handleChange("birthDate", e.target.value)
-                          }
-                          className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary-100 focus:border-primary-500 outline-none transition-all text-sm font-medium"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-xs font-bold uppercase text-slate-500 mb-1.5">
-                        Gender
-                      </label>
-                      <select
-                        value={profile.gender}
-                        onChange={(e) => handleChange("gender", e.target.value)}
-                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary-100 focus:border-primary-500 outline-none transition-all text-sm font-medium"
-                      >
-                        <option value="">Select</option>
-                        <option value="Male">Male</option>
-                        <option value="Female">Female</option>
-                        <option value="Other">Other</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold uppercase text-slate-500 mb-1.5">
-                        Province / State
-                      </label>
-                      <input
-                        type="text"
-                        value={profile.province}
-                        onChange={(e) =>
-                          handleChange("province", e.target.value)
-                        }
-                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary-100 focus:border-primary-500 outline-none transition-all text-sm font-medium"
-                        placeholder="e.g., West Java"
-                      />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold uppercase text-slate-500 mb-1.5">
-                      City / District
+                    <label className={labelClass}>
+                      Country / Region <span className="text-red-500">*</span>
                     </label>
-                    <input
-                      type="text"
-                      value={profile.city}
-                      onChange={(e) => handleChange("city", e.target.value)}
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary-100 focus:border-primary-500 outline-none transition-all text-sm font-medium"
-                      placeholder="e.g., Bandung"
-                    />
+                    <select
+                      value={profile.profile.country}
+                      onChange={(e) => handleChange("country", e.target.value)}
+                      className={selectClass}
+                    >
+                      <option value="">Select country</option>
+                      {countries.map((country) => (
+                        <option key={country} value={country}>
+                          {country}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </div>
               )}
 
-              {/* --- ACADEMIC TAB (MANDATORY) --- */}
-              {activeTab === "academic" && profile && (
-                <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-                  <div className="bg-blue-50 border border-blue-100 p-4 rounded-xl mb-6">
-                    <p className="text-sm text-blue-800 font-medium flex items-center gap-2">
-                      <AlertCircle size={16} />
-                      Academic data is required for event registration and
-                      certificates.
+              {activeTab === "academic" && (
+                <div className="space-y-6">
+                  <div className="bg-blue-50 border border-blue-100 p-4 rounded-xl flex gap-3 items-start">
+                    <AlertCircle size={18} className="text-blue-600" />
+                    <p className="text-sm text-blue-800 font-medium">
+                      This section is required for event registration and
+                      certificate issuance.
                     </p>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="md:col-span-2">
-                      <label className="block text-xs font-bold uppercase text-slate-500 mb-1.5">
-                        Institution
+                    <div>
+                      <label className={labelClass}>
+                        Affiliation Type <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        value={profile.profile.affiliationType}
+                        onChange={(e) =>
+                          handleChange("affiliationType", e.target.value)
+                        }
+                        className={selectClass}
+                      >
+                        <option value="">Select affiliation</option>
+                        {affiliationTypes.map((item) => (
+                          <option key={item} value={item}>
+                            {item}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className={labelClass}>
+                        Education Level <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        value={profile.profile.educationLevel}
+                        onChange={(e) =>
+                          handleChange("educationLevel", e.target.value)
+                        }
+                        className={selectClass}
+                      >
+                        <option value="">Select level</option>
+                        {educationLevels.map((level) => (
+                          <option key={level} value={level}>
+                            {level}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-6">
+                    <div>
+                      <label className={labelClass}>
+                        Institution / Organization Name{" "}
                         <span className="text-red-500">*</span>
                       </label>
                       <div className="relative">
@@ -556,39 +762,37 @@ const DashboardProfile: React.FC = () => {
                         />
                         <input
                           type="text"
-                          value={profile.schoolName}
+                          value={profile.profile.schoolName}
                           onChange={(e) =>
                             handleChange("schoolName", e.target.value)
                           }
-                          className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary-100 focus:border-primary-500 outline-none transition-all text-sm font-medium"
-                          placeholder="Institution name"
+                          className={`${inputClass} pl-10`}
+                          placeholder="e.g. Universitas Indonesia"
                         />
                       </div>
                     </div>
+                  </div>
 
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-xs font-bold uppercase text-slate-500 mb-1.5">
-                        Education Level
+                      <label className={labelClass}>
+                        Faculty / Department{" "}
+                        <span className="text-red-500">*</span>
                       </label>
-                      <select
-                        value={profile.schoolLevel}
+                      <input
+                        type="text"
+                        value={profile.profile.faculty}
                         onChange={(e) =>
-                          handleChange("schoolLevel", e.target.value)
+                          handleChange("faculty", e.target.value)
                         }
-                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary-100 focus:border-primary-500 outline-none transition-all text-sm font-medium"
-                      >
-                        <option value="">Select</option>
-                        <option value="High School">High School</option>
-                        <option value="University">University</option>
-                        <option value="Research Institution">
-                          Research Institution
-                        </option>
-                      </select>
+                        className={inputClass}
+                        placeholder="e.g. Faculty of Engineering"
+                      />
                     </div>
-
                     <div>
-                      <label className="block text-xs font-bold uppercase text-slate-500 mb-1.5">
-                        Field of Study
+                      <label className={labelClass}>
+                        Major / Field of Study{" "}
+                        <span className="text-red-500">*</span>
                       </label>
                       <div className="relative">
                         <BookOpen
@@ -597,109 +801,96 @@ const DashboardProfile: React.FC = () => {
                         />
                         <input
                           type="text"
-                          value={profile.major}
+                          value={profile.profile.fieldOfStudy}
                           onChange={(e) =>
-                            handleChange("major", e.target.value)
+                            handleChange("fieldOfStudy", e.target.value)
                           }
-                          className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary-100 focus:border-primary-500 outline-none transition-all text-sm font-medium"
-                          placeholder="e.g., Computer Science"
+                          className={`${inputClass} pl-10`}
+                          placeholder="e.g. Computer Science"
                         />
                       </div>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-xs font-bold uppercase text-slate-500 mb-1.5">
-                        Grade / Year
+                      <label className={labelClass}>
+                        Graduation Year / Grade{" "}
+                        <span className="text-red-500">*</span>
                       </label>
-                      <input
-                        type="text"
-                        value={profile.grade}
-                        onChange={(e) => handleChange("grade", e.target.value)}
-                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary-100 focus:border-primary-500 outline-none transition-all text-sm font-medium"
-                        placeholder="Grade 11 / Semester 5"
-                      />
+                      <div className="relative">
+                        <Calendar
+                          className="absolute left-3 top-2.5 text-slate-400"
+                          size={18}
+                        />
+                        <input
+                          type="text"
+                          value={profile.profile.graduationYear}
+                          onChange={(e) =>
+                            handleChange("graduationYear", e.target.value)
+                          }
+                          className={`${inputClass} pl-10`}
+                          placeholder="2025 or Class 11"
+                        />
+                      </div>
                     </div>
                     <div>
-                      <label className="block text-xs font-bold uppercase text-slate-500 mb-1.5">
-                        Student ID
+                      <label className={labelClass}>
+                        Student / Academic ID (Optional)
                       </label>
                       <input
                         type="text"
-                        value={profile.studentId}
+                        value={profile.profile.studentId}
                         onChange={(e) =>
                           handleChange("studentId", e.target.value)
                         }
-                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary-100 focus:border-primary-500 outline-none transition-all text-sm font-medium"
-                        placeholder="Student ID"
+                        className={inputClass}
+                        placeholder="e.g. 2021001234"
                       />
+                      <p className="text-xs text-slate-400 mt-1">
+                        Providing this helps verify your status for specific
+                        grants.
+                      </p>
                     </div>
-                    <div>
-                      <label className="block text-xs font-bold uppercase text-slate-500 mb-1.5">
-                        Province / State
-                      </label>
-                      <input
-                        type="text"
-                        value={profile.province}
-                        onChange={(e) =>
-                          handleChange("province", e.target.value)
-                        }
-                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary-100 focus:border-primary-500 outline-none transition-all text-sm font-medium"
-                        placeholder="e.g., West Java"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold uppercase text-slate-500 mb-1.5">
-                      City / District
-                    </label>
-                    <input
-                      type="text"
-                      value={profile.city}
-                      onChange={(e) => handleChange("city", e.target.value)}
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary-100 focus:border-primary-500 outline-none transition-all text-sm font-medium"
-                      placeholder="e.g., Bandung"
-                    />
                   </div>
                 </div>
               )}
 
-              {/* --- PUBLIC TAB --- */}
-              {activeTab === "public" && profile && (
-                <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+              {activeTab === "public" && (
+                <div className="space-y-6">
                   <div>
-                    <label className="block text-xs font-bold uppercase text-slate-500 mb-1.5">
-                      Short Bio
-                    </label>
+                    <label className={labelClass}>Short Bio</label>
                     <textarea
-                      value={profile.bio}
-                      onChange={(e) => handleChange("bio", e.target.value)}
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary-100 focus:border-primary-500 outline-none transition-all text-sm font-medium h-32 resize-none"
-                      placeholder="Describe your research interests or current project"
+                      value={profile.profile.bio}
+                      onChange={(e) =>
+                        handleChange("bio", e.target.value.slice(0, 500))
+                      }
+                      maxLength={500}
+                      className={`${inputClass} h-32 resize-none`}
+                      placeholder="Tell the community about your research interests and goals..."
                     />
-                    <p className="text-right text-xs text-slate-400 mt-1">
-                      {profile.bio.length}/500 chars
+                    <p className="text-xs text-slate-400 text-right mt-1">
+                      {profile.profile.bio.length}/500 chars
                     </p>
                   </div>
 
-                  <div>
-                    <label className="block text-xs font-bold uppercase text-slate-500 mb-2">
-                      Skills
+                  <div className="space-y-3">
+                    <label className={labelClass}>
+                      Research Interests & Skills
                     </label>
-                    <div className="flex flex-wrap gap-2 mb-3">
-                      {profile.skills.map((skill, i) => (
+                    <div className="flex flex-wrap gap-2">
+                      {(profile.profile.skills || []).map((skill) => (
                         <span
-                          key={i}
-                          className="inline-flex items-center gap-1 px-3 py-1 bg-primary-50 text-primary-700 text-sm font-bold rounded-full border border-primary-100"
+                          key={skill}
+                          className="inline-flex items-center gap-2 bg-primary-50 text-primary-700 text-sm font-bold rounded-full px-3 py-1"
                         >
                           {skill}
                           <button
+                            type="button"
                             onClick={() => removeSkill(skill)}
                             className="hover:text-primary-900"
                           >
-                            ×
+                            <X size={14} />
                           </button>
                         </span>
                       ))}
@@ -709,57 +900,200 @@ const DashboardProfile: React.FC = () => {
                         type="text"
                         value={newSkill}
                         onChange={(e) => setNewSkill(e.target.value)}
-                        onKeyDown={(e) => e.key === "Enter" && addSkill()}
-                        className="flex-1 px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary-100 outline-none text-sm"
-                        placeholder="Add skill (e.g., React, Data Science)"
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            addSkill();
+                          }
+                        }}
+                        className={inputClass}
+                        placeholder="Add a skill (e.g. Robotics, Python)..."
                       />
                       <Button
-                        size="sm"
                         type="button"
+                        size="sm"
                         onClick={addSkill}
-                        className="w-auto px-4"
+                        className="px-4"
                       >
-                        <Plus size={18} />
+                        <Plus size={16} />
                       </Button>
                     </div>
                   </div>
 
-                  <div className="space-y-4 pt-4 border-t border-slate-100">
-                    <h4 className="text-sm font-bold text-slate-900">
-                      Public Links
+                  <div className="pt-4 border-t border-slate-100 space-y-4">
+                    <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                      <LinkIcon size={16} className="text-slate-500" /> Academic
+                      & Social Links
                     </h4>
-
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
-                          <Linkedin size={20} />
+                        <div className="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+                          <Linkedin size={18} />
                         </div>
                         <input
                           type="url"
-                          value={profile.linkedin}
+                          value={profile.profile.linkedin}
                           onChange={(e) =>
                             handleChange("linkedin", e.target.value)
                           }
-                          className="flex-1 px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none text-sm"
+                          className={inputClass}
                           placeholder="LinkedIn URL"
                         />
                       </div>
-
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-slate-700 shrink-0">
-                          <Github size={20} />
+                        <div className="w-10 h-10 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center">
+                          <Github size={18} />
                         </div>
                         <input
                           type="url"
-                          value={profile.github}
+                          value={profile.profile.github}
                           onChange={(e) =>
                             handleChange("github", e.target.value)
                           }
-                          className="flex-1 px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 outline-none text-sm"
+                          className={inputClass}
                           placeholder="GitHub URL"
                         />
                       </div>
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                          <Globe size={18} />
+                        </div>
+                        <input
+                          type="url"
+                          value={profile.profile.website}
+                          onChange={(e) =>
+                            handleChange("website", e.target.value)
+                          }
+                          className={inputClass}
+                          placeholder="Personal Website"
+                        />
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center">
+                          <BookOpen size={18} />
+                        </div>
+                        <input
+                          type="url"
+                          value={profile.profile.googleScholar}
+                          onChange={(e) =>
+                            handleChange("googleScholar", e.target.value)
+                          }
+                          className={inputClass}
+                          placeholder="Google Scholar URL"
+                        />
+                      </div>
                     </div>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === "security" && (
+                <div className="space-y-8">
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                      <Lock size={18} /> Change Password
+                    </h3>
+                    <div className="space-y-3 max-w-md">
+                      <input
+                        type="password"
+                        placeholder="Current Password"
+                        value={passwords.current}
+                        onChange={(e) =>
+                          setPasswords({
+                            ...passwords,
+                            current: e.target.value,
+                          })
+                        }
+                        className={inputClass}
+                      />
+                      <input
+                        type="password"
+                        placeholder="New Password"
+                        value={passwords.next}
+                        onChange={(e) =>
+                          setPasswords({ ...passwords, next: e.target.value })
+                        }
+                        className={inputClass}
+                      />
+                      <input
+                        type="password"
+                        placeholder="Confirm New Password"
+                        value={passwords.confirm}
+                        onChange={(e) =>
+                          setPasswords({
+                            ...passwords,
+                            confirm: e.target.value,
+                          })
+                        }
+                        className={inputClass}
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={handlePasswordUpdate}
+                        disabled={passwordSaving}
+                        className="mt-1 w-fit"
+                      >
+                        {passwordSaving ? "Updating..." : "Update Password"}
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3 max-w-lg">
+                    <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                      <LinkIcon size={18} /> Connected Accounts
+                    </h3>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between p-3 border border-slate-100 rounded-xl">
+                        <div className="flex items-center gap-3">
+                          <img
+                            src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg"
+                            alt="Google"
+                            className="w-6 h-6"
+                          />
+                          <div>
+                            <p className="text-sm font-semibold text-slate-900">
+                              Google
+                            </p>
+                            <span className="inline-flex items-center gap-1 text-xs text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+                              <CheckCircle size={12} /> Connected
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between p-3 border border-slate-100 rounded-xl opacity-60">
+                        <div className="flex items-center gap-3">
+                          <img
+                            src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg"
+                            alt="Microsoft"
+                            className="w-6 h-6"
+                          />
+                          <p className="text-sm font-semibold text-slate-900">
+                            Microsoft
+                          </p>
+                        </div>
+                        <button className="text-sm font-semibold text-primary-600 hover:text-primary-700">
+                          Connect
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 space-y-2 max-w-lg">
+                    <div className="flex items-center gap-2 text-amber-700">
+                      <Shield size={18} />
+                      <h4 className="text-sm font-bold">
+                        Two-Factor Authentication
+                      </h4>
+                    </div>
+                    <p className="text-sm text-amber-800">
+                      Protect your account by adding an extra layer of security.
+                      We support Authenticator apps (Google/Microsoft Auth).
+                    </p>
+                    <button className="text-sm font-semibold text-amber-800 underline">
+                      Enable 2FA
+                    </button>
                   </div>
                 </div>
               )}

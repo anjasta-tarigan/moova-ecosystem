@@ -115,12 +115,15 @@ model SiswaProfile {
   userId          String   @unique
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  // Personal
   phone           String   @default("")
   birthDate       DateTime?
   gender          String   @default("")
   address         String   @default("")
   avatar          String   @default("")
+  country         String   @default("")
 
+  // Academic (REQUIRED)
   schoolName      String   @default("")
   schoolLevel     String   @default("")
   major           String   @default("")
@@ -128,12 +131,21 @@ model SiswaProfile {
   grade           String   @default("")
   province        String   @default("")
   city            String   @default("")
+  affiliationType String   @default("University")
+  faculty         String   @default("")
+  fieldOfStudy    String   @default("")
+  educationLevel  String   @default("")
+  graduationYear  String   @default("")
 
+  // Public Profile
   bio             String   @default("")
   skills          String[]
   linkedin        String   @default("")
   github          String   @default("")
+  website         String   @default("")
+  googleScholar   String   @default("")
 
+  // System
   completeness    Int      @default(0)
   updatedAt       DateTime @updatedAt
 
