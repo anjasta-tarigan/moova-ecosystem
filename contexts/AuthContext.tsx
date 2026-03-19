@@ -11,7 +11,7 @@ interface User {
   id: string;
   fullName: string;
   email: string;
-  role: "SUPERADMIN" | "ADMIN" | "JURI" | "SISWA";
+  role: "SUPERADMIN" | "ADMIN" | "JUDGE" | "STUDENT";
 }
 
 interface AuthContextType {
@@ -22,7 +22,7 @@ interface AuthContextType {
   isSuperAdmin: boolean;
   isAdmin: boolean;
   isJudge: boolean;
-  isSiswa: boolean;
+  isStudent: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -77,8 +77,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const isSuperAdmin = user?.role === "SUPERADMIN";
   const isAdmin = user?.role === "ADMIN" || isSuperAdmin;
-  const isJudge = user?.role === "JURI";
-  const isSiswa = user?.role === "SISWA";
+  const isJudge = user?.role === "JUDGE";
+  const isStudent = user?.role === "STUDENT";
 
   return (
     <AuthContext.Provider
@@ -90,7 +90,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         isSuperAdmin,
         isAdmin,
         isJudge,
-        isSiswa,
+        isStudent,
       }}
     >
       {children}

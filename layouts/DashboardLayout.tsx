@@ -35,7 +35,7 @@ const getCurrentUser = (): User => {
     firstName: "Guest",
     lastName: "User",
     email: "guest@giva.io",
-    role: "guest",
+    role: "STUDENT",
   };
 };
 
@@ -54,12 +54,7 @@ const DashboardLayout: React.FC = () => {
 
   // Navigation Items per Role
   const getNavItems = (role: UserRole) => {
-    // Participant specific structure requested
-    if (
-      role === "participant" ||
-      role === "team_leader" ||
-      role === "team_member"
-    ) {
+    if (role === "STUDENT") {
       return [
         {
           label: "Overview",
@@ -94,7 +89,7 @@ const DashboardLayout: React.FC = () => {
       ];
     }
 
-    if (role === "judge") {
+    if (role === "JUDGE") {
       return [
         {
           label: "Dashboard",
@@ -140,10 +135,8 @@ const DashboardLayout: React.FC = () => {
   };
 
   const navItems = getNavItems(user.role);
-  const isParticipant = ["participant", "team_leader", "team_member"].includes(
-    user.role,
-  );
-  const isJudge = user.role === "judge";
+  const isStudent = user.role === "STUDENT";
+  const isJudge = user.role === "JUDGE";
 
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden font-sans">
@@ -251,7 +244,7 @@ const DashboardLayout: React.FC = () => {
             </button>
             <div className="h-6 w-px bg-slate-200"></div>
             <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wide">
-              {user.role === "judge" ? (
+              {isJudge ? (
                 <span className="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-xs font-bold border border-purple-200">
                   Logged in as Judge
                 </span>

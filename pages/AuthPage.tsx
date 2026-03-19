@@ -76,7 +76,7 @@ const AuthPage: React.FC = () => {
       firstName: formData.firstName || "New",
       lastName: formData.lastName || "User",
       email: formData.email,
-      role: "participant" as UserRole,
+      role: "STUDENT" as UserRole,
       organization: formData.institution || "New Member",
     };
     localStorage.setItem("giva_user", JSON.stringify(mockUser));
@@ -96,7 +96,7 @@ const AuthPage: React.FC = () => {
         navigate("/superadmin");
       } else if (user.role === "ADMIN") {
         navigate("/admin");
-      } else if (user.role === "JURI") {
+      } else if (user.role === "JUDGE") {
         navigate("/dashboard/judge");
       } else {
         navigate("/dashboard");
@@ -241,15 +241,6 @@ const AuthPage: React.FC = () => {
             {/* Login Flow */}
             {isLogin ? (
               <form onSubmit={handleLoginSubmit} className="space-y-6">
-                {/* Dev Hint */}
-                <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 text-xs text-slate-500">
-                  <strong>Test Accounts:</strong>
-                  <br />
-                  siswa@giva.test / siswa123 (Student)
-                  <br />
-                  juri1@giva.test / juri123 (Judge)
-                </div>
-
                 {error && (
                   <div className="p-3 rounded-lg bg-red-50 border border-red-100 flex items-start gap-3 text-red-600 text-sm">
                     <AlertCircle size={18} className="shrink-0 mt-0.5" />

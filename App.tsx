@@ -127,7 +127,7 @@ const RoleGuard = ({
       return <Navigate to="/superadmin" replace />;
     } else if (user.role === "ADMIN") {
       return <Navigate to="/admin" replace />;
-    } else if (user.role === "JURI") {
+    } else if (user.role === "JUDGE") {
       return <Navigate to="/dashboard/judge" replace />;
     } else {
       return <Navigate to="/dashboard" replace />;
@@ -194,7 +194,7 @@ const App: React.FC = () => {
               <Route
                 index
                 element={
-                  <RoleGuard allowedRoles={["SISWA"]}>
+                  <RoleGuard allowedRoles={["STUDENT"]}>
                     <DashboardPage />
                   </RoleGuard>
                 }
@@ -204,7 +204,7 @@ const App: React.FC = () => {
               <Route
                 path="event/:id"
                 element={
-                  <RoleGuard allowedRoles={["SISWA"]}>
+                  <RoleGuard allowedRoles={["STUDENT"]}>
                     <DashboardEventHub />
                   </RoleGuard>
                 }
@@ -212,7 +212,7 @@ const App: React.FC = () => {
               <Route
                 path="team/:id"
                 element={
-                  <RoleGuard allowedRoles={["SISWA"]}>
+                  <RoleGuard allowedRoles={["STUDENT"]}>
                     <DashboardTeam />
                   </RoleGuard>
                 }
@@ -220,7 +220,7 @@ const App: React.FC = () => {
               <Route
                 path="submission/:id"
                 element={
-                  <RoleGuard allowedRoles={["SISWA"]}>
+                  <RoleGuard allowedRoles={["STUDENT"]}>
                     <DashboardSubmission />
                   </RoleGuard>
                 }
@@ -228,16 +228,7 @@ const App: React.FC = () => {
               <Route
                 path="certificates"
                 element={
-                  <RoleGuard
-                    allowedRoles={[
-                      "participant",
-                      "team_leader",
-                      "team_member",
-                      "guest",
-                      "partner",
-                      "mentor",
-                    ]}
-                  >
+                  <RoleGuard allowedRoles={["STUDENT"]}>
                     <DashboardCertificates />
                   </RoleGuard>
                 }
@@ -250,7 +241,7 @@ const App: React.FC = () => {
               <Route
                 path="judge"
                 element={
-                  <RoleGuard allowedRoles={["JURI"]}>
+                  <RoleGuard allowedRoles={["JUDGE"]}>
                     <Outlet />
                   </RoleGuard>
                 }

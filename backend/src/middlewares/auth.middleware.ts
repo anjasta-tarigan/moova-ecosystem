@@ -10,7 +10,7 @@ const ACCESS_TOKEN_SECRET =
 interface TokenPayload {
   id: string;
   email: string;
-  role: "SUPERADMIN" | "ADMIN" | "JURI" | "SISWA";
+  role: "SUPERADMIN" | "ADMIN" | "JUDGE" | "STUDENT";
   iat: number;
   exp: number;
 }

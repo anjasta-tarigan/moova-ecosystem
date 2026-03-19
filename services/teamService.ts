@@ -10,7 +10,7 @@ const SEED_TEAMS = [
       {
         id: "u-current",
         name: "Alex Participant",
-        email: "alex@moova.io",
+        email: "alex@giva.io",
         role: "Leader",
         avatar: "AP",
       },
@@ -47,7 +47,7 @@ const SEED_TEAMS = [
       {
         id: "u-current",
         name: "Alex Participant",
-        email: "alex@moova.io",
+        email: "alex@giva.io",
         role: "Member",
         avatar: "AP",
       },
@@ -56,7 +56,7 @@ const SEED_TEAMS = [
   },
 ];
 
-const DB_KEY = "moova_teams_db_v1";
+const DB_KEY = "giva_teams_db_v1";
 const CURRENT_USER_ID = "u-current"; // Mock logged-in user
 
 class TeamService {
@@ -110,7 +110,7 @@ class TeamService {
         {
           id: CURRENT_USER_ID,
           name: "Alex Participant",
-          email: "alex@moova.io",
+          email: "alex@giva.io",
           role: "Leader",
           avatar: "AP",
         },
@@ -140,7 +140,7 @@ class TeamService {
     team.members.push({
       id: CURRENT_USER_ID,
       name: "Alex Participant",
-      email: "alex@moova.io",
+      email: "alex@giva.io",
       role: "Member",
       avatar: "AP",
     });

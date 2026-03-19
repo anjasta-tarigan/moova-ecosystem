@@ -37,7 +37,7 @@ export const register = async (
       fullName,
       email,
       password: hashed,
-      role: "SISWA",
+      role: "STUDENT",
       profile: {
         create: {},
       },

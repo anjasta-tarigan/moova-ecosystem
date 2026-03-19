@@ -54,8 +54,8 @@ const SuperAdminDashboard: React.FC = () => {
       <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
         {[
           { label: "Total Admins", value: stats?.totalUsers?.ADMIN || 0 },
-          { label: "Total Judges", value: stats?.totalUsers?.JURI || 0 },
-          { label: "Total Students", value: stats?.totalUsers?.SISWA || 0 },
+          { label: "Total Judges", value: stats?.totalUsers?.JUDGE || 0 },
+          { label: "Total Students", value: stats?.totalUsers?.STUDENT || 0 },
           { label: "Total Events", value: stats?.totalEvents || 0 },
           { label: "Total Submissions", value: stats?.totalSubmissions || 0 },
           { label: "Storage (MB)", value: stats?.storageUsed || 0 },

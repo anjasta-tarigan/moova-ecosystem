@@ -28,7 +28,7 @@ export const dashboard = async () => {
     recentRegistrations,
     topEvents,
   ] = await Promise.all([
-    prisma.user.count({ where: { role: "SISWA" } }),
+    prisma.user.count({ where: { role: "STUDENT" } }),
     prisma.event.count(),
     prisma.submission.count(),
     prisma.team.count(),
@@ -198,7 +198,7 @@ export const revokeCertificate = async (id: string, reason: string) => {
 export const listSiswa = async (query: any) => {
   const { page, limit } = parsePagination(query.page, query.limit);
   const skip = (page - 1) * limit;
-  const where: any = { role: "SISWA" };
+  const where: any = { role: "STUDENT" };
   if (query.search)
     where.fullName = { contains: query.search, mode: "insensitive" };
   if (query.province)

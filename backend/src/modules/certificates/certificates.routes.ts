@@ -13,7 +13,7 @@ const router = Router();
 
 router.get("/verify/:id", verify);
 router.use(authenticate);
-router.get("/", requireRole("SISWA"), myCertificates);
+router.get("/", requireRole("STUDENT"), myCertificates);
 router.post("/", requireRole("ADMIN", "SUPERADMIN"), createCertificate);
 router.get("/all", requireRole("ADMIN", "SUPERADMIN"), listCertificates);
 router.patch(

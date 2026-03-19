@@ -30,16 +30,16 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 app.use("/api/auth", authRoutes);
-app.use("/api/siswa", authenticate, requireRole("SISWA"), siswaRoutes);
+app.use("/api/siswa", authenticate, requireRole("STUDENT"), siswaRoutes);
 app.use("/api/events", eventsRoutes);
-app.use("/api/teams", authenticate, requireRole("SISWA"), teamsRoutes);
+app.use("/api/teams", authenticate, requireRole("STUDENT"), teamsRoutes);
 app.use(
   "/api/submissions",
   authenticate,
-  requireRole("SISWA"),
+  requireRole("STUDENT"),
   submissionsRoutes,
 );
-app.use("/api/judge", authenticate, requireRole("JURI"), judgeRoutes);
+app.use("/api/judge", authenticate, requireRole("JUDGE"), judgeRoutes);
 app.use("/api/certificates", certificatesRoutes);
 app.use(
   "/api/admin",

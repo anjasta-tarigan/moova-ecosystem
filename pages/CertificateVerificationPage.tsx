@@ -80,7 +80,7 @@ const CertificateVerificationPage: React.FC = () => {
             className="flex items-center gap-2 cursor-pointer"
           >
             <div className="w-8 h-8 bg-brand-gradient rounded-lg flex items-center justify-center font-bold text-white">
-              M
+              G
             </div>
             <span className="font-bold text-slate-900">GIVA Verify</span>
           </div>

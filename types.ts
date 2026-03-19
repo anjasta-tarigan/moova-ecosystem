@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 export interface NavItem {
   label: string;
@@ -27,17 +27,7 @@ export interface CardProps {
 
 // --- Auth & Role Types ---
 
-export type UserRole = 
-  | 'super_admin' 
-  | 'admin' 
-  | 'partner' 
-  | 'mentor' 
-  | 'team_leader' 
-  | 'team_member' 
-  | 'participant' 
-  | 'guest'
-  | 'judge'
-  | 'reviewer';
+export type UserRole = "SUPERADMIN" | "ADMIN" | "JUDGE" | "STUDENT";
 
 export interface User {
   id: string;

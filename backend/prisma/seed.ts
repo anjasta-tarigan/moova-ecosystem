@@ -56,7 +56,7 @@ async function main() {
     superadmin: await hashPassword("superadmin123"),
     admin: await hashPassword("admin123"),
     judge: await hashPassword("judge123"),
-    siswa: await hashPassword("student123"),
+    student: await hashPassword("student123"),
   };
 
   const superadmin = await prisma.user.upsert({
@@ -69,6 +69,7 @@ async function main() {
       role: "SUPERADMIN",
     },
   });
+  console.log("[seed] superadmin@giva.test ensured");
 
   const admin = await prisma.user.upsert({
     where: { email: "admin@giva.test" },
@@ -80,41 +81,33 @@ async function main() {
       role: "ADMIN",
     },
   });
+  console.log("[seed] admin@giva.test ensured");
 
-  const judge1 = await prisma.user.upsert({
-    where: { email: "judge1@giva.test" },
+  const judge = await prisma.user.upsert({
+    where: { email: "judge@giva.test" },
     update: {},
     create: {
-      fullName: "Judge 1",
-      email: "judge1@giva.test",
+      fullName: "Judge GIVA",
+      email: "judge@giva.test",
       password: passwords.judge,
-      role: "JURI",
+      role: "JUDGE",
     },
   });
+  console.log("[seed] judge@giva.test ensured");
 
-  const judge2 = await prisma.user.upsert({
-    where: { email: "judge2@giva.test" },
-    update: {},
-    create: {
-      fullName: "Judge 2",
-      email: "judge2@giva.test",
-      password: passwords.judge,
-      role: "JURI",
-    },
-  });
-
-  const siswa = await prisma.user.upsert({
+  const student = await prisma.user.upsert({
     where: { email: "student@giva.test" },
     update: {},
     create: {
-      fullName: "Alex Smith",
+      fullName: "Student GIVA",
       email: "student@giva.test",
-      password: passwords.siswa,
-      role: "SISWA",
+      password: passwords.student,
+      role: "STUDENT",
     },
   });
+  console.log("[seed] student@giva.test ensured");
 
-  const profileCompleteness = computeCompleteness("Alex Smith", {
+  const profileCompleteness = computeCompleteness("Student GIVA", {
     phone: "+62-812-3456-7890",
     birthDate: new Date("2008-01-01"),
     gender: "Male",
@@ -128,7 +121,7 @@ async function main() {
   });
 
   await prisma.siswaProfile.upsert({
-    where: { userId: siswa.id },
+    where: { userId: student.id },
     update: {
       phone: "+62-812-3456-7890",
       birthDate: new Date("2008-01-01"),
@@ -144,7 +137,7 @@ async function main() {
       completeness: profileCompleteness,
     },
     create: {
-      userId: siswa.id,
+      userId: student.id,
       phone: "+62-812-3456-7890",
       birthDate: new Date("2008-01-01"),
       gender: "Male",
@@ -231,6 +224,7 @@ async function main() {
       },
     },
   });
+  console.log("[seed] Sample event created/ensured");
 
   const categories = await prisma.eventCategory.findMany({
     where: { eventId: event.id },
@@ -249,7 +243,7 @@ async function main() {
       status: "ACTIVE",
       members: {
         create: {
-          userId: siswa.id,
+          userId: student.id,
           role: "LEADER",
         },
       },
@@ -257,18 +251,18 @@ async function main() {
   });
 
   await prisma.eventRegistration.upsert({
-    where: { userId_eventId: { userId: siswa.id, eventId: event.id } },
+    where: { userId_eventId: { userId: student.id, eventId: event.id } },
     update: { teamId: team.id },
-    create: { userId: siswa.id, eventId: event.id, teamId: team.id },
+    create: { userId: student.id, eventId: event.id, teamId: team.id },
   });
 
-  await prisma.juriAssignment.upsert({
+  await prisma.judgeAssignment.upsert({
     where: {
-      juriId_categoryId: { juriId: judge1.id, categoryId: informatics.id },
+      judgeId_categoryId: { judgeId: judge.id, categoryId: informatics.id },
     },
     update: { currentStage: "PAPER" },
     create: {
-      juriId: judge1.id,
+      judgeId: judge.id,
       eventId: event.id,
       categoryId: informatics.id,
       currentStage: "PAPER",
@@ -280,7 +274,7 @@ async function main() {
     update: {},
     create: {
       id: "sample-certificate",
-      recipientId: siswa.id,
+      recipientId: student.id,
       eventId: event.id,
       type: "PARTICIPANT",
       award: "Certificate of Participation - GIVA 2024",

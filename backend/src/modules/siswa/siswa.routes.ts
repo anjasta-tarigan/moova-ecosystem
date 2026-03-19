@@ -15,7 +15,7 @@ import { updateProfileSchema } from "./siswa.schema";
 
 const router = Router();
 
-router.use(authenticate, requireRole("SISWA"));
+router.use(authenticate, requireRole("STUDENT"));
 
 router.get("/profile", getProfile);
 router.put("/profile", validate(updateProfileSchema), updateProfile);

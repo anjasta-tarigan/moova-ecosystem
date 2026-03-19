@@ -22,7 +22,7 @@ import {
 
 const router = Router();
 
-router.use(authenticate, requireRole("SISWA"));
+router.use(authenticate, requireRole("STUDENT"));
 
 router.get("/", listTeams);
 router.get("/:id", getTeam);

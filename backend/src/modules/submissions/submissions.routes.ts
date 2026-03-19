@@ -21,7 +21,7 @@ import {
 
 const router = Router();
 
-router.use(authenticate, requireRole("SISWA"));
+router.use(authenticate, requireRole("STUDENT"));
 
 router.get("/", listMySubmissions);
 router.get("/:id", getSubmission);

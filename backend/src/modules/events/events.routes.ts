@@ -24,7 +24,7 @@ router.get("/:id", getEventDetail);
 router.post(
   "/:id/register",
   authenticate,
-  requireRole("SISWA"),
+  requireRole("STUDENT"),
   validate(registerEventSchema),
   registerEvent,
 );
@@ -32,7 +32,7 @@ router.get("/:id/qa", getQuestions);
 router.post(
   "/:id/qa",
   authenticate,
-  requireRole("SISWA", "ADMIN", "SUPERADMIN"),
+  requireRole("STUDENT", "ADMIN", "SUPERADMIN"),
   validate(questionSchema),
   createQuestion,
 );
@@ -45,7 +45,7 @@ router.post(
 router.post(
   "/:id/qa/:questionId/upvote",
   authenticate,
-  requireRole("SISWA"),
+  requireRole("STUDENT"),
   toggleUpvote,
 );
 

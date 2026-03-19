@@ -273,7 +273,7 @@ const EventDetailPage: React.FC = () => {
       navigate("/login");
       return;
     }
-    if (user.role !== "SISWA") {
+    if (user.role !== "STUDENT") {
       setError("Please log in as a Student to register.");
       return;
     }

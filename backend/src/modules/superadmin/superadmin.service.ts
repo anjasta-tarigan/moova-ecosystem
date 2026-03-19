@@ -9,11 +9,11 @@ const parsePagination = (page?: number, limit?: number) => {
 export const listUsers = async (query: any) => {
   const { page, limit } = parsePagination(query.page, query.limit);
   const skip = (page - 1) * limit;
-  const where: any = { role: { in: ["ADMIN", "JURI"] } };
+  const allowedRoles = ["ADMIN", "JUDGE"];
+  const where: any = { role: { in: allowedRoles } };
   if (query.search)
     where.fullName = { contains: query.search, mode: "insensitive" };
-  if (query.role && ["ADMIN", "JURI"].includes(query.role))
-    where.role = query.role;
+  if (query.role && allowedRoles.includes(query.role)) where.role = query.role;
 
   const [total, data] = await Promise.all([
     prisma.user.count({ where }),
@@ -78,7 +78,7 @@ export const createAssignment = async (data: {
   currentStage?: string;
 }) => {
   const judge = await prisma.user.findUnique({ where: { id: data.judgeId } });
-  if (!judge || judge.role !== "JURI") throw new Error("Invalid judge");
+  if (!judge || judge.role !== "JUDGE") throw new Error("Invalid judge");
   const category = await prisma.eventCategory.findUnique({
     where: { id: data.categoryId },
   });

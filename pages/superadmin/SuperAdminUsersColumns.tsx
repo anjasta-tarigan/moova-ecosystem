@@ -5,7 +5,7 @@ export type User = {
   id: string;
   fullName?: string;
   email?: string;
-  role?: "ADMIN" | "JURI";
+  role?: "ADMIN" | "JUDGE";
   isActive?: boolean;
   createdAt?: string;
 };

@@ -14,7 +14,7 @@ const JudgeCertificates: React.FC = () => {
       try {
         const res = await profileApi.getMyCertificates();
         const data = res.data.data || [];
-        setCertificates(data.filter((c: any) => c.type === "JURI"));
+        setCertificates(data.filter((c: any) => c.type === "JUDGE"));
       } catch (err) {
         console.error(err);
         setError("Failed to load data");

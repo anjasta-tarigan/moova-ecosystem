@@ -12,7 +12,7 @@ import { scoreSchema } from "./judge.schema";
 
 const router = Router();
 
-router.use(authenticate, requireRole("JURI"));
+router.use(authenticate, requireRole("JUDGE"));
 
 router.get("/assignments", getAssignments);
 router.get("/assignments/:categoryId/submissions", listSubmissions);
