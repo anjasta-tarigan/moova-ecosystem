@@ -6,6 +6,12 @@ export const profileApi = {
   updateProfile: (data: Record<string, any>) =>
     api.put("/api/siswa/profile", data),
 
+  changePassword: (data: {
+    currentPassword: string;
+    newPassword: string;
+    confirmPassword: string;
+  }) => api.post("/api/auth/change-password", data),
+
   uploadAvatar: (file: File) => {
     const form = new FormData();
     form.append("avatar", file);

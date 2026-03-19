@@ -58,6 +58,26 @@ export const logout = async (req: Request, res: Response) => {
   }
 };
 
+export const changePassword = async (req: Request, res: Response) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const result = await authService.changePassword(
+      req.user!.id,
+      currentPassword,
+      newPassword,
+    );
+    return success(res, result, "Password changed successfully");
+  } catch (err: any) {
+    if (err?.statusCode === 400) {
+      return error(res, err.message, 400);
+    }
+    if (err?.code === "P2025") {
+      return error(res, "User not found", 404);
+    }
+    return error(res, "Failed to change password", 500);
+  }
+};
+
 export const me = async (req: Request, res: Response) => {
   try {
     const data = await authService.getMe(req.user!.id);

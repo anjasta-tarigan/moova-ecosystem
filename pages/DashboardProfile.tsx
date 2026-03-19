@@ -23,7 +23,6 @@ import {
   User,
   X,
 } from "lucide-react";
-import api from "../lib/axios";
 import Button from "../components/Button";
 import { useAuthContext } from "../contexts/AuthContext";
 import { profileApi } from "../services/api/profileApi";
@@ -42,13 +41,20 @@ interface ProfileData {
   avatar?: string;
   phone: string;
   country: string;
+  birthDate?: string | null;
+  gender?: string;
+  address?: string;
   province?: string;
+  city?: string;
   educationLevel?: string;
   affiliationType?: string;
   schoolName?: string;
+  schoolLevel?: string;
   faculty?: string;
   fieldOfStudy?: string;
+  major?: string;
   graduationYear?: string;
+  grade?: string;
   studentId?: string;
   bio: string;
   skills: string[];
@@ -72,20 +78,202 @@ const selectClass = inputClass;
 const labelClass =
   "block text-xs font-bold uppercase text-slate-500 mb-1.5 tracking-wide";
 
-const countries = [
+const WORLD_COUNTRIES = [
+  "Afghanistan",
+  "Albania",
+  "Algeria",
+  "Andorra",
+  "Angola",
+  "Antigua and Barbuda",
+  "Argentina",
+  "Armenia",
+  "Australia",
+  "Austria",
+  "Azerbaijan",
+  "Bahamas",
+  "Bahrain",
+  "Bangladesh",
+  "Barbados",
+  "Belarus",
+  "Belgium",
+  "Belize",
+  "Benin",
+  "Bhutan",
+  "Bolivia",
+  "Bosnia and Herzegovina",
+  "Botswana",
+  "Brazil",
+  "Brunei",
+  "Bulgaria",
+  "Burkina Faso",
+  "Burundi",
+  "Cabo Verde",
+  "Cambodia",
+  "Cameroon",
+  "Central African Republic",
+  "Chad",
+  "Chile",
+  "China",
+  "Colombia",
+  "Comoros",
+  "Congo (Brazzaville)",
+  "Congo (Kinshasa)",
+  "Costa Rica",
+  "Croatia",
+  "Cuba",
+  "Cyprus",
+  "Czech Republic",
+  "Denmark",
+  "Djibouti",
+  "Dominica",
+  "Dominican Republic",
+  "Ecuador",
+  "Egypt",
+  "El Salvador",
+  "Equatorial Guinea",
+  "Eritrea",
+  "Estonia",
+  "Eswatini",
+  "Ethiopia",
+  "Fiji",
+  "Finland",
+  "France",
+  "Gabon",
+  "Gambia",
+  "Georgia",
+  "Germany",
+  "Ghana",
+  "Greece",
+  "Grenada",
+  "Guatemala",
+  "Guinea",
+  "Guinea-Bissau",
+  "Guyana",
+  "Haiti",
+  "Honduras",
+  "Hungary",
+  "Iceland",
+  "India",
   "Indonesia",
+  "Iran",
+  "Iraq",
+  "Ireland",
+  "Israel",
+  "Italy",
+  "Jamaica",
+  "Japan",
+  "Jordan",
+  "Kazakhstan",
+  "Kenya",
+  "Kiribati",
+  "Kosovo",
+  "Kuwait",
+  "Kyrgyzstan",
+  "Laos",
+  "Latvia",
+  "Lebanon",
+  "Lesotho",
+  "Liberia",
+  "Libya",
+  "Liechtenstein",
+  "Lithuania",
+  "Luxembourg",
+  "Madagascar",
+  "Malawi",
+  "Malaysia",
+  "Maldives",
+  "Mali",
+  "Malta",
+  "Marshall Islands",
+  "Mauritania",
+  "Mauritius",
+  "Mexico",
+  "Micronesia",
+  "Moldova",
+  "Monaco",
+  "Mongolia",
+  "Montenegro",
+  "Morocco",
+  "Mozambique",
+  "Myanmar",
+  "Namibia",
+  "Nauru",
+  "Nepal",
+  "Netherlands",
+  "New Zealand",
+  "Nicaragua",
+  "Niger",
+  "Nigeria",
+  "North Korea",
+  "North Macedonia",
+  "Norway",
+  "Oman",
+  "Pakistan",
+  "Palau",
+  "Palestine",
+  "Panama",
+  "Papua New Guinea",
+  "Paraguay",
+  "Peru",
+  "Philippines",
+  "Poland",
+  "Portugal",
+  "Qatar",
+  "Romania",
+  "Russia",
+  "Rwanda",
+  "Saint Kitts and Nevis",
+  "Saint Lucia",
+  "Saint Vincent and the Grenadines",
+  "Samoa",
+  "San Marino",
+  "Sao Tome and Principe",
+  "Saudi Arabia",
+  "Senegal",
+  "Serbia",
+  "Seychelles",
+  "Sierra Leone",
+  "Singapore",
+  "Slovakia",
+  "Slovenia",
+  "Solomon Islands",
+  "Somalia",
+  "South Africa",
+  "South Korea",
+  "South Sudan",
+  "Spain",
+  "Sri Lanka",
+  "Sudan",
+  "Suriname",
+  "Sweden",
+  "Switzerland",
+  "Syria",
+  "Taiwan",
+  "Tajikistan",
+  "Tanzania",
+  "Thailand",
+  "Timor-Leste",
+  "Togo",
+  "Tonga",
+  "Trinidad and Tobago",
+  "Tunisia",
+  "Turkey",
+  "Turkmenistan",
+  "Tuvalu",
+  "Uganda",
+  "Ukraine",
+  "United Arab Emirates",
   "United Kingdom",
   "United States",
-  "Canada",
-  "Germany",
-  "Singapore",
-  "India",
-  "Nigeria",
-  "Brazil",
-  "Japan",
-  "Malaysia",
-  "Australia",
-  "Other",
+  "Uruguay",
+  "Uzbekistan",
+  "Vanuatu",
+  "Vatican City",
+  "Venezuela",
+  "Vietnam",
+  "Yemen",
+  "Zambia",
+  "Zimbabwe",
 ];
 
 const affiliationTypes = [
@@ -132,7 +320,11 @@ const normalizeProfile = (data: any, fallbackUser?: any): ProfileState => {
       avatar: profileData.avatar || userData.avatar || "",
       phone: profileData.phone || "",
       country: profileData.country || profileData.province || "",
+      birthDate: profileData.birthDate || null,
+      gender: profileData.gender || "",
+      address: profileData.address || "",
       province: profileData.province || "",
+      city: profileData.city || "",
       educationLevel:
         profileData.educationLevel || profileData.schoolLevel || "",
       affiliationType:
@@ -140,7 +332,10 @@ const normalizeProfile = (data: any, fallbackUser?: any): ProfileState => {
       schoolName: profileData.schoolName || profileData.institution || "",
       faculty: profileData.faculty || "",
       fieldOfStudy: profileData.fieldOfStudy || profileData.major || "",
+      schoolLevel: profileData.schoolLevel || "",
+      major: profileData.major || "",
       graduationYear: profileData.graduationYear || profileData.grade || "",
+      grade: profileData.grade || "",
       studentId: profileData.studentId || "",
       bio: profileData.bio || "",
       skills: profileData.skills || [],
@@ -150,14 +345,6 @@ const normalizeProfile = (data: any, fallbackUser?: any): ProfileState => {
       googleScholar: profileData.googleScholar || "",
       completeness: profileData.completeness ?? data?.completeness ?? 0,
     },
-  };
-};
-
-const getNameParts = (fullName: string) => {
-  const parts = fullName?.trim()?.split(/\s+/).filter(Boolean) || [];
-  return {
-    firstName: parts[0] || "",
-    lastName: parts.slice(1).join(" ") || "",
   };
 };
 
@@ -173,12 +360,15 @@ const DashboardProfile: React.FC = () => {
   const [notification, setNotification] = useState<Notification>(null);
   const [newSkill, setNewSkill] = useState("");
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
-  const [passwordSaving, setPasswordSaving] = useState(false);
-  const [passwords, setPasswords] = useState({
-    current: "",
-    next: "",
-    confirm: "",
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
   });
+  const [passwordErrors, setPasswordErrors] = useState<Record<string, string>>(
+    {},
+  );
+  const [changingPassword, setChangingPassword] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -209,30 +399,24 @@ const DashboardProfile: React.FC = () => {
     setTimeout(() => setNotification(null), 4000);
   };
 
-  const handleChange = (field: keyof ProfileData, value: any) => {
-    setProfile((prev) =>
-      prev
-        ? {
-            ...prev,
-            profile: {
-              ...prev.profile,
-              [field]: value,
-            },
-          }
-        : prev,
-    );
-  };
-
-  const handleNameChange = (part: "first" | "last", value: string) => {
+  const handleChange = (field: string, value: any) => {
+    if (!profile) return;
     setProfile((prev) => {
       if (!prev) return prev;
-      const { firstName, lastName } = getNameParts(prev.user.fullName || "");
-      const nextFirst = part === "first" ? value : firstName;
-      const nextLast = part === "last" ? value : lastName;
-      const nextFullName = [nextFirst, nextLast].filter(Boolean).join(" ");
       return {
         ...prev,
-        user: { ...prev.user, fullName: nextFullName },
+        profile: { ...prev.profile, [field]: value },
+      };
+    });
+  };
+
+  const handleUserChange = (field: string, value: any) => {
+    if (!profile) return;
+    setProfile((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        user: { ...prev.user, [field]: value },
       };
     });
   };
@@ -304,71 +488,93 @@ const DashboardProfile: React.FC = () => {
     setSaving(true);
     try {
       const payload = {
-        fullName: profile.user.fullName,
-        phone: profile.profile.phone,
-        country: profile.profile.country,
-        affiliationType: profile.profile.affiliationType,
-        schoolName: profile.profile.schoolName,
-        faculty: profile.profile.faculty,
-        fieldOfStudy: profile.profile.fieldOfStudy,
-        educationLevel: profile.profile.educationLevel,
-        graduationYear: profile.profile.graduationYear,
-        studentId: profile.profile.studentId,
-        bio: profile.profile.bio,
-        skills: profile.profile.skills,
-        linkedin: profile.profile.linkedin,
-        github: profile.profile.github,
-        website: profile.profile.website,
-        googleScholar: profile.profile.googleScholar,
+        fullName: profile.user?.fullName || "",
+        phone: profile.profile?.phone || "",
+        birthDate: profile.profile?.birthDate || null,
+        gender: profile.profile?.gender || "",
+        address: profile.profile?.address || "",
+        country: profile.profile?.country || "",
+        affiliationType: profile.profile?.affiliationType || "University",
+        schoolName: profile.profile?.schoolName || "",
+        schoolLevel: profile.profile?.schoolLevel || "",
+        faculty: profile.profile?.faculty || "",
+        fieldOfStudy: profile.profile?.fieldOfStudy || "",
+        major: profile.profile?.major || "",
+        studentId: profile.profile?.studentId || "",
+        grade: profile.profile?.grade || "",
+        graduationYear: profile.profile?.graduationYear || "",
+        province: profile.profile?.province || "",
+        city: profile.profile?.city || "",
+        educationLevel: profile.profile?.educationLevel || "",
+        bio: profile.profile?.bio || "",
+        skills: profile.profile?.skills || [],
+        linkedin: profile.profile?.linkedin || "",
+        github: profile.profile?.github || "",
+        website: profile.profile?.website || "",
+        googleScholar: profile.profile?.googleScholar || "",
       };
 
       const res = await profileApi.updateProfile(payload);
-      const normalized = normalizeProfile(res.data?.data || res.data, user);
-      setProfile(normalized);
+
+      setProfile(res.data.data);
+
       showNotification("success", "Profile updated successfully.");
-    } catch (err) {
-      console.error(err);
-      showNotification("error", "Failed to save changes.");
+    } catch (err: any) {
+      showNotification(
+        "error",
+        err.response?.data?.message || "Failed to save changes.",
+      );
     } finally {
       setSaving(false);
     }
   };
 
-  const handlePasswordUpdate = async () => {
-    if (!passwords.current || !passwords.next || !passwords.confirm) {
-      showNotification("error", "Please fill all password fields.");
-      return;
+  const handleChangePassword = async () => {
+    const errors: Record<string, string> = {};
+
+    if (!passwordForm.currentPassword) {
+      errors.currentPassword = "Current password is required";
     }
-    if (passwords.next !== passwords.confirm) {
-      showNotification("error", "New passwords do not match.");
+    if (!passwordForm.newPassword) {
+      errors.newPassword = "New password is required";
+    } else if (passwordForm.newPassword.length < 8) {
+      errors.newPassword = "Password must be at least 8 characters";
+    }
+    if (!passwordForm.confirmPassword) {
+      errors.confirmPassword = "Please confirm your password";
+    } else if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      errors.confirmPassword = "Passwords do not match";
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setPasswordErrors(errors);
       return;
     }
 
-    setPasswordSaving(true);
+    setChangingPassword(true);
+    setPasswordErrors({});
     try {
-      await api.post("/api/auth/change-password", {
-        currentPassword: passwords.current,
-        newPassword: passwords.next,
-        confirmPassword: passwords.confirm,
+      await profileApi.changePassword(passwordForm);
+      showNotification("success", "Password changed successfully.");
+      setPasswordForm({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
       });
-      showNotification("success", "Password updated successfully.");
-      setPasswords({ current: "", next: "", confirm: "" });
     } catch (err: any) {
-      const status = err?.response?.status;
-      if (status === 404) {
-        showNotification("error", "Change password is coming soon.");
+      const msg = err.response?.data?.message || "Failed to change password.";
+      if (msg.toLowerCase().includes("current")) {
+        setPasswordErrors({ currentPassword: "Current password is incorrect" });
       } else {
-        showNotification("error", "Failed to update password.");
+        showNotification("error", msg);
       }
     } finally {
-      setPasswordSaving(false);
+      setChangingPassword(false);
     }
   };
 
-  const completeness = Math.min(
-    100,
-    Math.max(0, profile?.profile?.completeness ?? 0),
-  );
+  const completeness = profile?.profile?.completeness || 0;
+  const isComplete = completeness >= 80;
 
   if (loading) {
     return (
@@ -393,8 +599,6 @@ const DashboardProfile: React.FC = () => {
   }
 
   if (!profile) return null;
-
-  const { firstName, lastName } = getNameParts(profile.user.fullName);
 
   const apiBase =
     (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
@@ -482,17 +686,15 @@ const DashboardProfile: React.FC = () => {
                 </div>
               </div>
               <h2 className="text-xl font-bold text-slate-900 mt-4">
-                {profile.user.fullName || "GIVA User"}
+                {profile?.user?.fullName || "New User"}
               </h2>
               <div className="mt-2 flex items-center gap-2">
-                {profile.profile.affiliationType ? (
-                  <span className="px-2 py-0.5 bg-slate-100 text-slate-500 text-[10px] font-semibold uppercase rounded-full">
-                    {profile.profile.affiliationType}
-                  </span>
-                ) : null}
+                <span className="px-2 py-0.5 bg-slate-100 text-slate-500 text-[10px] font-semibold uppercase rounded-full">
+                  {profile?.profile?.affiliationType || "Unknown"}
+                </span>
               </div>
               <p className="text-sm text-slate-500 mt-2">
-                {profile.profile.schoolName || "No institution provided"}
+                {profile?.profile?.schoolName || "No Institution"}
               </p>
 
               <div className="w-full mt-6 space-y-3">
@@ -508,28 +710,30 @@ const DashboardProfile: React.FC = () => {
                 <div className="pt-3 border-t border-slate-100 space-y-3 text-left">
                   <div className="flex items-center gap-3 text-sm text-slate-700">
                     <Mail size={16} className="text-slate-400" />
-                    <span className="truncate">{profile.user.email}</span>
+                    <span className="truncate">
+                      {profile?.user?.email || ""}
+                    </span>
                   </div>
-                  {profile.profile.country || profile.profile.province ? (
-                    <div className="flex items-center gap-3 text-sm text-slate-700">
-                      <MapPin size={16} className="text-slate-400" />
-                      <span>
-                        {[profile.profile.country, profile.profile.province]
-                          .filter(Boolean)
-                          .join(", ")}
-                      </span>
-                    </div>
-                  ) : null}
-                  {profile.profile.educationLevel ? (
-                    <div className="flex items-center gap-3 text-sm text-slate-700">
-                      <GraduationCap size={16} className="text-slate-400" />
-                      <span>{profile.profile.educationLevel}</span>
-                    </div>
-                  ) : null}
-                  {profile.profile.studentId ? (
+                  <div className="flex items-center gap-3 text-sm text-slate-700">
+                    <MapPin size={16} className="text-slate-400" />
+                    <span>
+                      {profile?.profile?.country ||
+                        profile?.profile?.province ||
+                        "Global"}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3 text-sm text-slate-700">
+                    <GraduationCap size={16} className="text-slate-400" />
+                    <span>
+                      {profile?.profile?.educationLevel ||
+                        profile?.profile?.schoolLevel ||
+                        "Not set"}
+                    </span>
+                  </div>
+                  {profile?.profile?.studentId ? (
                     <div className="flex items-center gap-3 text-sm text-slate-700">
                       <FileBadge size={16} className="text-slate-400" />
-                      <span>{profile.profile.studentId}</span>
+                      <span>ID: {profile.profile.studentId}</span>
                     </div>
                   ) : null}
                 </div>
@@ -570,42 +774,40 @@ const DashboardProfile: React.FC = () => {
                 <div className="space-y-6">
                   <div
                     className={`rounded-xl p-4 border flex items-start gap-3 ${
-                      completeness < 80
-                        ? "bg-amber-50 border-amber-100"
-                        : "bg-emerald-50 border-emerald-100"
+                      isComplete
+                        ? "bg-emerald-50 border-emerald-100"
+                        : "bg-amber-50 border-amber-100"
                     }`}
                   >
                     <div
                       className={`p-2 rounded-full ${
-                        completeness < 80
-                          ? "bg-amber-100 text-amber-700"
-                          : "bg-emerald-100 text-emerald-700"
+                        isComplete
+                          ? "bg-emerald-100 text-emerald-700"
+                          : "bg-amber-100 text-amber-700"
                       }`}
                     >
-                      {completeness < 80 ? (
-                        <AlertTriangle size={18} />
-                      ) : (
+                      {isComplete ? (
                         <CheckCircle size={18} />
+                      ) : (
+                        <AlertTriangle size={18} />
                       )}
                     </div>
                     <div className="flex-1">
                       <p className="text-sm font-semibold text-slate-900">
-                        {completeness < 80
-                          ? "Profile Incomplete — complete Academic & Affiliation to register for events"
-                          : "Profile Complete"}
+                        {isComplete
+                          ? "Profile Complete"
+                          : "Profile Incomplete — complete Academic & Affiliation to register for events"}
                       </p>
-                      <div className="w-full bg-white/70 rounded-full h-2 overflow-hidden mt-3">
+                      <div className="w-full bg-white/50 rounded-full h-2 overflow-hidden mt-3">
                         <div
                           className={`h-full ${
-                            completeness < 80
-                              ? "bg-amber-500"
-                              : "bg-emerald-500"
+                            isComplete ? "bg-emerald-500" : "bg-amber-500"
                           }`}
                           style={{ width: `${completeness}%` }}
                         />
                       </div>
-                      <p className="text-xs text-slate-500 mt-1 font-medium">
-                        {completeness}% completed
+                      <p className="text-xs text-slate-500 mt-1 font-medium text-right">
+                        {completeness}% Completed
                       </p>
                     </div>
                   </div>
@@ -622,10 +824,18 @@ const DashboardProfile: React.FC = () => {
                         />
                         <input
                           type="text"
-                          value={firstName}
-                          onChange={(e) =>
-                            handleNameChange("first", e.target.value)
-                          }
+                          value={profile?.user?.fullName?.split(" ")[0] || ""}
+                          onChange={(e) => {
+                            const lastName =
+                              profile?.user?.fullName
+                                ?.split(" ")
+                                .slice(1)
+                                .join(" ") || "";
+                            handleUserChange(
+                              "fullName",
+                              `${e.target.value} ${lastName}`.trim(),
+                            );
+                          }}
                           className={`${inputClass} pl-10`}
                           placeholder="First name"
                         />
@@ -637,10 +847,20 @@ const DashboardProfile: React.FC = () => {
                       </label>
                       <input
                         type="text"
-                        value={lastName}
-                        onChange={(e) =>
-                          handleNameChange("last", e.target.value)
+                        value={
+                          profile?.user?.fullName
+                            ?.split(" ")
+                            .slice(1)
+                            .join(" ") || ""
                         }
+                        onChange={(e) => {
+                          const firstName =
+                            profile?.user?.fullName?.split(" ")[0] || "";
+                          handleUserChange(
+                            "fullName",
+                            `${firstName} ${e.target.value}`.trim(),
+                          );
+                        }}
                         className={inputClass}
                         placeholder="Last name"
                       />
@@ -693,14 +913,14 @@ const DashboardProfile: React.FC = () => {
                       Country / Region <span className="text-red-500">*</span>
                     </label>
                     <select
-                      value={profile.profile.country}
+                      value={profile?.profile?.country || ""}
                       onChange={(e) => handleChange("country", e.target.value)}
-                      className={selectClass}
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary-100 focus:border-primary-500 outline-none transition-all text-sm font-medium"
                     >
-                      <option value="">Select country</option>
-                      {countries.map((country) => (
-                        <option key={country} value={country}>
-                          {country}
+                      <option value="">Select Country / Region</option>
+                      {WORLD_COUNTRIES.map((c) => (
+                        <option key={c} value={c}>
+                          {c}
                         </option>
                       ))}
                     </select>
@@ -998,57 +1218,163 @@ const DashboardProfile: React.FC = () => {
               )}
 
               {activeTab === "security" && (
-                <div className="space-y-8">
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                      <Lock size={18} /> Change Password
+                <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
+                  <div>
+                    <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+                      <Lock size={20} className="text-primary-600" />
+                      Change Password
                     </h3>
-                    <div className="space-y-3 max-w-md">
-                      <input
-                        type="password"
-                        placeholder="Current Password"
-                        value={passwords.current}
-                        onChange={(e) =>
-                          setPasswords({
-                            ...passwords,
-                            current: e.target.value,
-                          })
-                        }
-                        className={inputClass}
-                      />
-                      <input
-                        type="password"
-                        placeholder="New Password"
-                        value={passwords.next}
-                        onChange={(e) =>
-                          setPasswords({ ...passwords, next: e.target.value })
-                        }
-                        className={inputClass}
-                      />
-                      <input
-                        type="password"
-                        placeholder="Confirm New Password"
-                        value={passwords.confirm}
-                        onChange={(e) =>
-                          setPasswords({
-                            ...passwords,
-                            confirm: e.target.value,
-                          })
-                        }
-                        className={inputClass}
-                      />
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={handlePasswordUpdate}
-                        disabled={passwordSaving}
-                        className="mt-1 w-fit"
+                    <div className="space-y-4 max-w-md">
+                      <div>
+                        <label className="block text-xs font-bold uppercase text-slate-500 mb-1.5">
+                          Current Password
+                        </label>
+                        <input
+                          type="password"
+                          value={passwordForm.currentPassword}
+                          onChange={(e) => {
+                            setPasswordForm((p) => ({
+                              ...p,
+                              currentPassword: e.target.value,
+                            }));
+                            setPasswordErrors((p) => ({
+                              ...p,
+                              currentPassword: "",
+                            }));
+                          }}
+                          className={`w-full px-4 py-2.5 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-primary-100 outline-none transition-all text-sm font-medium
+                ${passwordErrors.currentPassword ? "border-red-300 bg-red-50" : "border-slate-200"}`}
+                          placeholder="Enter current password"
+                        />
+                        {passwordErrors.currentPassword && (
+                          <p className="text-xs text-red-600 mt-1">
+                            {passwordErrors.currentPassword}
+                          </p>
+                        )}
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold uppercase text-slate-500 mb-1.5">
+                          New Password
+                        </label>
+                        <input
+                          type="password"
+                          value={passwordForm.newPassword}
+                          onChange={(e) => {
+                            setPasswordForm((p) => ({
+                              ...p,
+                              newPassword: e.target.value,
+                            }));
+                            setPasswordErrors((p) => ({
+                              ...p,
+                              newPassword: "",
+                            }));
+                          }}
+                          className={`w-full px-4 py-2.5 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-primary-100 outline-none transition-all text-sm font-medium
+                ${passwordErrors.newPassword ? "border-red-300 bg-red-50" : "border-slate-200"}`}
+                          placeholder="Min. 8 characters"
+                        />
+                        {passwordErrors.newPassword && (
+                          <p className="text-xs text-red-600 mt-1">
+                            {passwordErrors.newPassword}
+                          </p>
+                        )}
+                        {passwordForm.newPassword && (
+                          <div className="mt-2">
+                            <div className="flex gap-1 mb-1">
+                              {[1, 2, 3, 4].map((i) => (
+                                <div
+                                  key={i}
+                                  className={`h-1 flex-1 rounded-full transition-colors ${
+                                    passwordForm.newPassword.length >= i * 3
+                                      ? i <= 1
+                                        ? "bg-red-400"
+                                        : i <= 2
+                                          ? "bg-amber-400"
+                                          : i <= 3
+                                            ? "bg-blue-400"
+                                            : "bg-emerald-500"
+                                      : "bg-slate-200"
+                                  }`}
+                                />
+                              ))}
+                            </div>
+                            <p className="text-xs text-slate-400">
+                              {passwordForm.newPassword.length < 4
+                                ? "Too short"
+                                : passwordForm.newPassword.length < 7
+                                  ? "Weak"
+                                  : passwordForm.newPassword.length < 10
+                                    ? "Good"
+                                    : "Strong"}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold uppercase text-slate-500 mb-1.5">
+                          Confirm New Password
+                        </label>
+                        <input
+                          type="password"
+                          value={passwordForm.confirmPassword}
+                          onChange={(e) => {
+                            setPasswordForm((p) => ({
+                              ...p,
+                              confirmPassword: e.target.value,
+                            }));
+                            setPasswordErrors((p) => ({
+                              ...p,
+                              confirmPassword: "",
+                            }));
+                          }}
+                          className={`w-full px-4 py-2.5 bg-slate-50 border rounded-lg focus:ring-2 focus:ring-primary-100 outline-none transition-all text-sm font-medium
+                ${
+                  passwordErrors.confirmPassword
+                    ? "border-red-300 bg-red-50"
+                    : passwordForm.confirmPassword &&
+                        passwordForm.newPassword ===
+                          passwordForm.confirmPassword
+                      ? "border-emerald-300 bg-emerald-50"
+                      : "border-slate-200"
+                }`}
+                          placeholder="Re-enter new password"
+                        />
+                        {passwordErrors.confirmPassword ? (
+                          <p className="text-xs text-red-600 mt-1">
+                            {passwordErrors.confirmPassword}
+                          </p>
+                        ) : passwordForm.confirmPassword &&
+                          passwordForm.newPassword ===
+                            passwordForm.confirmPassword ? (
+                          <p className="text-xs text-emerald-600 mt-1 flex items-center gap-1">
+                            <CheckCircle size={12} /> Passwords match
+                          </p>
+                        ) : null}
+                      </div>
+
+                      <button
+                        onClick={handleChangePassword}
+                        disabled={changingPassword}
+                        className="flex items-center gap-2 px-4 py-2.5 bg-slate-900 text-white rounded-lg text-sm font-bold hover:bg-black transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        {passwordSaving ? "Updating..." : "Update Password"}
-                      </Button>
+                        {changingPassword ? (
+                          <>
+                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                            Updating...
+                          </>
+                        ) : (
+                          <>
+                            <Lock size={16} />
+                            Update Password
+                          </>
+                        )}
+                      </button>
                     </div>
                   </div>
+
+                  <hr className="border-slate-100" />
 
                   <div className="space-y-3 max-w-lg">
                     <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
