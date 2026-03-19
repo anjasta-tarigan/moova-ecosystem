@@ -350,7 +350,9 @@ const normalizeProfile = (data: any, fallbackUser?: any): ProfileState => {
 
 const DashboardProfile: React.FC = () => {
   const { user } = useAuthContext();
-  const [profile, setProfile] = useState<ProfileState | null>(null);
+  const [savedProfile, setSavedProfile] = useState<ProfileState | null>(null);
+  const [draftProfile, setDraftProfile] = useState<ProfileState | null>(null);
+  const [isDirty, setIsDirty] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -382,7 +384,9 @@ const DashboardProfile: React.FC = () => {
     try {
       const res = await profileApi.getProfile();
       const normalized = normalizeProfile(res.data?.data || res.data, user);
-      setProfile(normalized);
+      setSavedProfile(normalized);
+      setDraftProfile(normalized);
+      setIsDirty(false);
       if ((normalized.profile.completeness || 0) < 80) {
         setActiveTab("academic");
       }
@@ -399,26 +403,40 @@ const DashboardProfile: React.FC = () => {
     setTimeout(() => setNotification(null), 4000);
   };
 
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isDirty) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [isDirty]);
+
   const handleChange = (field: string, value: any) => {
-    if (!profile) return;
-    setProfile((prev) => {
+    setDraftProfile((prev) => {
       if (!prev) return prev;
       return {
         ...prev,
         profile: { ...prev.profile, [field]: value },
       };
     });
+    setIsDirty(true);
   };
 
   const handleUserChange = (field: string, value: any) => {
-    if (!profile) return;
-    setProfile((prev) => {
+    setDraftProfile((prev) => {
       if (!prev) return prev;
       return {
         ...prev,
         user: { ...prev.user, [field]: value },
       };
     });
+    setIsDirty(true);
   };
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -430,8 +448,8 @@ const DashboardProfile: React.FC = () => {
       const res = await profileApi.uploadAvatar(file);
       const { avatarUrl } = res.data.data;
 
-      // Update local state immediately (optimistic)
-      setProfile((prev) =>
+      // Update local states to reflect saved avatar
+      setSavedProfile((prev) =>
         prev
           ? {
               ...prev,
@@ -439,6 +457,15 @@ const DashboardProfile: React.FC = () => {
             }
           : prev,
       );
+      setDraftProfile((prev) =>
+        prev
+          ? {
+              ...prev,
+              profile: { ...prev.profile, avatar: avatarUrl },
+            }
+          : prev,
+      );
+      setIsDirty(false);
 
       showNotification("success", "Profile photo updated.");
     } catch (err: any) {
@@ -456,19 +483,26 @@ const DashboardProfile: React.FC = () => {
 
   const addSkill = () => {
     const value = newSkill.trim();
-    if (!value || !profile) return;
-    setProfile({
-      ...profile,
-      profile: {
-        ...profile.profile,
-        skills: Array.from(new Set([...(profile.profile.skills || []), value])),
-      },
-    });
+    if (!value || !draftProfile) return;
+    setDraftProfile((prev) =>
+      prev
+        ? {
+            ...prev,
+            profile: {
+              ...prev.profile,
+              skills: Array.from(
+                new Set([...(prev.profile.skills || []), value]),
+              ),
+            },
+          }
+        : prev,
+    );
+    setIsDirty(true);
     setNewSkill("");
   };
 
   const removeSkill = (skillToRemove: string) => {
-    setProfile((prev) =>
+    setDraftProfile((prev) =>
       prev
         ? {
             ...prev,
@@ -481,52 +515,94 @@ const DashboardProfile: React.FC = () => {
           }
         : prev,
     );
+    setIsDirty(true);
   };
 
   const handleSave = async () => {
-    if (!profile) return;
+    if (!draftProfile || !isDirty) return;
     setSaving(true);
     try {
-      const payload = {
-        fullName: profile.user?.fullName || "",
-        phone: profile.profile?.phone || "",
-        birthDate: profile.profile?.birthDate || null,
-        gender: profile.profile?.gender || "",
-        address: profile.profile?.address || "",
-        country: profile.profile?.country || "",
-        affiliationType: profile.profile?.affiliationType || "University",
-        schoolName: profile.profile?.schoolName || "",
-        schoolLevel: profile.profile?.schoolLevel || "",
-        faculty: profile.profile?.faculty || "",
-        fieldOfStudy: profile.profile?.fieldOfStudy || "",
-        major: profile.profile?.major || "",
-        studentId: profile.profile?.studentId || "",
-        grade: profile.profile?.grade || "",
-        graduationYear: profile.profile?.graduationYear || "",
-        province: profile.profile?.province || "",
-        city: profile.profile?.city || "",
-        educationLevel: profile.profile?.educationLevel || "",
-        bio: profile.profile?.bio || "",
-        skills: profile.profile?.skills || [],
-        linkedin: profile.profile?.linkedin || "",
-        github: profile.profile?.github || "",
-        website: profile.profile?.website || "",
-        googleScholar: profile.profile?.googleScholar || "",
-      };
+      // Build diff — only send fields that actually changed
+      const payload: Record<string, any> = {};
+
+      // Compare user.fullName
+      if (draftProfile.user?.fullName !== savedProfile?.user?.fullName) {
+        const name = draftProfile.user?.fullName?.trim();
+        if (name && name.length >= 3) {
+          payload.fullName = name;
+        }
+      }
+
+      // Compare scalar profile fields
+      const profileFields = [
+        "phone",
+        "birthDate",
+        "gender",
+        "address",
+        "country",
+        "affiliationType",
+        "schoolName",
+        "schoolLevel",
+        "faculty",
+        "fieldOfStudy",
+        "major",
+        "studentId",
+        "grade",
+        "graduationYear",
+        "province",
+        "city",
+        "educationLevel",
+        "bio",
+        "linkedin",
+        "github",
+        "website",
+        "googleScholar",
+      ];
+
+      for (const field of profileFields) {
+        const oldVal = savedProfile?.profile?.[field] ?? "";
+        const newVal = draftProfile.profile?.[field] ?? "";
+        if (newVal !== oldVal) {
+          payload[field] = newVal;
+        }
+      }
+
+      // Compare skills array by serialized value
+      const oldSkills = JSON.stringify(savedProfile?.profile?.skills ?? []);
+      const newSkills = JSON.stringify(draftProfile.profile?.skills ?? []);
+      if (newSkills !== oldSkills) {
+        payload.skills = draftProfile.profile?.skills ?? [];
+      }
+
+      // Edge case: isDirty=true but nothing actually differs
+      if (Object.keys(payload).length === 0) {
+        setIsDirty(false);
+        return;
+      }
 
       const res = await profileApi.updateProfile(payload);
+      const updated = res.data.data;
 
-      setProfile(res.data.data);
-
-      showNotification("success", "Profile updated successfully.");
+      setSavedProfile(updated);
+      setDraftProfile(updated);
+      setIsDirty(false);
+      showNotification("success", "Profile saved successfully.");
     } catch (err: any) {
+      // savedProfile stays intact on failure
+      // draftProfile keeps user's unsaved edits
       showNotification(
         "error",
-        err.response?.data?.message || "Failed to save changes.",
+        err.response?.data?.message || "Failed to save.",
       );
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleDiscard = () => {
+    setDraftProfile(savedProfile);
+    setIsDirty(false);
+    showNotification("success", "Changes discarded.");
   };
 
   const handleChangePassword = async () => {
@@ -573,7 +649,7 @@ const DashboardProfile: React.FC = () => {
     }
   };
 
-  const completeness = profile?.profile?.completeness || 0;
+  const completeness = savedProfile?.profile?.completeness || 0;
   const isComplete = completeness >= 80;
 
   if (loading) {
@@ -598,16 +674,16 @@ const DashboardProfile: React.FC = () => {
     );
   }
 
-  if (!profile) return null;
+  if (!savedProfile || !draftProfile) return null;
 
   const apiBase =
     (import.meta as any).env?.VITE_API_URL || "http://localhost:5000";
 
-  const avatarSrc = profile.profile?.avatar
-    ? profile.profile.avatar.startsWith("http")
-      ? profile.profile.avatar
-      : `${apiBase}${profile.profile.avatar}`
-    : `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.user.fullName || "User")}&background=random`;
+  const avatarSrc = savedProfile.profile?.avatar
+    ? savedProfile.profile.avatar.startsWith("http")
+      ? savedProfile.profile.avatar
+      : `${apiBase}${savedProfile.profile.avatar}`
+    : `https://ui-avatars.com/api/?name=${encodeURIComponent(savedProfile.user.fullName || "User")}&background=random`;
 
   return (
     <div className="max-w-5xl mx-auto space-y-8 pb-20">
@@ -638,19 +714,45 @@ const DashboardProfile: React.FC = () => {
             security settings for the GIVA ecosystem.
           </p>
         </div>
-        <Button
-          onClick={handleSave}
-          disabled={saving}
-          className="min-w-[150px] shadow-md"
-        >
-          {saving ? (
-            "Saving..."
-          ) : (
-            <span className="inline-flex items-center gap-2">
-              <Save size={16} /> Save Changes
+        <div className="flex items-center gap-3">
+          {isDirty && (
+            <span className="flex items-center gap-1.5 text-xs font-medium text-amber-600 bg-amber-50 px-3 py-1.5 rounded-full border border-amber-200">
+              <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+              Unsaved changes
             </span>
           )}
-        </Button>
+
+          {isDirty && (
+            <button
+              onClick={handleDiscard}
+              className="px-4 py-2.5 border border-slate-200 text-slate-600 rounded-xl text-sm font-bold hover:bg-slate-50 transition-colors"
+            >
+              Discard
+            </button>
+          )}
+
+          <button
+            onClick={handleSave}
+            disabled={saving || !isDirty}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${
+              isDirty
+                ? "bg-slate-900 text-white hover:bg-black shadow-md"
+                : "bg-slate-100 text-slate-400 cursor-not-allowed"
+            } disabled:opacity-60`}
+          >
+            {saving ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                Saving...
+              </>
+            ) : (
+              <>
+                <Save size={16} />
+                Save Changes
+              </>
+            )}
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -686,15 +788,15 @@ const DashboardProfile: React.FC = () => {
                 </div>
               </div>
               <h2 className="text-xl font-bold text-slate-900 mt-4">
-                {profile?.user?.fullName || "New User"}
+                {savedProfile?.user?.fullName || "New User"}
               </h2>
               <div className="mt-2 flex items-center gap-2">
                 <span className="px-2 py-0.5 bg-slate-100 text-slate-500 text-[10px] font-semibold uppercase rounded-full">
-                  {profile?.profile?.affiliationType || "Unknown"}
+                  {savedProfile?.profile?.affiliationType || "Unknown"}
                 </span>
               </div>
               <p className="text-sm text-slate-500 mt-2">
-                {profile?.profile?.schoolName || "No Institution"}
+                {savedProfile?.profile?.schoolName || "No Institution"}
               </p>
 
               <div className="w-full mt-6 space-y-3">
@@ -711,29 +813,29 @@ const DashboardProfile: React.FC = () => {
                   <div className="flex items-center gap-3 text-sm text-slate-700">
                     <Mail size={16} className="text-slate-400" />
                     <span className="truncate">
-                      {profile?.user?.email || ""}
+                      {savedProfile?.user?.email || ""}
                     </span>
                   </div>
                   <div className="flex items-center gap-3 text-sm text-slate-700">
                     <MapPin size={16} className="text-slate-400" />
                     <span>
-                      {profile?.profile?.country ||
-                        profile?.profile?.province ||
+                      {savedProfile?.profile?.country ||
+                        savedProfile?.profile?.province ||
                         "Global"}
                     </span>
                   </div>
                   <div className="flex items-center gap-3 text-sm text-slate-700">
                     <GraduationCap size={16} className="text-slate-400" />
                     <span>
-                      {profile?.profile?.educationLevel ||
-                        profile?.profile?.schoolLevel ||
+                      {savedProfile?.profile?.educationLevel ||
+                        savedProfile?.profile?.schoolLevel ||
                         "Not set"}
                     </span>
                   </div>
-                  {profile?.profile?.studentId ? (
+                  {savedProfile?.profile?.studentId ? (
                     <div className="flex items-center gap-3 text-sm text-slate-700">
                       <FileBadge size={16} className="text-slate-400" />
-                      <span>ID: {profile.profile.studentId}</span>
+                      <span>ID: {savedProfile.profile.studentId}</span>
                     </div>
                   ) : null}
                 </div>
@@ -824,10 +926,12 @@ const DashboardProfile: React.FC = () => {
                         />
                         <input
                           type="text"
-                          value={profile?.user?.fullName?.split(" ")[0] || ""}
+                          value={
+                            draftProfile?.user?.fullName?.split(" ")[0] || ""
+                          }
                           onChange={(e) => {
                             const lastName =
-                              profile?.user?.fullName
+                              draftProfile?.user?.fullName
                                 ?.split(" ")
                                 .slice(1)
                                 .join(" ") || "";
@@ -848,14 +952,14 @@ const DashboardProfile: React.FC = () => {
                       <input
                         type="text"
                         value={
-                          profile?.user?.fullName
+                          draftProfile?.user?.fullName
                             ?.split(" ")
                             .slice(1)
                             .join(" ") || ""
                         }
                         onChange={(e) => {
                           const firstName =
-                            profile?.user?.fullName?.split(" ")[0] || "";
+                            draftProfile?.user?.fullName?.split(" ")[0] || "";
                           handleUserChange(
                             "fullName",
                             `${firstName} ${e.target.value}`.trim(),
@@ -877,7 +981,7 @@ const DashboardProfile: React.FC = () => {
                         />
                         <input
                           type="email"
-                          value={profile.user.email}
+                          value={draftProfile.user.email}
                           disabled
                           className={`${inputClass} bg-slate-100 text-slate-500 cursor-not-allowed pl-10`}
                         />
@@ -897,7 +1001,7 @@ const DashboardProfile: React.FC = () => {
                         />
                         <input
                           type="tel"
-                          value={profile.profile.phone}
+                          value={draftProfile.profile.phone}
                           onChange={(e) =>
                             handleChange("phone", e.target.value)
                           }
@@ -913,7 +1017,7 @@ const DashboardProfile: React.FC = () => {
                       Country / Region <span className="text-red-500">*</span>
                     </label>
                     <select
-                      value={profile?.profile?.country || ""}
+                      value={draftProfile?.profile?.country || ""}
                       onChange={(e) => handleChange("country", e.target.value)}
                       className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary-100 focus:border-primary-500 outline-none transition-all text-sm font-medium"
                     >
@@ -944,7 +1048,7 @@ const DashboardProfile: React.FC = () => {
                         Affiliation Type <span className="text-red-500">*</span>
                       </label>
                       <select
-                        value={profile.profile.affiliationType}
+                        value={draftProfile.profile.affiliationType}
                         onChange={(e) =>
                           handleChange("affiliationType", e.target.value)
                         }
@@ -963,7 +1067,7 @@ const DashboardProfile: React.FC = () => {
                         Education Level <span className="text-red-500">*</span>
                       </label>
                       <select
-                        value={profile.profile.educationLevel}
+                        value={draftProfile.profile.educationLevel}
                         onChange={(e) =>
                           handleChange("educationLevel", e.target.value)
                         }
@@ -992,7 +1096,7 @@ const DashboardProfile: React.FC = () => {
                         />
                         <input
                           type="text"
-                          value={profile.profile.schoolName}
+                          value={draftProfile.profile.schoolName}
                           onChange={(e) =>
                             handleChange("schoolName", e.target.value)
                           }
@@ -1011,7 +1115,7 @@ const DashboardProfile: React.FC = () => {
                       </label>
                       <input
                         type="text"
-                        value={profile.profile.faculty}
+                        value={draftProfile.profile.faculty}
                         onChange={(e) =>
                           handleChange("faculty", e.target.value)
                         }
@@ -1031,7 +1135,7 @@ const DashboardProfile: React.FC = () => {
                         />
                         <input
                           type="text"
-                          value={profile.profile.fieldOfStudy}
+                          value={draftProfile.profile.fieldOfStudy}
                           onChange={(e) =>
                             handleChange("fieldOfStudy", e.target.value)
                           }
@@ -1055,7 +1159,7 @@ const DashboardProfile: React.FC = () => {
                         />
                         <input
                           type="text"
-                          value={profile.profile.graduationYear}
+                          value={draftProfile.profile.graduationYear}
                           onChange={(e) =>
                             handleChange("graduationYear", e.target.value)
                           }
@@ -1070,7 +1174,7 @@ const DashboardProfile: React.FC = () => {
                       </label>
                       <input
                         type="text"
-                        value={profile.profile.studentId}
+                        value={draftProfile.profile.studentId}
                         onChange={(e) =>
                           handleChange("studentId", e.target.value)
                         }
@@ -1091,7 +1195,7 @@ const DashboardProfile: React.FC = () => {
                   <div>
                     <label className={labelClass}>Short Bio</label>
                     <textarea
-                      value={profile.profile.bio}
+                      value={draftProfile.profile.bio}
                       onChange={(e) =>
                         handleChange("bio", e.target.value.slice(0, 500))
                       }
@@ -1100,7 +1204,7 @@ const DashboardProfile: React.FC = () => {
                       placeholder="Tell the community about your research interests and goals..."
                     />
                     <p className="text-xs text-slate-400 text-right mt-1">
-                      {profile.profile.bio.length}/500 chars
+                      {draftProfile.profile.bio.length}/500 chars
                     </p>
                   </div>
 
@@ -1109,7 +1213,7 @@ const DashboardProfile: React.FC = () => {
                       Research Interests & Skills
                     </label>
                     <div className="flex flex-wrap gap-2">
-                      {(profile.profile.skills || []).map((skill) => (
+                      {(draftProfile.profile.skills || []).map((skill) => (
                         <span
                           key={skill}
                           className="inline-flex items-center gap-2 bg-primary-50 text-primary-700 text-sm font-bold rounded-full px-3 py-1"
@@ -1162,7 +1266,7 @@ const DashboardProfile: React.FC = () => {
                         </div>
                         <input
                           type="url"
-                          value={profile.profile.linkedin}
+                          value={draftProfile.profile.linkedin}
                           onChange={(e) =>
                             handleChange("linkedin", e.target.value)
                           }
@@ -1176,7 +1280,7 @@ const DashboardProfile: React.FC = () => {
                         </div>
                         <input
                           type="url"
-                          value={profile.profile.github}
+                          value={draftProfile.profile.github}
                           onChange={(e) =>
                             handleChange("github", e.target.value)
                           }
@@ -1190,7 +1294,7 @@ const DashboardProfile: React.FC = () => {
                         </div>
                         <input
                           type="url"
-                          value={profile.profile.website}
+                          value={draftProfile.profile.website}
                           onChange={(e) =>
                             handleChange("website", e.target.value)
                           }
@@ -1204,7 +1308,7 @@ const DashboardProfile: React.FC = () => {
                         </div>
                         <input
                           type="url"
-                          value={profile.profile.googleScholar}
+                          value={draftProfile.profile.googleScholar}
                           onChange={(e) =>
                             handleChange("googleScholar", e.target.value)
                           }
