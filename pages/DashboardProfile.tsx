@@ -1480,44 +1480,80 @@ const DashboardProfile: React.FC = () => {
 
                   <hr className="border-slate-100" />
 
-                  <div className="space-y-3 max-w-lg">
-                    <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                      <LinkIcon size={18} /> Connected Accounts
+                  {/* Connected Accounts */}
+                  <div>
+                    <h3
+                      className="text-lg font-bold text-slate-900 mb-4 
+    flex items-center gap-2"
+                    >
+                      <LinkIcon size={20} className="text-primary-600" />
+                      Connected Accounts
                     </h3>
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between p-3 border border-slate-100 rounded-xl">
+                    <div className="space-y-3 max-w-lg">
+                      {/* Google */}
+                      <div
+                        className="flex items-center justify-between 
+      p-4 border border-slate-200 rounded-xl bg-white 
+      opacity-60"
+                      >
                         <div className="flex items-center gap-3">
                           <img
                             src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg"
-                            alt="Google"
                             className="w-6 h-6"
+                            alt="Google"
                           />
-                          <div>
-                            <p className="text-sm font-semibold text-slate-900">
-                              Google
-                            </p>
-                            <span className="inline-flex items-center gap-1 text-xs text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
-                              <CheckCircle size={12} /> Connected
-                            </span>
-                          </div>
+                          <span className="font-bold text-slate-700 text-sm">
+                            Google
+                          </span>
                         </div>
+                        <button
+                          disabled
+                          className="text-xs text-slate-400 font-bold 
+          cursor-not-allowed"
+                          title="Coming soon"
+                        >
+                          Connect
+                        </button>
                       </div>
-                      <div className="flex items-center justify-between p-3 border border-slate-100 rounded-xl opacity-60">
+
+                      {/* Microsoft */}
+                      <div
+                        className="flex items-center justify-between 
+      p-4 border border-slate-200 rounded-xl bg-white 
+      opacity-60"
+                      >
                         <div className="flex items-center gap-3">
                           <img
                             src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg"
-                            alt="Microsoft"
                             className="w-6 h-6"
+                            alt="Microsoft"
                           />
-                          <p className="text-sm font-semibold text-slate-900">
+                          <span className="font-bold text-slate-700 text-sm">
                             Microsoft
-                          </p>
+                          </span>
                         </div>
-                        <button className="text-sm font-semibold text-primary-600 hover:text-primary-700">
+                        <button
+                          disabled
+                          className="text-xs text-slate-400 font-bold 
+          cursor-not-allowed"
+                          title="Coming soon"
+                        >
                           Connect
                         </button>
                       </div>
                     </div>
+
+                    {/* Coming soon notice */}
+                    <p
+                      className="text-xs text-slate-400 mt-4 
+    flex items-center gap-1.5"
+                    >
+                      <span
+                        className="w-1.5 h-1.5 rounded-full 
+      bg-slate-300 inline-block"
+                      />
+                      OAuth integration coming in a future update.
+                    </p>
                   </div>
 
                   <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 space-y-2 max-w-lg">
