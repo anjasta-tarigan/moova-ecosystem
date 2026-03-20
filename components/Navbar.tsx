@@ -27,7 +27,7 @@ const Navbar: React.FC = () => {
     <header
       className={`fixed top-0 w-full z-50 transition-all duration-300 border-b ${
         scrolled || isOpen
-          ? "bg-white/95 backdrop-blur-md border-primary-100 py-3 shadow-sm"
+          ? "bg-white/95 backdrop-blur-md border-slate-200 py-3 shadow-sm"
           : "bg-transparent border-transparent py-5"
       }`}
     >
@@ -56,8 +56,10 @@ const Navbar: React.FC = () => {
               <Link
                 key={item.label}
                 to={item.href}
-                className={`text-sm font-semibold transition-all hover:text-secondary-500 ${
-                  isActive ? "text-primary-600" : "text-primary-900/80"
+                className={`text-sm font-semibold transition-all hover:text-slate-900 ${
+                  isActive
+                    ? "text-slate-900 underline underline-offset-4"
+                    : "text-slate-600"
                 }`}
               >
                 {item.label}
@@ -75,7 +77,7 @@ const Navbar: React.FC = () => {
 
         {/* Mobile Menu Toggle */}
         <button
-          className="lg:hidden p-2 text-primary-900"
+          className="lg:hidden p-2 text-slate-900"
           onClick={() => setIsOpen(!isOpen)}
           aria-label="Toggle menu"
         >
@@ -85,7 +87,7 @@ const Navbar: React.FC = () => {
 
       {/* Mobile Menu Overlay */}
       {isOpen && (
-        <div className="fixed inset-0 top-[65px] bg-white z-40 lg:hidden overflow-y-auto border-t border-primary-100">
+        <div className="fixed inset-0 top-[65px] bg-white z-40 lg:hidden overflow-y-auto border-t border-slate-200">
           <div className="p-6 flex flex-col gap-6">
             <Link
               to="/"
@@ -105,7 +107,7 @@ const Navbar: React.FC = () => {
               <Link
                 key={item.label}
                 to={item.href}
-                className="text-xl font-bold text-primary-900 border-b border-primary-50 pb-4 block hover:text-secondary-500 transition-colors"
+                className="text-xl font-bold text-slate-900 border-b border-slate-100 pb-4 block hover:text-slate-600 transition-colors"
                 onClick={() => setIsOpen(false)}
               >
                 {item.label}

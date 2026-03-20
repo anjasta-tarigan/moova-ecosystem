@@ -335,7 +335,7 @@ const LandingPage: React.FC = () => {
         {/* Grid Texture */}
         <div className="absolute inset-0 bg-grid-pattern opacity-40 pointer-events-none" />
 
-        <div className="container mx-auto px-6 relative z-10 text-center flex flex-col items-center">
+        <div className="container mx-auto px-4 sm:px-6 relative z-10 text-center flex flex-col items-center w-full min-w-0">
           {/* Tag / Label */}
           <FadeIn delay={100}>
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-50 border border-slate-200 shadow-sm mb-8 cursor-default group hover:border-slate-300 transition-colors">
@@ -361,7 +361,7 @@ const LandingPage: React.FC = () => {
             </span>
           </div>
           <FadeIn delay={200} className="max-w-5xl">
-            <h1 className="text-5xl md:text-6xl lg:text-8xl font-extrabold text-slate-900 tracking-tighter mb-8 leading-[1]">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-extrabold text-slate-900 tracking-tighter mb-8 leading-[1.05] lg:leading-[1]">
               Turn Curiosity Into <br className="hidden lg:block" />
               <span className="text-transparent bg-clip-text bg-gradient-to-br from-slate-700 to-black">
                 Real-World Impact
@@ -381,7 +381,7 @@ const LandingPage: React.FC = () => {
           {/* Buttons (Monochrome) */}
           <FadeIn
             delay={400}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto"
+            className="flex flex-col sm:flex-row items-center justify-center gap-3 w-full max-w-xs sm:max-w-none sm:w-auto"
           >
             <Button
               size="lg"
