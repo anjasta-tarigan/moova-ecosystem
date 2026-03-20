@@ -313,6 +313,57 @@ const LandingPage: React.FC = () => {
 
   return (
     <div className="flex flex-col w-full bg-white overflow-hidden">
+      {/* ── STICKY NAVBAR ── */}
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100 shadow-sm">
+        <div className="container mx-auto px-6 h-16 flex items-center justify-between">
+          {/* Brand lockup */}
+          <div className="flex items-center gap-2.5">
+            <img
+              src="/brand.png"
+              alt="GIVA"
+              className="h-7 w-auto object-contain"
+            />
+            <span className="text-lg font-black text-slate-900 tracking-tight">
+              GIVA
+            </span>
+          </div>
+
+          {/* Nav links — hidden on mobile */}
+          <div className="hidden md:flex items-center gap-8">
+            {[
+              { label: "Programs", href: "/programs" },
+              { label: "Events", href: "/events" },
+              { label: "Community", href: "/join" },
+            ].map((link) => (
+              <a
+                key={link.label}
+                href={link.href}
+                className="text-sm font-semibold text-slate-600 hover:text-slate-900 transition-colors"
+              >
+                {link.label}
+              </a>
+            ))}
+          </div>
+
+          {/* CTA */}
+          <div className="flex items-center gap-3">
+            <a
+              href="/login"
+              className="text-sm font-bold text-slate-600 hover:text-slate-900 transition-colors hidden sm:block"
+            >
+              Sign In
+            </a>
+            <a
+              href="/join"
+              className="px-4 py-2 bg-slate-900 text-white text-sm font-bold rounded-full hover:bg-black transition-colors"
+            >
+              Get Started
+            </a>
+          </div>
+        </div>
+      </nav>
+      {/* ── END STICKY NAVBAR ── */}
+
       {/* 1. HERO SECTION */}
       <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 min-h-[95vh] flex flex-col items-center justify-center overflow-hidden bg-white">
         {/* ATMOSPHERIC ACCENTS (Brand Colors) */}
@@ -350,6 +401,16 @@ const LandingPage: React.FC = () => {
           </FadeIn>
 
           {/* Headline */}
+          <div className="flex items-center justify-center gap-3 mb-6">
+            <img
+              src="/brand.png"
+              alt="GIVA"
+              className="h-10 w-auto object-contain"
+            />
+            <span className="text-2xl font-black text-slate-900 tracking-tight">
+              GIVA
+            </span>
+          </div>
           <FadeIn delay={200} className="max-w-5xl">
             <h1 className="text-5xl md:text-6xl lg:text-8xl font-extrabold text-slate-900 tracking-tighter mb-8 leading-[1]">
               Turn Curiosity Into <br className="hidden lg:block" />
@@ -686,6 +747,127 @@ const LandingPage: React.FC = () => {
           </FadeIn>
         </div>
       </section>
+
+      {/* ── FOOTER ── */}
+      <footer className="bg-slate-900 text-white">
+        {/* Main footer content */}
+        <div className="container mx-auto px-6 py-16">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
+            {/* Brand column */}
+            <div className="md:col-span-1">
+              <div className="flex items-center gap-2.5 mb-4">
+                <img
+                  src="/brand.png"
+                  alt="GIVA"
+                  className="h-7 w-auto object-contain"
+                />
+                <span className="text-lg font-black text-white tracking-tight">
+                  GIVA
+                </span>
+              </div>
+              <p className="text-sm text-slate-400 leading-relaxed">
+                The Global Innovation & Venture Accelerator. Turning curiosity
+                into real-world impact.
+              </p>
+            </div>
+
+            {/* Platform links */}
+            <div>
+              <h4 className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-4">
+                Platform
+              </h4>
+              <ul className="space-y-3">
+                {[
+                  { label: "Programs", href: "/programs" },
+                  { label: "Events", href: "/events" },
+                  { label: "Community", href: "/join" },
+                  { label: "Dashboard", href: "/dashboard" },
+                ].map((link) => (
+                  <li key={link.label}>
+                    <a
+                      href={link.href}
+                      className="text-sm text-slate-400 hover:text-white transition-colors"
+                    >
+                      {link.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* For links */}
+            <div>
+              <h4 className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-4">
+                For
+              </h4>
+              <ul className="space-y-3">
+                {[
+                  { label: "Students", href: "/join" },
+                  { label: "Mentors", href: "/join" },
+                  { label: "Institutions", href: "/join" },
+                  { label: "Investors", href: "/join" },
+                ].map((link) => (
+                  <li key={link.label}>
+                    <a
+                      href={link.href}
+                      className="text-sm text-slate-400 hover:text-white transition-colors"
+                    >
+                      {link.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Legal links */}
+            <div>
+              <h4 className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-4">
+                Legal
+              </h4>
+              <ul className="space-y-3">
+                {[
+                  { label: "Privacy Policy", href: "#" },
+                  { label: "Terms of Service", href: "#" },
+                  { label: "Cookie Policy", href: "#" },
+                ].map((link) => (
+                  <li key={link.label}>
+                    <a
+                      href={link.href}
+                      className="text-sm text-slate-400 hover:text-white transition-colors"
+                    >
+                      {link.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom bar */}
+        <div className="border-t border-slate-800">
+          <div className="container mx-auto px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+            {/* Left: brand lockup small */}
+            <div className="flex items-center gap-2">
+              <img
+                src="/brand.png"
+                alt="GIVA"
+                className="h-5 w-auto object-contain opacity-60"
+              />
+              <span className="text-sm font-bold text-slate-500 tracking-tight">
+                GIVA
+              </span>
+            </div>
+
+            {/* Right: copyright */}
+            <p className="text-xs text-slate-600 text-center sm:text-right">
+              © {new Date().getFullYear()} GIVA — Science & Innovation
+              Ecosystem. All rights reserved.
+            </p>
+          </div>
+        </div>
+      </footer>
+      {/* ── END FOOTER ── */}
 
       {/* SDG Modal / Drawer */}
       {selectedSdg && (

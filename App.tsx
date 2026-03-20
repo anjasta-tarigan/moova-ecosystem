@@ -44,6 +44,7 @@ const AdminEvents = lazy(() => import("./pages/admin/AdminEvents"));
 const AdminEventForm = lazy(() => import("./pages/admin/AdminEventForm"));
 const AdminSubmissions = lazy(() => import("./pages/admin/AdminSubmissions"));
 const AdminSiswa = lazy(() => import("./pages/admin/AdminSiswa"));
+const AdminSiswaDetail = lazy(() => import("./pages/admin/AdminSiswaDetail"));
 const AdminCertificates = lazy(() => import("./pages/admin/AdminCertificates"));
 const AdminReports = lazy(() => import("./pages/admin/AdminReports"));
 
@@ -272,6 +273,7 @@ const App: React.FC = () => {
               <Route path="events/:id/edit" element={<AdminEventForm />} />
               <Route path="submissions" element={<AdminSubmissions />} />
               <Route path="siswa" element={<AdminSiswa />} />
+              <Route path="siswa/:id" element={<AdminSiswaDetail />} />
               <Route path="certificates" element={<AdminCertificates />} />
               <Route path="reports" element={<AdminReports />} />
             </Route>
@@ -290,6 +292,7 @@ const App: React.FC = () => {
               <Route path="events/:id/edit" element={<AdminEventForm />} />
               <Route path="submissions" element={<AdminSubmissions />} />
               <Route path="siswa" element={<AdminSiswa />} />
+              <Route path="siswa/:id" element={<AdminSiswaDetail />} />
               <Route path="certificates" element={<AdminCertificates />} />
               <Route path="reports" element={<AdminReports />} />
             </Route>

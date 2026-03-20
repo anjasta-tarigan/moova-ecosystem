@@ -22,7 +22,15 @@ export const adminApi = {
   advanceStage: (id: string, stage: string) =>
     api.patch(`/api/admin/submissions/${id}/stage`, { stage }),
 
-  // Siswa
+  // Students
+  getStudents: (params?: Record<string, any>) =>
+    api.get("/api/admin/siswa", { params }),
+  getStudent: (id: string) => api.get(`/api/admin/siswa/${id}`),
+  toggleStudentActive: (id: string) =>
+    api.patch(`/api/superadmin/users/${id}/toggle-active`),
+  deleteStudent: (id: string) => api.delete(`/api/superadmin/users/${id}`),
+
+  // Legacy aliases
   getSiswaList: (params?: Record<string, any>) =>
     api.get("/api/admin/siswa", { params }),
   getSiswaDetail: (id: string) => api.get(`/api/admin/siswa/${id}`),

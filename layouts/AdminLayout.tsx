@@ -77,15 +77,25 @@ const AdminLayout = () => {
           isCollapsed ? "w-20" : "w-64",
         )}
       >
-        <div className="flex items-center justify-center h-16 border-b border-white/10">
-          <h1
-            className={cn(
-              "text-xl font-bold tracking-tight",
-              isCollapsed && "text-lg",
-            )}
-          >
-            GIVA
-          </h1>
+        <div className="flex items-center justify-center h-16 border-b border-white/10 px-3">
+          {isCollapsed ? (
+            <img
+              src="/brand.png"
+              alt="GIVA"
+              className="w-7 h-7 object-contain mx-auto"
+            />
+          ) : (
+            <div className="flex items-center gap-2.5">
+              <img
+                src="/brand.png"
+                alt="GIVA"
+                className="h-7 w-auto object-contain"
+              />
+              <span className="text-lg font-black text-white tracking-tight">
+                GIVA
+              </span>
+            </div>
+          )}
         </div>
         <nav className="flex-grow px-2 py-4 space-y-1">
           {navItems.map((item) => {

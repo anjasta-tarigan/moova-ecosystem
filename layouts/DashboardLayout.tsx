@@ -155,13 +155,23 @@ const DashboardLayout: React.FC = () => {
       >
         {/* Brand */}
         <div className="h-20 flex items-center px-6 border-b border-slate-800/50">
-          <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-blue-600 rounded-lg flex items-center justify-center font-bold text-white shrink-0 shadow-lg shadow-primary-500/20">
-            G
-          </div>
-          {!collapsed && (
-            <span className="ml-3 font-bold text-lg text-white tracking-tight animate-in fade-in duration-300">
-              GIVA
-            </span>
+          {collapsed ? (
+            <img
+              src="/brand.png"
+              alt="GIVA"
+              className="w-7 h-7 object-contain mx-auto"
+            />
+          ) : (
+            <div className="flex items-center gap-2.5">
+              <img
+                src="/brand.png"
+                alt="GIVA"
+                className="h-7 w-auto object-contain"
+              />
+              <span className="text-lg font-black text-white tracking-tight">
+                GIVA
+              </span>
+            </div>
           )}
         </div>
 
@@ -277,8 +287,15 @@ const DashboardLayout: React.FC = () => {
         {/* Mobile Header */}
         <header className="lg:hidden h-16 bg-white border-b border-slate-100 flex items-center justify-between px-4 z-20 sticky top-0 shadow-sm">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-blue-600 rounded-lg flex items-center justify-center font-bold text-white">
-              G
+            <div className="flex items-center gap-2.5">
+              <img
+                src="/brand.png"
+                alt="GIVA"
+                className="h-7 w-auto object-contain"
+              />
+              <span className="text-lg font-black text-slate-900 tracking-tight">
+                GIVA
+              </span>
             </div>
             <span className="font-bold text-slate-900 text-lg">Dashboard</span>
           </div>

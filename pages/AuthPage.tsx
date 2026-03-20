@@ -141,10 +141,14 @@ const AuthPage: React.FC = () => {
         {/* Content */}
         <div className="relative z-10">
           <Link to="/" className="flex items-center gap-3 w-fit group">
-            <div className="w-10 h-10 bg-white/10 backdrop-blur-sm border border-white/10 rounded-xl flex items-center justify-center font-bold text-white group-hover:bg-white/20 transition-colors">
-              G
-            </div>
-            <span className="font-bold text-xl tracking-tight">GIVA</span>
+            <img
+              src="/brand.png"
+              alt="GIVA"
+              className="h-10 w-auto object-contain drop-shadow-lg group-hover:scale-[1.02] transition-transform"
+            />
+            <span className="text-xl font-black text-white tracking-tight">
+              GIVA
+            </span>
           </Link>
         </div>
 
@@ -190,14 +194,34 @@ const AuthPage: React.FC = () => {
 
           {/* Mobile Brand */}
           <div className="lg:hidden pointer-events-auto flex items-center gap-2">
-            <div className="w-8 h-8 bg-brand-gradient rounded-lg flex items-center justify-center text-white font-bold text-sm">
-              G
-            </div>
+            <img
+              src="/brand.png"
+              alt="GIVA"
+              className="h-7 w-auto object-contain"
+            />
+            <span className="text-lg font-black text-primary-900 tracking-tight">
+              GIVA
+            </span>
           </div>
         </div>
 
         {/* Content Container */}
         <div className="flex-1 flex flex-col justify-center px-6 lg:px-24 w-full max-w-2xl mx-auto py-24">
+          <div className="text-center mb-8">
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <img
+                src="/brand.png"
+                alt="GIVA"
+                className="h-10 w-auto object-contain"
+              />
+              <span className="text-2xl font-black text-slate-900 tracking-tight">
+                GIVA
+              </span>
+            </div>
+            <p className="text-slate-500 text-sm">
+              Science & Innovation Ecosystem
+            </p>
+          </div>
           <div className="mb-8 animate-in slide-in-from-bottom-4 duration-700">
             <h1 className="text-3xl font-bold text-primary-900 mb-3 tracking-tight">
               {isLogin ? "Welcome back" : "Create an account"}
