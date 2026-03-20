@@ -6,9 +6,14 @@ import {
   createTeam,
   deleteTeam,
   getTeam,
+  inviteMember,
   joinTeam,
   leaveTeam,
   listTeams,
+  assignMentor,
+  removeMentor,
+  searchMentors,
+  searchStudents,
   removeMember,
   updateTeam,
   changeRole,
@@ -21,6 +26,32 @@ import {
 } from "./teams.schema";
 
 const router = Router();
+
+// Search endpoints and mentor management should register before parameterized routes
+router.get(
+  "/search/students",
+  authenticate,
+  requireRole("STUDENT"),
+  searchStudents,
+);
+
+router.get(
+  "/search/mentors",
+  authenticate,
+  requireRole("STUDENT"),
+  searchMentors,
+);
+
+router.post("/:id/invite", authenticate, requireRole("STUDENT"), inviteMember);
+
+router.post("/:id/mentor", authenticate, requireRole("STUDENT"), assignMentor);
+
+router.delete(
+  "/:id/mentor/:userId",
+  authenticate,
+  requireRole("STUDENT"),
+  removeMentor,
+);
 
 router.use(authenticate, requireRole("STUDENT"));
 

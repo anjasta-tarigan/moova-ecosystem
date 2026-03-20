@@ -1,21 +1,21 @@
 import { PrismaClient } from "@prisma/client";
 
-const randomCode = () => {
+const randomSuffix = (length: number) => {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-  let code = "";
-  for (let i = 0; i < 6; i++) {
-    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  let result = "";
+  for (let i = 0; i < length; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
   }
-  return code;
+  return result;
 };
 
 export const generateTeamCode = async (
   prisma: PrismaClient,
 ): Promise<string> => {
-  let code = randomCode();
+  let code = `GIVA-${randomSuffix(5)}`;
   let exists = await prisma.team.findUnique({ where: { code } });
   while (exists) {
-    code = randomCode();
+    code = `GIVA-${randomSuffix(5)}`;
     exists = await prisma.team.findUnique({ where: { code } });
   }
   return code;

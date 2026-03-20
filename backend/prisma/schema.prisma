@@ -95,6 +95,7 @@ model User {
   qaReplies           QaReply[]
   qaUpvotes           QaUpvote[]
   notifications       Notification[]
+  mentorTeams         TeamMentor[] @relation("MentorTeams")
 
   @@map("users")
 }
@@ -243,6 +244,7 @@ model EventRegistration {
 model Team {
   id          String      @id @default(cuid())
   name        String
+  description String      @default("")
   code        String      @unique
   status      TeamStatus  @default(ACTIVE)
   createdAt   DateTime    @default(now())
@@ -251,6 +253,7 @@ model Team {
   members       TeamMember[]
   registrations EventRegistration[]
   submissions   Submission[]
+  mentors       TeamMentor[]
 
   @@map("teams")
 }
@@ -266,6 +269,18 @@ model TeamMember {
 
   @@unique([teamId, userId])
   @@map("team_members")
+}
+
+model TeamMentor {
+  id         String   @id @default(cuid())
+  teamId     String
+  team       Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User     @relation("MentorTeams", fields: [userId], references: [id])
+  assignedAt DateTime @default(now())
+
+  @@unique([teamId, userId])
+  @@map("team_mentors")
 }
 
 model Submission {

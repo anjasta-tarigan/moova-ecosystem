@@ -14,6 +14,18 @@ const mapError = (err: any, res: Response) => {
     return error(res, "Already a team member", 400);
   if (err?.message === "Cannot remove self")
     return error(res, "Leader cannot remove self", 400);
+  if (err?.message === "Only students can be invited as members")
+    return error(res, "Only students can be invited as members", 400);
+  if (err?.message === "Already a member of this team")
+    return error(res, "User is already a member of this team", 409);
+  if (err?.message === "Only admin or judge users can be mentors")
+    return error(
+      res,
+      "Only admin or judge users can be assigned as mentors",
+      400,
+    );
+  if (err?.message === "Already a mentor of this team")
+    return error(res, "User is already a mentor of this team", 409);
   return error(res, "Internal server error", 500);
 };
 
@@ -37,7 +49,11 @@ export const getTeam = async (req: Request, res: Response) => {
 
 export const createTeam = async (req: Request, res: Response) => {
   try {
-    const team = await teamService.createTeam(req.user!.id, req.body.name);
+    const team = await teamService.createTeam(
+      req.user!.id,
+      req.body.name,
+      req.body.description || "",
+    );
     return success(res, team, "Team created", 201);
   } catch (err) {
     return mapError(err, res);
@@ -106,6 +122,67 @@ export const changeRole = async (req: Request, res: Response) => {
       req.body.role,
     );
     return success(res, result);
+  } catch (err) {
+    return mapError(err, res);
+  }
+};
+
+export const searchStudents = async (req: Request, res: Response) => {
+  try {
+    const query = (req.query.q as string) || "";
+    const teamId = (req.query.teamId as string) || undefined;
+    const users = await teamService.searchStudents(query, teamId);
+    return success(res, users);
+  } catch (err) {
+    return mapError(err, res);
+  }
+};
+
+export const searchMentors = async (req: Request, res: Response) => {
+  try {
+    const query = (req.query.q as string) || "";
+    const teamId = (req.query.teamId as string) || undefined;
+    const users = await teamService.searchMentors(query, teamId);
+    return success(res, users);
+  } catch (err) {
+    return mapError(err, res);
+  }
+};
+
+export const inviteMember = async (req: Request, res: Response) => {
+  try {
+    const member = await teamService.inviteMember(
+      req.params.id,
+      req.user!.id,
+      req.body.userId,
+    );
+    return success(res, member, "Member invited successfully", 201);
+  } catch (err) {
+    return mapError(err, res);
+  }
+};
+
+export const assignMentor = async (req: Request, res: Response) => {
+  try {
+    const mentor = await teamService.assignMentor(
+      req.params.id,
+      req.user!.id,
+      req.body.userId,
+    );
+    return success(res, mentor, "Mentor assigned successfully", 201);
+  } catch (err) {
+    return mapError(err, res);
+  }
+};
+
+export const removeMentor = async (req: Request, res: Response) => {
+  try {
+    await teamService.removeMentor(
+      req.params.id,
+      req.user!.id,
+      req.params.userId,
+    );
+    return success(res, null, "Mentor removed");
   } catch (err) {
     return mapError(err, res);
   }
