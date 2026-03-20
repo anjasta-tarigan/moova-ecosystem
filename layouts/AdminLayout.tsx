@@ -23,7 +23,31 @@ const AdminLayout = () => {
   const { logout, isSuperAdmin, isAdmin } = useAuth();
 
   const getNavItems = () => {
-    const adminItems = [
+    if (isSuperAdmin) {
+      return [
+        { label: "Dashboard", href: "/superadmin", icon: LayoutDashboard },
+        { label: "Events", href: "/superadmin/events", icon: Calendar },
+        {
+          label: "Submissions",
+          href: "/superadmin/submissions",
+          icon: FileText,
+        },
+        { label: "Students", href: "/superadmin/siswa", icon: Users },
+        {
+          label: "Certificates",
+          href: "/superadmin/certificates",
+          icon: Award,
+        },
+        { label: "Reports", href: "/superadmin/reports", icon: BarChart2 },
+        { label: "Manage Users", href: "/superadmin/users", icon: Shield },
+        {
+          label: "Judge Assignments",
+          href: "/superadmin/assignments",
+          icon: Briefcase,
+        },
+      ];
+    }
+    return [
       { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
       { label: "Events", href: "/admin/events", icon: Calendar },
       { label: "Submissions", href: "/admin/submissions", icon: FileText },
@@ -31,21 +55,6 @@ const AdminLayout = () => {
       { label: "Certificates", href: "/admin/certificates", icon: Award },
       { label: "Reports", href: "/admin/reports", icon: BarChart2 },
     ];
-
-    const superAdminItems = [
-      { label: "Manage Users", href: "/superadmin/users", icon: Shield },
-      {
-        label: "Judge Assignments",
-        href: "/superadmin/assignments",
-        icon: Briefcase,
-      },
-      { label: "System Stats", href: "/superadmin", icon: Activity },
-    ];
-
-    if (isSuperAdmin) {
-      return [...adminItems, ...superAdminItems];
-    }
-    return adminItems;
   };
 
   const navItems = getNavItems();

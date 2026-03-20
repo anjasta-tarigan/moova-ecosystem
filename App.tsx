@@ -283,6 +283,15 @@ const App: React.FC = () => {
                 path="assignments"
                 element={<SuperAdminJudgeAssignments />}
               />
+
+              {/* Mirror semua admin pages di bawah /superadmin/* */}
+              <Route path="events" element={<AdminEvents />} />
+              <Route path="events/new" element={<AdminEventForm />} />
+              <Route path="events/:id/edit" element={<AdminEventForm />} />
+              <Route path="submissions" element={<AdminSubmissions />} />
+              <Route path="siswa" element={<AdminSiswa />} />
+              <Route path="certificates" element={<AdminCertificates />} />
+              <Route path="reports" element={<AdminReports />} />
             </Route>
           </Routes>
         </SuspenseWrapper>
