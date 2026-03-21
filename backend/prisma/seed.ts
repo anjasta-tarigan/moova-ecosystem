@@ -269,16 +269,24 @@ async function main() {
     },
   });
 
+  // Generate a simple cert code and hash for the sample certificate
+  const certCode =
+    `GIVA-${Date.now()}-` +
+    Math.random().toString(36).substring(2, 8).toUpperCase();
+  const certHash = await hashPassword(certCode);
+
   await prisma.certificate.upsert({
-    where: { id: "sample-certificate" },
+    where: { certCode: certCode },
     update: {},
     create: {
-      id: "sample-certificate",
-      recipientId: student.id,
+      certCode: certCode,
+      userId: student.id,
       eventId: event.id,
-      type: "PARTICIPANT",
-      award: "Certificate of Participation - GIVA 2024",
-      issuedBy: "GIVA Global",
+      awardType: "PARTICIPANT",
+      customTitle: "Certificate of Participation - GIVA 2024",
+      issuedById: admin.id,
+      certHash: certHash,
+      prevHash: "",
     },
   });
 

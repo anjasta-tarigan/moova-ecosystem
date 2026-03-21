@@ -174,7 +174,7 @@ export const listCertificates = async (query: any) => {
   const skip = (page - 1) * limit;
   const where: any = {};
   if (query.eventId) where.eventId = query.eventId;
-  if (query.type) where.type = query.type;
+  if (query.type) where.awardType = query.type;
 
   const [total, data] = await Promise.all([
     prisma.certificate.count({ where }),
@@ -182,7 +182,7 @@ export const listCertificates = async (query: any) => {
       where,
       skip,
       take: limit,
-      include: { event: true, recipient: true },
+      include: { event: true, user: true },
     }),
   ]);
   return { data, total, page, limit };

@@ -57,6 +57,19 @@ enum CertificateStatus {
   REVOKED
 }
 
+enum AwardType {
+  WINNER
+  PARTICIPANT
+  JUDGE
+  MENTOR
+  CUSTOM
+}
+
+enum CertStatus {
+  ACTIVE
+  REVOKED
+}
+
 enum TeamStatus {
   ACTIVE
   DISBANDED
@@ -88,6 +101,7 @@ model User {
   eventRegistrations  EventRegistration[]
   submissions         Submission[]        @relation("SubmittedBy")
   certificates        Certificate[]
+  issuedCertificates  Certificate[]       @relation("IssuedCertificates")
   judgeAssignments    JudgeAssignment[]   @relation("JudgeAssignments")
   scores              Score[]             @relation("JudgeScores")
   refreshTokens       RefreshToken[]
@@ -363,19 +377,31 @@ model Score {
 }
 
 model Certificate {
-  id               String            @id @default(cuid())
-  recipientId      String
-  recipient        User              @relation(fields: [recipientId], references: [id])
-  eventId          String
-  event            Event             @relation(fields: [eventId], references: [id])
-  type             CertificateType
-  award            String
-  issueDate        DateTime          @default(now())
-  issuedBy         String
-  status           CertificateStatus @default(VALID)
+  id               String     @id @default(uuid())
+  certCode         String     @unique
+  userId           String
+  user             User       @relation(fields: [userId], references: [id])
+  eventId          String?
+  event            Event?     @relation(fields: [eventId], references: [id])
+  awardType        AwardType
+  customTitle      String?
+  rankLabel        String?
+  issuedById       String
+  issuedBy         User       @relation("IssuedCertificates", fields: [issuedById], references: [id])
+  certHash         String     @unique
+  prevHash         String
+  templateId       String?
+  bgDataUrl        String?    @db.Text
+  status           CertStatus @default(ACTIVE)
+  revokedAt        DateTime?
+  revokedById      String?
   revocationReason String?
-  createdAt        DateTime          @default(now())
+  issuedAt         DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
 
+  @@index([userId])
+  @@index([eventId])
+  @@index([certCode])
   @@map("certificates")
 }
 

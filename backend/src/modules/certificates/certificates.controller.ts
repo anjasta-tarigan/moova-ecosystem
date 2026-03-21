@@ -1,56 +1,63 @@
 import { Request, Response } from "express";
-import { error, paginated, success } from "../../utils/response";
-import * as certService from "./certificates.service";
+import { error, success } from "../../utils/response";
+import * as svc from "./certificates.service";
 
-const mapError = (err: any, res: Response) => {
-  if (err?.code === "P2025") return error(res, "Data not found", 404);
-  return error(res, "Internal server error", 500);
-};
-
-export const verify = async (req: Request, res: Response) => {
+export async function issueHandler(req: Request, res: Response) {
   try {
-    const cert = await certService.verifyCertificate(req.params.id);
-    return success(res, cert);
-  } catch (err) {
-    return mapError(err, res);
+    const issuedById = req.user!.id;
+    const cert = await svc.issueCertificate({ ...req.body, issuedById });
+    return success(res, cert, "Certificate issued", 201);
+  } catch (e: any) {
+    return error(res, e.message, 400);
   }
-};
+}
 
-export const myCertificates = async (req: Request, res: Response) => {
+export async function listHandler(req: Request, res: Response) {
   try {
-    const certs = await certService.listMyCertificates(req.user!.id);
-    return success(res, certs);
-  } catch (err) {
-    return mapError(err, res);
+    const { userId, eventId, status, page, limit, search } = req.query;
+    const result = await svc.listCertificates({
+      userId: userId as string | undefined,
+      eventId: eventId as string | undefined,
+      status: status as any,
+      page: page ? Number(page) : 1,
+      limit: limit ? Number(limit) : 20,
+      search: search as string | undefined,
+    });
+    return res.json({ success: true, ...result });
+  } catch (e: any) {
+    return error(res, e.message, 500);
   }
-};
+}
 
-export const createCertificate = async (req: Request, res: Response) => {
+export async function revokeHandler(req: Request, res: Response) {
   try {
-    const cert = await certService.createCertificate(req.body);
-    return success(res, cert, "Certificate created", 201);
-  } catch (err) {
-    return mapError(err, res);
-  }
-};
-
-export const listCertificates = async (req: Request, res: Response) => {
-  try {
-    const result = await certService.listCertificates(req.query);
-    return paginated(res, result.data, result.total, result.page, result.limit);
-  } catch (err) {
-    return mapError(err, res);
-  }
-};
-
-export const revokeCertificate = async (req: Request, res: Response) => {
-  try {
-    const cert = await certService.revokeCertificate(
-      req.params.id,
-      req.body.reason,
-    );
+    const revokedById = req.user!.id;
+    const cert = await svc.revokeCertificate({
+      certCode: req.params.certCode,
+      revokedById,
+      reason: req.body.reason ?? "Revoked by administrator",
+    });
     return success(res, cert, "Certificate revoked");
-  } catch (err) {
-    return mapError(err, res);
+  } catch (e: any) {
+    return error(res, e.message, 400);
   }
-};
+}
+
+export async function verifyHandler(req: Request, res: Response) {
+  try {
+    const result = await svc.verifyCertificate(req.params.certCode);
+    return success(res, result);
+  } catch (e: any) {
+    return error(res, e.message, 500);
+  }
+}
+
+export async function myHandler(req: Request, res: Response) {
+  try {
+    const userId = req.user!.id;
+    const certs = await svc.getMyCertificates(userId);
+    return success(res, certs);
+  } catch (e: any) {
+    return error(res, e.message, 500);
+  }
+}

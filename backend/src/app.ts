@@ -40,7 +40,7 @@ app.use(
   submissionsRoutes,
 );
 app.use("/api/judge", authenticate, requireRole("JUDGE"), judgeRoutes);
-app.use("/api/certificates", certificatesRoutes);
+app.use("/api", certificatesRoutes);
 app.use(
   "/api/admin",
   authenticate,

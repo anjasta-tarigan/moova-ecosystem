@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuthContext } from "../../contexts/AuthContext";
 import { adminApi } from "../../services/api/adminApi";
@@ -57,7 +57,7 @@ interface StudentProfile {
   };
 }
 
-const TABS: { id: Tab; label: string; icon: JSX.Element }[] = [
+const TABS: { id: Tab; label: string; icon: ReactNode }[] = [
   { id: "identity", label: "Basic Identity", icon: <User size={16} /> },
   {
     id: "academic",

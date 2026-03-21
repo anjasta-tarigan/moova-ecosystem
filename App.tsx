@@ -46,6 +46,12 @@ const AdminSubmissions = lazy(() => import("./pages/admin/AdminSubmissions"));
 const AdminSiswa = lazy(() => import("./pages/admin/AdminSiswa"));
 const AdminSiswaDetail = lazy(() => import("./pages/admin/AdminSiswaDetail"));
 const AdminCertificates = lazy(() => import("./pages/admin/AdminCertificates"));
+const CertificateCreator = lazy(
+  () => import("./pages/admin/CertificateCreator"),
+);
+const EventCertificateView = lazy(
+  () => import("./pages/admin/EventCertificateView"),
+);
 const AdminReports = lazy(() => import("./pages/admin/AdminReports"));
 
 const SuperAdminDashboard = lazy(
@@ -275,6 +281,14 @@ const App: React.FC = () => {
               <Route path="siswa" element={<AdminSiswa />} />
               <Route path="siswa/:id" element={<AdminSiswaDetail />} />
               <Route path="certificates" element={<AdminCertificates />} />
+              <Route
+                path="certificates/create"
+                element={<CertificateCreator />}
+              />
+              <Route
+                path="certificates/event/:eventId"
+                element={<EventCertificateView />}
+              />
               <Route path="reports" element={<AdminReports />} />
             </Route>
 
@@ -294,6 +308,14 @@ const App: React.FC = () => {
               <Route path="siswa" element={<AdminSiswa />} />
               <Route path="siswa/:id" element={<AdminSiswaDetail />} />
               <Route path="certificates" element={<AdminCertificates />} />
+              <Route
+                path="certificates/create"
+                element={<CertificateCreator />}
+              />
+              <Route
+                path="certificates/event/:eventId"
+                element={<EventCertificateView />}
+              />
               <Route path="reports" element={<AdminReports />} />
             </Route>
           </Routes>

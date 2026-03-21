@@ -62,3 +62,28 @@ export const adminApi = {
   createJudgeAssignment: (data: Record<string, any>) =>
     api.post("/api/superadmin/judge-assignments", data),
 };
+
+export interface CertificatePayload {
+  userId: string;
+  eventId?: string;
+  awardType: "WINNER" | "PARTICIPANT" | "JUDGE" | "MENTOR" | "CUSTOM";
+  customTitle?: string;
+  rankLabel?: string;
+  templateId?: string;
+  bgDataUrl?: string;
+}
+
+export const issueCertificate = (data: CertificatePayload) =>
+  api.post("/api/admin/certificates", data);
+
+export const getAdminCertificates = (params?: {
+  userId?: string;
+  eventId?: string;
+  status?: string;
+  page?: number;
+  limit?: number;
+  search?: string;
+}) => api.get("/api/admin/certificates", { params });
+
+export const revokeCertificate = (certCode: string, reason: string) =>
+  api.delete(`/api/admin/certificates/${certCode}`, { data: { reason } });

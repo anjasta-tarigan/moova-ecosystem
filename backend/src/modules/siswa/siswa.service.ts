@@ -144,7 +144,7 @@ export const mySubmissions = async (userId: string) => {
 
 export const myCertificates = async (userId: string) => {
   return prisma.certificate.findMany({
-    where: { recipientId: userId },
+    where: { userId },
     include: { event: true },
   });
 };
