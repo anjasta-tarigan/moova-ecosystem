@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   ChevronLeft,
   ChevronRight,
@@ -43,34 +43,87 @@ interface Recipient {
 
 const RANKS = ["1st Place", "2nd Place", "3rd Place"] as const;
 
-async function downloadCertPDF(el: HTMLElement, certCode: string) {
+async function generateQrDataUrl(certCode: string): Promise<string> {
+  const verifyUrl = `${window.location.origin}/#/verify/${certCode}`;
+  const Q = await import("qrcode");
+  return Q.toDataURL(verifyUrl, {
+    width: 96,
+    margin: 1,
+    errorCorrectionLevel: "H",
+    color: { dark: "#000000", light: "#ffffff" },
+  });
+}
+
+async function downloadCertPDF(
+  certCode: string,
+  design: CertDesign,
+  template: any,
+  recipient: any,
+  issuerName: string,
+  eventTitle: string,
+  issuedAt: string,
+) {
+  const qrDataUrl = await generateQrDataUrl(certCode);
+
+  const container = document.createElement("div");
+  Object.assign(container.style, {
+    position: "absolute",
+    left: "-9999px",
+    top: "0",
+    width: CERT_W + "px",
+    height: CERT_H + "px",
+    overflow: "hidden",
+    pointerEvents: "none",
+    zIndex: "-1",
+  });
+  document.body.appendChild(container);
+
+  const { createRoot } = await import("react-dom/client");
+  const root = createRoot(container);
+
+  root.render(
+    <CertCanvas
+      design={design}
+      template={template}
+      recipient={recipient}
+      certCode={certCode}
+      issuerName={issuerName}
+      eventTitle={eventTitle}
+      issuedAt={issuedAt}
+      scale={1}
+      draggable={false}
+      layout={design.layout}
+      qrDataUrl={qrDataUrl}
+    />,
+  );
+
+  await new Promise<void>((r) =>
+    requestAnimationFrame(() => requestAnimationFrame(() => r())),
+  );
+
   await document.fonts.ready;
-
-  const qrImg = el.querySelector('img[alt="QR"]') as HTMLImageElement | null;
-  if (qrImg && !qrImg.complete) {
-    await new Promise<void>((r) => {
-      qrImg.onload = () => r();
-      qrImg.onerror = () => r();
-    });
-  }
-
-  const brandImg = el.querySelector(
-    'img[alt="GIVA"]',
-  ) as HTMLImageElement | null;
-  if (brandImg && !brandImg.complete) {
-    await new Promise<void>((r) => {
-      brandImg.onload = () => r();
-      brandImg.onerror = () => r();
-    });
-  }
+  const imgs = Array.from(container.querySelectorAll("img"));
+  await Promise.all(
+    imgs.map((img) =>
+      img.complete
+        ? Promise.resolve()
+        : new Promise<void>((r) => {
+            img.onload = () => r();
+            img.onerror = () => r();
+          }),
+    ),
+  );
 
   await new Promise<void>((r) => requestAnimationFrame(() => r()));
 
   try {
+    const el = container.firstChild as HTMLElement;
+    if (!el) throw new Error("CertCanvas did not render");
+
     const canvas = await html2canvas(el, {
       scale: 2,
       useCORS: true,
-      allowTaint: false,
+      allowTaint: true,
       backgroundColor: null,
       logging: false,
       imageTimeout: 8000,
@@ -83,15 +136,30 @@ async function downloadCertPDF(el: HTMLElement, certCode: string) {
       format: "a4",
     });
     pdf.addImage(canvas.toDataURL("image/png"), "PNG", 0, 0, 297, 210);
+
+    // Draw QR directly onto PDF as fallback/overlay
+    if (qrDataUrl) {
+      const qrX = (0.8 * CERT_W + 8) / CERT_W * 297;
+      const qrY = (0.76 * CERT_H + 8) / CERT_H * 210;
+      const qrSize = 80 / CERT_W * 297;
+      pdf.addImage(qrDataUrl, "PNG", qrX, qrY, qrSize, qrSize);
+    }
     pdf.save(`${certCode}.pdf`);
   } catch (err) {
     console.error("[PDF]", err);
     alert("PDF generation failed. Please try again.");
+  } finally {
+    root.unmount();
+    document.body.removeChild(container);
   }
 }
 
 const CertificateCreator: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const basePath = location.pathname.startsWith("/superadmin")
+    ? "/superadmin"
+    : "/admin";
   const [step, setStep] = useState(1);
 
   const [design, setDesign] = useState<CertDesign>({
@@ -106,6 +174,8 @@ const CertificateCreator: React.FC = () => {
 
   const [events, setEvents] = useState<any[]>([]);
   const [students, setStudents] = useState<any[]>([]);
+  const [judges, setJudges] = useState<any[]>([]);
+  const [recipientTab, setRecipientTab] = useState<"students" | "judges">("students");
   const [eventId, setEventId] = useState("");
   const [eventTitle, setEventTitle] = useState("");
   const [recipients, setRecipients] = useState<Recipient[]>([]);
@@ -125,6 +195,10 @@ const CertificateCreator: React.FC = () => {
       .get("/api/admin/siswa", { params: { limit: 300 } })
       .then((r) => setStudents(r.data.data ?? []))
       .catch(() => {});
+    api
+      .get("/api/superadmin/users", { params: { role: "JUDGE", limit: 200 } })
+      .then((r) => setJudges(r.data.data ?? []))
+      .catch(() => {});
   }, [step]);
 
   const handleEventChange = (id: string) => {
@@ -133,13 +207,13 @@ const CertificateCreator: React.FC = () => {
     setRecipients([]);
   };
 
-  const getStudentName = (s: any): string =>
+  const getPersonName = (s: any): string =>
     `${s.siswaProfile?.firstName ?? ""} ${s.siswaProfile?.lastName ?? ""}`.trim() ||
     s.fullName ||
     s.name ||
     s.email;
 
-  const toggleStudent = (s: any) => {
+  const togglePerson = (s: any) => {
     setRecipients((prev) => {
       const exists = prev.find((r) => r.userId === s.id);
       if (exists) return prev.filter((r) => r.userId !== s.id);
@@ -147,7 +221,7 @@ const CertificateCreator: React.FC = () => {
         ...prev,
         {
           userId: s.id,
-          name: getStudentName(s),
+          name: getPersonName(s),
           email: s.email,
           awardType: bulkAward,
           rankLabel: bulkAward === "WINNER" ? "1st Place" : undefined,
@@ -250,7 +324,7 @@ const CertificateCreator: React.FC = () => {
     <div className="space-y-6 max-w-6xl mx-auto animate-in fade-in duration-300">
       <div className="flex items-center gap-4">
         <button
-          onClick={() => navigate("/admin/certificates")}
+          onClick={() => navigate(`${basePath}/certificates`)}
           className="p-2 hover:bg-slate-100 rounded-lg text-slate-500"
         >
           <ChevronLeft size={20} />
@@ -654,42 +728,61 @@ const CertificateCreator: React.FC = () => {
           </div>
 
           <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-            <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
-              <p className="text-sm font-bold text-slate-700">
-                Students ({students.length})
-              </p>
+            {/* Tabs: Students | Judges */}
+            <div className="px-5 py-3 border-b border-slate-100 flex items-center gap-4">
+              {(["students", "judges"] as const).map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setRecipientTab(tab)}
+                  className={`text-sm font-bold pb-1 border-b-2 transition-colors ${
+                    recipientTab === tab
+                      ? "text-slate-900 border-slate-900"
+                      : "text-slate-400 border-transparent hover:text-slate-600"
+                  }`}
+                >
+                  {tab === "students" ? `Students (${students.length})` : `Judges (${judges.length})`}
+                </button>
+              ))}
               <button
-                onClick={() =>
-                  setRecipients(
-                    students.map((s) => ({
-                      userId: s.id,
-                      name: getStudentName(s),
-                      email: s.email,
-                      awardType: bulkAward,
-                      rankLabel:
-                        bulkAward === "WINNER" ? "1st Place" : undefined,
-                    })),
-                  )
-                }
-                className="text-xs text-blue-600 hover:underline font-medium"
+                onClick={() => {
+                  const list = recipientTab === "students" ? students : judges;
+                  setRecipients((prev) => {
+                    const existingIds = new Set(prev.map((r) => r.userId));
+                    const newRecipients = list
+                      .filter((s) => !existingIds.has(s.id))
+                      .map((s) => ({
+                        userId: s.id,
+                        name: getPersonName(s),
+                        email: s.email,
+                        awardType: recipientTab === "judges" ? ("JUDGE" as AwardType) : bulkAward,
+                        rankLabel: bulkAward === "WINNER" && recipientTab === "students" ? "1st Place" : undefined,
+                      }));
+                    return [...prev, ...newRecipients];
+                  });
+                }}
+                className="text-xs text-blue-600 hover:underline font-medium ml-auto"
               >
                 Select All
               </button>
             </div>
             <div className="overflow-y-auto max-h-[480px]">
-              {students.length === 0 ? (
-                <div className="py-16 text-center text-slate-400 text-sm">
-                  <RefreshCw size={24} className="animate-spin mx-auto mb-2" />
-                  Loading students...
-                </div>
-              ) : (
-                students.map((s: any) => {
-                  const name = getStudentName(s);
+              {(() => {
+                const list = recipientTab === "students" ? students : judges;
+                if (list.length === 0) {
+                  return (
+                    <div className="py-16 text-center text-slate-400 text-sm">
+                      <RefreshCw size={24} className="animate-spin mx-auto mb-2" />
+                      Loading {recipientTab}...
+                    </div>
+                  );
+                }
+                return list.map((s: any) => {
+                  const name = getPersonName(s);
                   const sel = !!recipients.find((r) => r.userId === s.id);
                   return (
                     <div
                       key={s.id}
-                      onClick={() => toggleStudent(s)}
+                      onClick={() => togglePerson(s)}
                       className={`flex items-center gap-3 px-5 py-3 cursor-pointer transition-colors border-b border-slate-50 last:border-0 ${
                         sel
                           ? "bg-emerald-50 hover:bg-emerald-100"
@@ -711,12 +804,15 @@ const CertificateCreator: React.FC = () => {
                         </p>
                         <p className="text-xs text-slate-400 truncate">
                           {s.email}
+                          {recipientTab === "judges" && (
+                            <span className="ml-2 text-purple-500 font-medium">JUDGE</span>
+                          )}
                         </p>
                       </div>
                     </div>
                   );
-                })
-              )}
+                });
+              })()}
             </div>
           </div>
         </div>
@@ -736,7 +832,7 @@ const CertificateCreator: React.FC = () => {
                         ? selectedTemplate.label
                         : "Custom Upload",
                   },
-                  { label: "Recipients", val: `${recipients.length} students` },
+                  { label: "Recipients", val: `${recipients.length} recipients` },
                 ].map((s) => (
                   <div key={s.label}>
                     <p className="text-xs text-slate-400 uppercase font-bold tracking-wider mb-1">
@@ -818,8 +914,8 @@ const CertificateCreator: React.FC = () => {
                   onClick={() =>
                     navigate(
                       eventId
-                        ? `/admin/certificates/event/${eventId}`
-                        : "/admin/certificates",
+                        ? `${basePath}/certificates/event/${eventId}`
+                        : `${basePath}/certificates`,
                     )
                   }
                   className="px-5 py-2.5 bg-slate-900 text-white font-bold rounded-lg hover:bg-black transition-colors"
@@ -827,7 +923,7 @@ const CertificateCreator: React.FC = () => {
                   View Certificates
                 </button>
                 <button
-                  onClick={() => navigate("/admin/certificates")}
+                  onClick={() => navigate(`${basePath}/certificates`)}
                   className="px-5 py-2.5 border border-slate-200 text-slate-700 font-bold rounded-lg hover:bg-slate-50 transition-colors"
                 >
                   Back to List
@@ -843,7 +939,7 @@ const CertificateCreator: React.FC = () => {
           <button
             onClick={() =>
               step === 1
-                ? navigate("/admin/certificates")
+                ? navigate(`${basePath}/certificates`)
                 : setStep((s) => s - 1)
             }
             className="flex items-center gap-2 px-4 py-2 border border-slate-200 text-slate-700 text-sm font-bold rounded-lg hover:bg-slate-50 transition-colors"

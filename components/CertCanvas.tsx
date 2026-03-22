@@ -59,35 +59,35 @@ export const TEMPLATES: TemplateStyle[] = [
   {
     id: "formal",
     label: "Formal",
-    description: "Navy & gold - classic official look",
-    bg: "linear-gradient(145deg,#0F172A 0%,#1E3A5F 100%)",
-    bgColor: "#0F172A",
-    textColor: "#F8FAFC",
-    accentColor: "#F59E0B",
-    fontFamily: 'Georgia,"Times New Roman",serif',
-    borderStyle: "8px solid #1E3A5F",
+    description: "Deep navy & gold — elegant official look",
+    bg: "linear-gradient(160deg,#0A1628 0%,#132347 50%,#0D1B3E 100%)",
+    bgColor: "#0A1628",
+    textColor: "#E8EDF5",
+    accentColor: "#D4A843",
+    fontFamily: '"Playfair Display",Georgia,"Times New Roman",serif',
+    borderStyle: "none",
   },
   {
     id: "modern",
     label: "Modern",
-    description: "White with blue bar - clean & professional",
+    description: "White with blue accent — clean & professional",
     bg: "#FFFFFF",
     bgColor: "#FFFFFF",
     textColor: "#0F172A",
-    accentColor: "#2563EB",
+    accentColor: "#1D4ED8",
     fontFamily: '"Inter","Segoe UI",Arial,sans-serif',
-    borderStyle: "8px solid #E2E8F0",
+    borderStyle: "none",
   },
   {
     id: "minimal",
     label: "Minimal",
-    description: "Light grey - understated elegance",
-    bg: "linear-gradient(180deg,#F8FAFC 0%,#F1F5F9 100%)",
-    bgColor: "#F8FAFC",
-    textColor: "#1E293B",
-    accentColor: "#475569",
+    description: "Warm grey — understated elegance",
+    bg: "linear-gradient(180deg,#FAFAF9 0%,#F5F5F4 100%)",
+    bgColor: "#FAFAF9",
+    textColor: "#1C1917",
+    accentColor: "#78716C",
     fontFamily: '"Helvetica Neue",Arial,sans-serif',
-    borderStyle: "8px solid #CBD5E1",
+    borderStyle: "none",
   },
 ];
 
@@ -123,7 +123,7 @@ export interface CertCanvasProps {
   draggable?: boolean;
   layout: ComponentLayout[];
   onLayoutChange?: (l: ComponentLayout[]) => void;
-  qrDataUrl?: string; // ← NEW: injected from parent for PDF
+  qrDataUrl?: string;
 }
 
 const CertCanvas: React.FC<CertCanvasProps> = ({
@@ -138,7 +138,7 @@ const CertCanvas: React.FC<CertCanvasProps> = ({
   draggable = false,
   layout,
   onLayoutChange,
-  qrDataUrl: qrDataUrlProp, // ← injected override
+  qrDataUrl: qrDataUrlProp,
 }) => {
   const verifyUrl = `${window.location.origin}/#/verify/${certCode}`;
   const qrUrlHook = useQR(qrDataUrlProp ? "" : verifyUrl);
@@ -149,12 +149,14 @@ const CertCanvas: React.FC<CertCanvasProps> = ({
   const textColor = tpl.textColor;
   const fontFamily = tpl.fontFamily;
   const isDark = tpl.id === "formal";
+  const isModern = tpl.id === "modern";
+  const isMinimal = tpl.id === "minimal";
 
   const awardLabel =
     recipient.awardType === "CUSTOM"
       ? (recipient.customTitle ?? "")
       : recipient.awardType === "WINNER"
-        ? `${recipient.rankLabel ?? "1st Place"} - Winner`
+        ? `${recipient.rankLabel ?? "1st Place"} — Winner`
         : recipient.awardType === "JUDGE"
           ? "Certificate of Judgeship"
           : recipient.awardType === "MENTOR"
@@ -224,7 +226,7 @@ const CertCanvas: React.FC<CertCanvasProps> = ({
     transform: `scale(${scale})`,
     transformOrigin: "top left",
     flexShrink: 0,
-    border: design.mode === "builtin" ? tpl.borderStyle : "8px solid #E2E8F0",
+    border: tpl.borderStyle,
     background: bgStyle,
     backgroundColor: tpl.bgColor,
     fontFamily,
@@ -275,17 +277,234 @@ const CertCanvas: React.FC<CertCanvasProps> = ({
 
   return (
     <div style={rootStyle}>
-      <div
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          height: 6,
-          backgroundColor: accentColor,
-          zIndex: 20,
-        }}
-      />
+      {/* ── FORMAL TEMPLATE DECORATIONS ── */}
+      {isDark && design.mode === "builtin" && (
+        <>
+          {/* Top accent bar with gradient */}
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              height: 5,
+              background: `linear-gradient(90deg, ${accentColor} 0%, #B8860B 50%, ${accentColor} 100%)`,
+              zIndex: 20,
+            }}
+          />
+          {/* Bottom accent bar */}
+          <div
+            style={{
+              position: "absolute",
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: 5,
+              background: `linear-gradient(90deg, ${accentColor} 0%, #B8860B 50%, ${accentColor} 100%)`,
+              zIndex: 20,
+            }}
+          />
+          {/* Inner border frame */}
+          <div
+            style={{
+              position: "absolute",
+              top: 18,
+              left: 18,
+              right: 18,
+              bottom: 18,
+              border: `1.5px solid ${accentColor}40`,
+              borderRadius: 2,
+              zIndex: 5,
+              pointerEvents: "none",
+            }}
+          />
+          {/* Corner geometric accents */}
+          {[
+            { top: 18, left: 18 },
+            { top: 18, right: 18 },
+            { bottom: 18, left: 18 },
+            { bottom: 18, right: 18 },
+          ].map((pos, i) => (
+            <div
+              key={i}
+              style={{
+                position: "absolute",
+                ...pos,
+                width: 36,
+                height: 36,
+                zIndex: 6,
+                pointerEvents: "none",
+              }}
+            >
+              <svg width="36" height="36" viewBox="0 0 36 36">
+                <path
+                  d={
+                    i === 0
+                      ? "M0 0 L18 0 L18 3 L3 3 L3 18 L0 18 Z"
+                      : i === 1
+                        ? "M18 0 L36 0 L36 18 L33 18 L33 3 L18 3 Z"
+                        : i === 2
+                          ? "M0 18 L3 18 L3 33 L18 33 L18 36 L0 36 Z"
+                          : "M18 33 L33 33 L33 18 L36 18 L36 36 L18 36 Z"
+                  }
+                  fill={accentColor}
+                  opacity="0.6"
+                />
+              </svg>
+            </div>
+          ))}
+          {/* Subtle rosette watermark */}
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              pointerEvents: "none",
+              opacity: 0.03,
+              zIndex: 1,
+            }}
+          >
+            <svg width="400" height="400" viewBox="0 0 400 400">
+              <circle
+                cx="200"
+                cy="200"
+                r="180"
+                fill="none"
+                stroke="#D4A843"
+                strokeWidth="0.5"
+              />
+              <circle
+                cx="200"
+                cy="200"
+                r="150"
+                fill="none"
+                stroke="#D4A843"
+                strokeWidth="0.3"
+              />
+              <circle
+                cx="200"
+                cy="200"
+                r="120"
+                fill="none"
+                stroke="#D4A843"
+                strokeWidth="0.3"
+              />
+              {Array.from({ length: 12 }).map((_, i) => {
+                const angle = (i * 30 * Math.PI) / 180;
+                return (
+                  <line
+                    key={i}
+                    x1={200 + 120 * Math.cos(angle)}
+                    y1={200 + 120 * Math.sin(angle)}
+                    x2={200 + 180 * Math.cos(angle)}
+                    y2={200 + 180 * Math.sin(angle)}
+                    stroke="#D4A843"
+                    strokeWidth="0.3"
+                  />
+                );
+              })}
+            </svg>
+          </div>
+        </>
+      )}
+
+      {/* ── MODERN TEMPLATE DECORATIONS ── */}
+      {isModern && design.mode === "builtin" && (
+        <>
+          {/* Top accent bar */}
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              height: 6,
+              background: `linear-gradient(90deg, #1D4ED8 0%, #3B82F6 50%, #1D4ED8 100%)`,
+              zIndex: 20,
+            }}
+          />
+          {/* Left geometric stripe */}
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: 80,
+              height: "100%",
+              background: `linear-gradient(180deg, ${accentColor}08 0%, ${accentColor}03 100%)`,
+              zIndex: 2,
+              pointerEvents: "none",
+            }}
+          />
+          {/* Right side accent geometric shape */}
+          <svg
+            style={{
+              position: "absolute",
+              right: 0,
+              top: 0,
+              height: "100%",
+              width: 200,
+              zIndex: 2,
+              pointerEvents: "none",
+            }}
+            viewBox="0 0 200 794"
+            preserveAspectRatio="none"
+          >
+            <path
+              d="M160 0 L200 0 L200 794 L160 794 Z"
+              fill={`${accentColor}05`}
+            />
+            <path
+              d="M180 0 L200 0 L200 794 L180 794 Z"
+              fill={`${accentColor}04`}
+            />
+          </svg>
+          {/* Subtle grid pattern */}
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              backgroundImage: `radial-gradient(${accentColor}06 1px, transparent 1px)`,
+              backgroundSize: "24px 24px",
+              zIndex: 1,
+              pointerEvents: "none",
+            }}
+          />
+        </>
+      )}
+
+      {/* ── MINIMAL TEMPLATE DECORATIONS ── */}
+      {isMinimal && design.mode === "builtin" && (
+        <>
+          {/* Thin top accent */}
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              height: 3,
+              backgroundColor: "#A8A29E",
+              zIndex: 20,
+            }}
+          />
+          {/* Subtle inner border */}
+          <div
+            style={{
+              position: "absolute",
+              top: 24,
+              left: 24,
+              right: 24,
+              bottom: 24,
+              border: "1px solid #E7E5E4",
+              zIndex: 5,
+              pointerEvents: "none",
+            }}
+          />
+        </>
+      )}
 
       {draggable && (
         <div
@@ -314,25 +533,7 @@ const CertCanvas: React.FC<CertCanvasProps> = ({
         </div>
       )}
 
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          pointerEvents: "none",
-          opacity: 0.025,
-          fontSize: 160,
-          fontWeight: 900,
-          letterSpacing: -8,
-          zIndex: 1,
-          color: isDark ? "#fff" : "#000",
-        }}
-      >
-        GIVA
-      </div>
-
+      {/* ── SYSTEM NAME ── */}
       <Comp id="systemName">
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <img
@@ -346,19 +547,20 @@ const CertCanvas: React.FC<CertCanvasProps> = ({
               style={{
                 fontSize: 10,
                 fontWeight: 700,
-                letterSpacing: 2,
+                letterSpacing: 3,
                 textTransform: "uppercase",
-                opacity: 0.7,
-                fontFamily: "Arial,sans-serif",
+                opacity: isDark ? 0.5 : 0.45,
+                fontFamily: '"Inter",Arial,sans-serif',
               }}
             >
-              GIVA - Science &amp; Innovation Ecosystem
+              GIVA — Science &amp; Innovation Ecosystem
             </div>
             <div
               style={{
                 fontSize: 9,
-                opacity: 0.5,
-                fontFamily: "Arial,sans-serif",
+                opacity: 0.35,
+                fontFamily: '"Inter",Arial,sans-serif',
+                marginTop: 2,
               }}
             >
               Official Certificate of Achievement
@@ -367,10 +569,11 @@ const CertCanvas: React.FC<CertCanvasProps> = ({
         </div>
       </Comp>
 
+      {/* Certificate ID badge (top-right) */}
       <div
         style={{
           position: "absolute",
-          right: SAFE_MARGIN + 4,
+          right: SAFE_MARGIN + 8,
           top: CERT_H * 0.06,
           textAlign: "right",
           zIndex: 10,
@@ -378,42 +581,57 @@ const CertCanvas: React.FC<CertCanvasProps> = ({
       >
         <div
           style={{
-            fontSize: 9,
-            letterSpacing: 1,
+            fontSize: 8,
+            letterSpacing: 2,
             textTransform: "uppercase",
-            opacity: 0.5,
-            fontFamily: "Arial,sans-serif",
+            opacity: 0.35,
+            fontFamily: '"Inter",Arial,sans-serif',
           }}
         >
           Certificate ID
         </div>
         <div
           style={{
-            fontFamily: '"Courier New",monospace',
+            fontFamily: '"JetBrains Mono","Courier New",monospace',
             fontSize: 11,
-            fontWeight: 700,
-            opacity: 0.85,
+            fontWeight: 600,
+            opacity: isDark ? 0.6 : 0.7,
+            marginTop: 2,
           }}
         >
           {certCode}
         </div>
       </div>
 
+      {/* ── AWARD TITLE ── */}
       <Comp id="awardTitle" centered>
-        <div
-          style={{
-            textAlign: "center",
-            fontSize: 28,
-            fontWeight: 700,
-            color: accentColor,
-            whiteSpace: "nowrap",
-            letterSpacing: -0.5,
-          }}
-        >
-          {awardLabel || "Award Title"}
+        <div style={{ textAlign: "center" }}>
+          {/* Decorative line above */}
+          <div
+            style={{
+              width: 50,
+              height: 1,
+              backgroundColor: accentColor,
+              opacity: 0.5,
+              margin: "0 auto 14px",
+            }}
+          />
+          <div
+            style={{
+              fontSize: 30,
+              fontWeight: 700,
+              color: accentColor,
+              whiteSpace: "nowrap",
+              letterSpacing: isDark ? 1 : -0.5,
+              lineHeight: 1.1,
+            }}
+          >
+            {awardLabel || "Award Title"}
+          </div>
         </div>
       </Comp>
 
+      {/* "This certifies that" label */}
       <div
         style={{
           position: "absolute",
@@ -422,17 +640,18 @@ const CertCanvas: React.FC<CertCanvasProps> = ({
           transform: "translateX(-50%)",
           textAlign: "center",
           zIndex: 10,
-          fontSize: 11,
-          letterSpacing: 5,
+          fontSize: 10,
+          letterSpacing: 6,
           textTransform: "uppercase",
-          opacity: 0.55,
-          fontFamily: "Arial,sans-serif",
+          opacity: 0.4,
+          fontFamily: '"Inter",Arial,sans-serif',
           whiteSpace: "nowrap",
         }}
       >
         This certifies that
       </div>
 
+      {/* ── RECIPIENT NAME ── */}
       <Comp id="recipient" centered>
         <div
           style={{
@@ -444,10 +663,10 @@ const CertCanvas: React.FC<CertCanvasProps> = ({
           <div
             style={{
               textAlign: "center",
-              fontSize: 52,
+              fontSize: 48,
               fontWeight: 700,
-              lineHeight: 1.1,
-              letterSpacing: -1,
+              lineHeight: 1.15,
+              letterSpacing: isDark ? 1 : -1,
               whiteSpace: "nowrap",
               paddingLeft: 12,
               paddingRight: 12,
@@ -458,10 +677,10 @@ const CertCanvas: React.FC<CertCanvasProps> = ({
           <div
             style={{
               marginTop: 14,
-              height: 2,
-              backgroundColor: isDark
-                ? "rgba(255,255,255,0.35)"
-                : "rgba(15,23,42,0.20)",
+              height: isDark ? 1 : 2,
+              background: isDark
+                ? `linear-gradient(90deg, transparent, ${accentColor}60, transparent)`
+                : `linear-gradient(90deg, transparent, rgba(15,23,42,0.15), transparent)`,
               borderRadius: 1,
               flexShrink: 0,
             }}
@@ -469,13 +688,14 @@ const CertCanvas: React.FC<CertCanvasProps> = ({
         </div>
       </Comp>
 
+      {/* ── EVENT NAME ── */}
       <Comp id="eventName" centered>
         <div
           style={{
             textAlign: "center",
             fontSize: 14,
-            opacity: 0.65,
-            fontFamily: "Arial,sans-serif",
+            opacity: 0.55,
+            fontFamily: '"Inter",Arial,sans-serif',
             whiteSpace: "nowrap",
           }}
         >
@@ -483,23 +703,25 @@ const CertCanvas: React.FC<CertCanvasProps> = ({
         </div>
       </Comp>
 
+      {/* ── SIGNATURE ── */}
       <Comp id="signature">
         <div>
           <div
             style={{
               width: 160,
-              borderBottom: `1px solid ${isDark ? "#334155" : "#CBD5E1"}`,
+              borderBottom: `1px solid ${isDark ? accentColor + "40" : "#CBD5E1"}`,
               marginBottom: 8,
             }}
           />
           <div style={{ fontSize: 13, fontWeight: 700 }}>{issuerName}</div>
           <div
             style={{
-              fontSize: 10,
-              letterSpacing: 2,
+              fontSize: 9,
+              letterSpacing: 3,
               textTransform: "uppercase",
-              opacity: 0.5,
-              fontFamily: "Arial,sans-serif",
+              opacity: 0.4,
+              fontFamily: '"Inter",Arial,sans-serif',
+              marginTop: 2,
             }}
           >
             Authorized Issuer
@@ -507,6 +729,7 @@ const CertCanvas: React.FC<CertCanvasProps> = ({
         </div>
       </Comp>
 
+      {/* ── QR + DATE ── */}
       <Comp id="qrDate">
         <div style={{ textAlign: "center" }}>
           <div
@@ -517,12 +740,14 @@ const CertCanvas: React.FC<CertCanvasProps> = ({
               display: "inline-block",
               lineHeight: 0,
               border: "1px solid #E2E8F0",
+              boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
             }}
           >
             {qrUrl ? (
               <img
                 src={qrUrl}
                 alt="QR"
+                crossOrigin="anonymous"
                 width={80}
                 height={80}
                 style={{ display: "block" }}
@@ -550,8 +775,8 @@ const CertCanvas: React.FC<CertCanvasProps> = ({
             style={{
               marginTop: 6,
               fontSize: 10,
-              opacity: 0.55,
-              fontFamily: "Arial,sans-serif",
+              opacity: 0.45,
+              fontFamily: '"Inter",Arial,sans-serif',
             }}
           >
             {new Date(issuedAt).toLocaleDateString("en-US", {

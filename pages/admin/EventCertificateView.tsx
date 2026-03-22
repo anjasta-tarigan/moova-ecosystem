@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import {
   ChevronLeft,
   Download,
@@ -36,35 +36,96 @@ function buildDesign(cert: any): CertDesign {
   };
 }
 
-async function downloadSingleCert(cert: any) {
-  const el = document.getElementById(`ev-cert-${cert.id}`);
-  if (!el) return;
+// -- QR pre-generator (silent, no DOM output) -----------------------
+const QRGenerator: React.FC<{
+  certCode: string;
+  onGenerated: (certCode: string, dataUrl: string) => void;
+}> = ({ certCode, onGenerated }) => {
+  const verifyUrl = `${window.location.origin}/#/verify/${certCode}`;
+  useEffect(() => {
+    import("qrcode").then((Q) =>
+      Q.toDataURL(verifyUrl, {
+        width: 96,
+        margin: 1,
+        errorCorrectionLevel: "H",
+        color: { dark: "#000000", light: "#ffffff" },
+      }).then((dataUrl) => onGenerated(certCode, dataUrl)),
+    );
+  }, [certCode]);
+  return null;
+};
 
+// -- Imperative PDF download with QR injection ----------------------
+async function downloadSingleCert(cert: any, qrDataUrl: string) {
+  const container = document.createElement("div");
+  Object.assign(container.style, {
+    position: "absolute",
+    left: "-9999px",
+    top: "0",
+    width: CERT_W + "px",
+    height: CERT_H + "px",
+    overflow: "hidden",
+    pointerEvents: "none",
+    zIndex: "-1",
+  });
+  document.body.appendChild(container);
+
+  const { createRoot } = await import("react-dom/client");
+  const root = createRoot(container);
+
+  root.render(
+    <CertCanvas
+      design={buildDesign(cert)}
+      template={getTemplate(cert.templateId)}
+      recipient={{
+        name: cert.user?.fullName ?? cert.user?.name ?? "Recipient",
+        awardType: cert.awardType,
+        rankLabel: cert.rankLabel,
+        customTitle: cert.customTitle,
+      }}
+      certCode={cert.certCode}
+      issuerName={
+        cert.issuedBy?.fullName ?? cert.issuedBy?.name ?? "GIVA Administrator"
+      }
+      eventTitle={cert.event?.title ?? ""}
+      issuedAt={cert.issuedAt}
+      scale={1}
+      draggable={false}
+      layout={AUTO_LAYOUT}
+      qrDataUrl={qrDataUrl}
+    />,
+  );
+
+  // Wait for React to flush + browser to paint
+  await new Promise<void>((r) =>
+    requestAnimationFrame(() => requestAnimationFrame(() => r())),
+  );
+
+  // Wait for all images to load
   await document.fonts.ready;
-  const qrImg = el.querySelector('img[alt="QR"]') as HTMLImageElement | null;
-  if (qrImg && !qrImg.complete) {
-    await new Promise<void>((r) => {
-      qrImg.onload = () => r();
-      qrImg.onerror = () => r();
-    });
-  }
-  const brandImg = el.querySelector(
-    'img[alt="GIVA"]',
-  ) as HTMLImageElement | null;
-  if (brandImg && !brandImg.complete) {
-    await new Promise<void>((r) => {
-      brandImg.onload = () => r();
-      brandImg.onerror = () => r();
-    });
-  }
+  const imgs = Array.from(container.querySelectorAll("img"));
+  await Promise.all(
+    imgs.map((img) =>
+      img.complete
+        ? Promise.resolve()
+        : new Promise<void>((r) => {
+            img.onload = () => r();
+            img.onerror = () => r();
+          }),
+    ),
+  );
 
+  // One final frame to ensure paint
   await new Promise<void>((r) => requestAnimationFrame(() => r()));
 
   try {
+    const el = container.firstChild as HTMLElement;
+    if (!el) throw new Error("CertCanvas did not render");
+
     const canvas = await html2canvas(el, {
       scale: 2,
       useCORS: true,
-      allowTaint: false,
+      allowTaint: true,
       backgroundColor: null,
       logging: false,
       imageTimeout: 8000,
@@ -77,21 +138,39 @@ async function downloadSingleCert(cert: any) {
       format: "a4",
     });
     pdf.addImage(canvas.toDataURL("image/png"), "PNG", 0, 0, 297, 210);
+
+    // Draw QR directly onto PDF as a fallback/overlay
+    if (qrDataUrl) {
+      const qrX = (0.8 * CERT_W + 8) / CERT_W * 297;
+      const qrY = (0.76 * CERT_H + 8) / CERT_H * 210;
+      const qrSize = 80 / CERT_W * 297;
+      pdf.addImage(qrDataUrl, "PNG", qrX, qrY, qrSize, qrSize);
+    }
     pdf.save(`${cert.certCode}.pdf`);
-  } catch {
-    alert("PDF generation failed. Please try again.");
+  } finally {
+    root.unmount();
+    document.body.removeChild(container);
   }
 }
 
 const EventCertificateView: React.FC = () => {
   const { eventId } = useParams<{ eventId: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const basePath = location.pathname.startsWith("/superadmin")
+    ? "/superadmin"
+    : "/admin";
+
   const [certs, setCerts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [preview, setPreview] = useState<any | null>(null);
   const [revoking, setRevoking] = useState<any | null>(null);
   const [reason, setReason] = useState("");
   const [rl, setRL] = useState(false);
+  const [qrMap, setQrMap] = useState<Record<string, string>>({});
+
+  const handleQRGenerated = (certCode: string, dataUrl: string) =>
+    setQrMap((prev) => ({ ...prev, [certCode]: dataUrl }));
 
   const load = async () => {
     setLoading(true);
@@ -127,41 +206,38 @@ const EventCertificateView: React.FC = () => {
     }
   };
 
+  const handleDownload = async (cert: any) => {
+    const qr = qrMap[cert.certCode];
+    if (!qr) {
+      alert("QR code is still generating. Please wait a moment and try again.");
+      return;
+    }
+    try {
+      await downloadSingleCert(cert, qr);
+    } catch {
+      alert("PDF generation failed. Please try again.");
+    }
+  };
+
   const eventTitle = certs[0]?.event?.title ?? "General Certificates";
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
-      {certs.map((c) => (
-        <div
-          key={c.id}
-          id={`ev-cert-${c.id}`}
-          style={{ position: "absolute", left: -9999, top: 0 }}
-        >
-          <CertCanvas
-            design={buildDesign(c)}
-            template={getTemplate(c.templateId)}
-            recipient={{
-              name: c.user?.fullName ?? c.user?.name ?? "Recipient",
-              awardType: c.awardType,
-              rankLabel: c.rankLabel,
-              customTitle: c.customTitle,
-            }}
-            certCode={c.certCode}
-            issuerName={
-              c.issuedBy?.fullName ?? c.issuedBy?.name ?? "GIVA Administrator"
-            }
-            eventTitle={c.event?.title ?? ""}
-            issuedAt={c.issuedAt}
-            scale={1}
-            draggable={false}
-            layout={AUTO_LAYOUT}
-          />
-        </div>
-      ))}
+      {/* Pre-generate QR data URLs silently */}
+      {certs.map(
+        (c) =>
+          !qrMap[c.certCode] && (
+            <QRGenerator
+              key={c.id}
+              certCode={c.certCode}
+              onGenerated={handleQRGenerated}
+            />
+          ),
+      )}
 
       <div className="flex items-center gap-4">
         <button
-          onClick={() => navigate("/admin/certificates")}
+          onClick={() => navigate(`${basePath}/certificates`)}
           className="p-2 hover:bg-slate-100 rounded-lg text-slate-500"
         >
           <ChevronLeft size={20} />
@@ -175,7 +251,7 @@ const EventCertificateView: React.FC = () => {
           </p>
         </div>
         <button
-          onClick={() => navigate("/admin/certificates/create")}
+          onClick={() => navigate(`${basePath}/certificates/create`)}
           className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white text-sm font-bold rounded-lg hover:bg-black transition-colors"
         >
           + Issue More
@@ -260,7 +336,7 @@ const EventCertificateView: React.FC = () => {
                         <Eye size={15} />
                       </button>
                       <button
-                        onClick={() => downloadSingleCert(cert)}
+                        onClick={() => handleDownload(cert)}
                         title="Download PDF"
                         className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
                       >
@@ -333,13 +409,20 @@ const EventCertificateView: React.FC = () => {
                   scale={MODAL_SCALE}
                   draggable={false}
                   layout={AUTO_LAYOUT}
+                  qrDataUrl={qrMap[preview.certCode] || undefined}
                 />
               </div>
             </div>
-            <div className="p-4 border-t border-slate-100 flex justify-end gap-3">
+            <div className="p-4 border-t border-slate-100 flex justify-between items-center">
+              <p className="text-xs text-slate-400">
+                {!qrMap[preview.certCode]
+                  ? "Generating QR code..."
+                  : "Ready to download"}
+              </p>
               <button
-                onClick={() => downloadSingleCert(preview)}
-                className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white text-sm font-bold rounded-lg hover:bg-black transition-colors"
+                onClick={() => handleDownload(preview)}
+                disabled={!qrMap[preview.certCode]}
+                className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white text-sm font-bold rounded-lg hover:bg-black transition-colors disabled:opacity-40"
               >
                 <Download size={15} /> Download PDF
               </button>

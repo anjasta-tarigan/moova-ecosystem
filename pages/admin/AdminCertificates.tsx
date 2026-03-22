@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Award, Plus, RefreshCw, ChevronRight, Clock } from "lucide-react";
 import { getAdminCertificates } from "../../services/api/adminApi";
 
@@ -14,6 +14,10 @@ interface EventCertGroup {
 
 const AdminCertificates: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const basePath = location.pathname.startsWith("/superadmin")
+    ? "/superadmin"
+    : "/admin";
   const [groups, setGroups] = useState<EventCertGroup[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -68,7 +72,7 @@ const AdminCertificates: React.FC = () => {
           </p>
         </div>
         <button
-          onClick={() => navigate("/admin/certificates/create")}
+          onClick={() => navigate(`${basePath}/certificates/create`)}
           className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white text-sm font-bold rounded-lg hover:bg-black transition-colors"
         >
           <Plus size={16} /> Create Certificates
@@ -89,7 +93,7 @@ const AdminCertificates: React.FC = () => {
             Create your first batch for an event.
           </p>
           <button
-            onClick={() => navigate("/admin/certificates/create")}
+            onClick={() => navigate(`${basePath}/certificates/create`)}
             className="px-5 py-2.5 bg-slate-900 text-white text-sm font-bold rounded-lg hover:bg-black transition-colors"
           >
             Create Certificates
@@ -103,8 +107,8 @@ const AdminCertificates: React.FC = () => {
               onClick={() =>
                 navigate(
                   g.eventId
-                    ? `/admin/certificates/event/${g.eventId}`
-                    : "/admin/certificates/event/general",
+                    ? `${basePath}/certificates/event/${g.eventId}`
+                    : `${basePath}/certificates/event/general`,
                 )
               }
               className="group bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 p-6 flex flex-col cursor-pointer"

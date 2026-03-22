@@ -159,7 +159,7 @@ async function downloadCertPDF(cert: Cert, qrDataUrl: string): Promise<void> {
     const canvas = await html2canvas(el, {
       scale: 2,
       useCORS: true,
-      allowTaint: false,
+      allowTaint: true,
       backgroundColor: null,
       logging: false,
       imageTimeout: 8000,
@@ -173,6 +173,14 @@ async function downloadCertPDF(cert: Cert, qrDataUrl: string): Promise<void> {
       format: "a4",
     });
     pdf.addImage(canvas.toDataURL("image/png"), "PNG", 0, 0, 297, 210);
+
+    // Draw QR directly onto PDF as fallback/overlay
+    if (qrDataUrl) {
+      const qrX = (0.8 * CERT_W + 8) / CERT_W * 297;
+      const qrY = (0.76 * CERT_H + 8) / CERT_H * 210;
+      const qrSize = 80 / CERT_W * 297;
+      pdf.addImage(qrDataUrl, "PNG", qrX, qrY, qrSize, qrSize);
+    }
     pdf.save(`${cert.certCode}.pdf`);
   } finally {
     // Always cleanup
