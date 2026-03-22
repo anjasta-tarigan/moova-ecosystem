@@ -3,6 +3,16 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.3.1] – 2026-03-22 13:03:56 (UTC+8)
+- Fixed certificate title overlapping decorative line: increased font to 36px with 20px margin around lines.
+- Vertically centered main certificate content block on the page.
+
+## [0.3.0] – 2026-03-22 12:52:21 (UTC+8)
+- Fixed recipient name showing "Recipient" instead of actual name on student dashboard (`Cert` interface used `name` but API returns `fullName`).
+- Redesigned certificate body text per international standards: role-specific headings (Certificate of Achievement/Participation/Appreciation) and body descriptions.
+- Event name now automatically included and prominently displayed in certificate body text.
+- Removed CUSTOM from bulk award type dropdown.
+
 ## [0.2.0] – 2026-03-22 12:00:57 (UTC+8)
 - Fixed QR code blank in PDF downloads: set `allowTaint: true` in html2canvas + direct QR overlay on jsPDF for guaranteed rendering.
 - Redesigned 3 built-in certificate templates with modern premium aesthetics (geometric corner accents, gradient bars, watermarks, dot grid patterns).

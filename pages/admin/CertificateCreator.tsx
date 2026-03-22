@@ -620,7 +620,6 @@ const CertificateCreator: React.FC = () => {
                     "PARTICIPANT",
                     "JUDGE",
                     "MENTOR",
-                    "CUSTOM",
                   ] as AwardType[]
                 ).map((v) => (
                   <option key={v} value={v}>

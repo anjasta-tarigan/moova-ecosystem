@@ -48,9 +48,7 @@ export interface CertRecipient {
 
 export const AUTO_LAYOUT: ComponentLayout[] = [
   { id: "systemName", x: 0.05, y: 0.06 },
-  { id: "awardTitle", x: 0.5, y: 0.23 },
-  { id: "recipient", x: 0.5, y: 0.43 },
-  { id: "eventName", x: 0.5, y: 0.57 },
+  { id: "mainContent", x: 0.5, y: 0.5 },
   { id: "signature", x: 0.06, y: 0.82 },
   { id: "qrDate", x: 0.8, y: 0.76 },
 ];
@@ -111,6 +109,46 @@ export function useQR(value: string): string {
   return url;
 }
 
+/* ── International standard certificate text per award type ── */
+function getCertificateTitle(awardType?: AwardType, rankLabel?: string): string {
+  switch (awardType) {
+    case "WINNER":
+      return "Certificate of Achievement";
+    case "PARTICIPANT":
+      return "Certificate of Participation";
+    case "JUDGE":
+      return "Certificate of Appreciation";
+    case "MENTOR":
+      return "Certificate of Appreciation";
+    case "CUSTOM":
+      return "Certificate of Recognition";
+    default:
+      return "Certificate of Recognition";
+  }
+}
+
+function getCertificateBody(
+  awardType?: AwardType,
+  rankLabel?: string,
+  eventTitle?: string,
+): string {
+  const eventLine = eventTitle ? `\n\n${eventTitle}` : "";
+  switch (awardType) {
+    case "WINNER":
+      return `Has been awarded ${rankLabel ?? "Winner"} in recognition of\noutstanding achievement and excellence in${eventLine}`;
+    case "PARTICIPANT":
+      return `Has successfully participated and demonstrated\ncommitment and enthusiasm in${eventLine}`;
+    case "JUDGE":
+      return `Is hereby recognized for the valuable contribution\nas an Official Judge in${eventLine}`;
+    case "MENTOR":
+      return `Is hereby recognized for the dedicated guidance\nand mentorship provided in${eventLine}`;
+    case "CUSTOM":
+      return `Is hereby recognized for the outstanding contribution\nand dedication in${eventLine}`;
+    default:
+      return `Is hereby recognized for participation in${eventLine}`;
+  }
+}
+
 export interface CertCanvasProps {
   design: CertDesign;
   template?: TemplateStyle;
@@ -152,16 +190,12 @@ const CertCanvas: React.FC<CertCanvasProps> = ({
   const isModern = tpl.id === "modern";
   const isMinimal = tpl.id === "minimal";
 
-  const awardLabel =
-    recipient.awardType === "CUSTOM"
-      ? (recipient.customTitle ?? "")
-      : recipient.awardType === "WINNER"
-        ? `${recipient.rankLabel ?? "1st Place"} — Winner`
-        : recipient.awardType === "JUDGE"
-          ? "Certificate of Judgeship"
-          : recipient.awardType === "MENTOR"
-            ? "Certificate of Mentorship"
-            : "Certificate of Participation";
+  const certTitle = getCertificateTitle(recipient.awardType, recipient.rankLabel);
+  const bodyText = getCertificateBody(
+    recipient.awardType,
+    recipient.rankLabel,
+    eventTitle,
+  );
 
   const dragRef = useRef<{
     id: string;
@@ -247,7 +281,7 @@ const CertCanvas: React.FC<CertCanvasProps> = ({
           position: "absolute",
           left: pos.x * CERT_W,
           top: pos.y * CERT_H,
-          transform: centered ? "translateX(-50%)" : undefined,
+          transform: centered ? "translate(-50%, -50%)" : undefined,
           cursor: draggable ? "grab" : "default",
           zIndex: 10,
         }}
@@ -280,7 +314,6 @@ const CertCanvas: React.FC<CertCanvasProps> = ({
       {/* ── FORMAL TEMPLATE DECORATIONS ── */}
       {isDark && design.mode === "builtin" && (
         <>
-          {/* Top accent bar with gradient */}
           <div
             style={{
               position: "absolute",
@@ -292,7 +325,6 @@ const CertCanvas: React.FC<CertCanvasProps> = ({
               zIndex: 20,
             }}
           />
-          {/* Bottom accent bar */}
           <div
             style={{
               position: "absolute",
@@ -304,7 +336,6 @@ const CertCanvas: React.FC<CertCanvasProps> = ({
               zIndex: 20,
             }}
           />
-          {/* Inner border frame */}
           <div
             style={{
               position: "absolute",
@@ -318,7 +349,6 @@ const CertCanvas: React.FC<CertCanvasProps> = ({
               pointerEvents: "none",
             }}
           />
-          {/* Corner geometric accents */}
           {[
             { top: 18, left: 18 },
             { top: 18, right: 18 },
@@ -327,25 +357,15 @@ const CertCanvas: React.FC<CertCanvasProps> = ({
           ].map((pos, i) => (
             <div
               key={i}
-              style={{
-                position: "absolute",
-                ...pos,
-                width: 36,
-                height: 36,
-                zIndex: 6,
-                pointerEvents: "none",
-              }}
+              style={{ position: "absolute", ...pos, width: 36, height: 36, zIndex: 6, pointerEvents: "none" }}
             >
               <svg width="36" height="36" viewBox="0 0 36 36">
                 <path
                   d={
-                    i === 0
-                      ? "M0 0 L18 0 L18 3 L3 3 L3 18 L0 18 Z"
-                      : i === 1
-                        ? "M18 0 L36 0 L36 18 L33 18 L33 3 L18 3 Z"
-                        : i === 2
-                          ? "M0 18 L3 18 L3 33 L18 33 L18 36 L0 36 Z"
-                          : "M18 33 L33 33 L33 18 L36 18 L36 36 L18 36 Z"
+                    i === 0 ? "M0 0 L18 0 L18 3 L3 3 L3 18 L0 18 Z"
+                    : i === 1 ? "M18 0 L36 0 L36 18 L33 18 L33 3 L18 3 Z"
+                    : i === 2 ? "M0 18 L3 18 L3 33 L18 33 L18 36 L0 36 Z"
+                    : "M18 33 L33 33 L33 18 L36 18 L36 36 L18 36 Z"
                   }
                   fill={accentColor}
                   opacity="0.6"
@@ -353,7 +373,6 @@ const CertCanvas: React.FC<CertCanvasProps> = ({
               </svg>
             </div>
           ))}
-          {/* Subtle rosette watermark */}
           <div
             style={{
               position: "absolute",
@@ -367,30 +386,9 @@ const CertCanvas: React.FC<CertCanvasProps> = ({
             }}
           >
             <svg width="400" height="400" viewBox="0 0 400 400">
-              <circle
-                cx="200"
-                cy="200"
-                r="180"
-                fill="none"
-                stroke="#D4A843"
-                strokeWidth="0.5"
-              />
-              <circle
-                cx="200"
-                cy="200"
-                r="150"
-                fill="none"
-                stroke="#D4A843"
-                strokeWidth="0.3"
-              />
-              <circle
-                cx="200"
-                cy="200"
-                r="120"
-                fill="none"
-                stroke="#D4A843"
-                strokeWidth="0.3"
-              />
+              <circle cx="200" cy="200" r="180" fill="none" stroke="#D4A843" strokeWidth="0.5" />
+              <circle cx="200" cy="200" r="150" fill="none" stroke="#D4A843" strokeWidth="0.3" />
+              <circle cx="200" cy="200" r="120" fill="none" stroke="#D4A843" strokeWidth="0.3" />
               {Array.from({ length: 12 }).map((_, i) => {
                 const angle = (i * 30 * Math.PI) / 180;
                 return (
@@ -413,96 +411,21 @@ const CertCanvas: React.FC<CertCanvasProps> = ({
       {/* ── MODERN TEMPLATE DECORATIONS ── */}
       {isModern && design.mode === "builtin" && (
         <>
-          {/* Top accent bar */}
-          <div
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              right: 0,
-              height: 6,
-              background: `linear-gradient(90deg, #1D4ED8 0%, #3B82F6 50%, #1D4ED8 100%)`,
-              zIndex: 20,
-            }}
-          />
-          {/* Left geometric stripe */}
-          <div
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width: 80,
-              height: "100%",
-              background: `linear-gradient(180deg, ${accentColor}08 0%, ${accentColor}03 100%)`,
-              zIndex: 2,
-              pointerEvents: "none",
-            }}
-          />
-          {/* Right side accent geometric shape */}
-          <svg
-            style={{
-              position: "absolute",
-              right: 0,
-              top: 0,
-              height: "100%",
-              width: 200,
-              zIndex: 2,
-              pointerEvents: "none",
-            }}
-            viewBox="0 0 200 794"
-            preserveAspectRatio="none"
-          >
-            <path
-              d="M160 0 L200 0 L200 794 L160 794 Z"
-              fill={`${accentColor}05`}
-            />
-            <path
-              d="M180 0 L200 0 L200 794 L180 794 Z"
-              fill={`${accentColor}04`}
-            />
+          <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 6, background: `linear-gradient(90deg, #1D4ED8 0%, #3B82F6 50%, #1D4ED8 100%)`, zIndex: 20 }} />
+          <div style={{ position: "absolute", top: 0, left: 0, width: 80, height: "100%", background: `linear-gradient(180deg, ${accentColor}08 0%, ${accentColor}03 100%)`, zIndex: 2, pointerEvents: "none" }} />
+          <svg style={{ position: "absolute", right: 0, top: 0, height: "100%", width: 200, zIndex: 2, pointerEvents: "none" }} viewBox="0 0 200 794" preserveAspectRatio="none">
+            <path d="M160 0 L200 0 L200 794 L160 794 Z" fill={`${accentColor}05`} />
+            <path d="M180 0 L200 0 L200 794 L180 794 Z" fill={`${accentColor}04`} />
           </svg>
-          {/* Subtle grid pattern */}
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              backgroundImage: `radial-gradient(${accentColor}06 1px, transparent 1px)`,
-              backgroundSize: "24px 24px",
-              zIndex: 1,
-              pointerEvents: "none",
-            }}
-          />
+          <div style={{ position: "absolute", inset: 0, backgroundImage: `radial-gradient(${accentColor}06 1px, transparent 1px)`, backgroundSize: "24px 24px", zIndex: 1, pointerEvents: "none" }} />
         </>
       )}
 
       {/* ── MINIMAL TEMPLATE DECORATIONS ── */}
       {isMinimal && design.mode === "builtin" && (
         <>
-          {/* Thin top accent */}
-          <div
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              right: 0,
-              height: 3,
-              backgroundColor: "#A8A29E",
-              zIndex: 20,
-            }}
-          />
-          {/* Subtle inner border */}
-          <div
-            style={{
-              position: "absolute",
-              top: 24,
-              left: 24,
-              right: 24,
-              bottom: 24,
-              border: "1px solid #E7E5E4",
-              zIndex: 5,
-              pointerEvents: "none",
-            }}
-          />
+          <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, backgroundColor: "#A8A29E", zIndex: 20 }} />
+          <div style={{ position: "absolute", top: 24, left: 24, right: 24, bottom: 24, border: "1px solid #E7E5E4", zIndex: 5, pointerEvents: "none" }} />
         </>
       )}
 
@@ -533,7 +456,7 @@ const CertCanvas: React.FC<CertCanvasProps> = ({
         </div>
       )}
 
-      {/* ── SYSTEM NAME ── */}
+      {/* ── SYSTEM NAME / BRANDING ── */}
       <Comp id="systemName">
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <img
@@ -563,7 +486,7 @@ const CertCanvas: React.FC<CertCanvasProps> = ({
                 marginTop: 2,
               }}
             >
-              Official Certificate of Achievement
+              Official Certificate
             </div>
           </div>
         </div>
@@ -603,103 +526,130 @@ const CertCanvas: React.FC<CertCanvasProps> = ({
         </div>
       </div>
 
-      {/* ── AWARD TITLE ── */}
-      <Comp id="awardTitle" centered>
-        <div style={{ textAlign: "center" }}>
-          {/* Decorative line above */}
-          <div
-            style={{
-              width: 50,
-              height: 1,
-              backgroundColor: accentColor,
-              opacity: 0.5,
-              margin: "0 auto 14px",
-            }}
-          />
-          <div
-            style={{
-              fontSize: 30,
-              fontWeight: 700,
-              color: accentColor,
-              whiteSpace: "nowrap",
-              letterSpacing: isDark ? 1 : -0.5,
-              lineHeight: 1.1,
-            }}
-          >
-            {awardLabel || "Award Title"}
-          </div>
-        </div>
-      </Comp>
-
-      {/* "This certifies that" label */}
-      <div
-        style={{
-          position: "absolute",
-          left: CERT_W * 0.5,
-          top: CERT_H * 0.36,
-          transform: "translateX(-50%)",
-          textAlign: "center",
-          zIndex: 10,
-          fontSize: 10,
-          letterSpacing: 6,
-          textTransform: "uppercase",
-          opacity: 0.4,
-          fontFamily: '"Inter",Arial,sans-serif',
-          whiteSpace: "nowrap",
-        }}
-      >
-        This certifies that
-      </div>
-
-      {/* ── RECIPIENT NAME ── */}
-      <Comp id="recipient" centered>
+      {/* ── MAIN CONTENT BLOCK (centered as one group) ── */}
+      <Comp id="mainContent" centered>
         <div
           style={{
-            display: "inline-flex",
+            display: "flex",
             flexDirection: "column",
-            alignItems: "stretch",
+            alignItems: "center",
+            gap: 0,
           }}
         >
+          {/* Award Title */}
+          <div style={{ textAlign: "center" }}>
+            <div
+              style={{
+                width: 60,
+                height: 1.5,
+                backgroundColor: accentColor,
+                opacity: 0.5,
+                margin: "0 auto 20px",
+              }}
+            />
+            <div
+              style={{
+                fontSize: 36,
+                fontWeight: 700,
+                color: accentColor,
+                whiteSpace: "nowrap",
+                letterSpacing: isDark ? 1.5 : 0,
+                lineHeight: 1.2,
+              }}
+            >
+              {recipient.customTitle || certTitle}
+            </div>
+            <div
+              style={{
+                width: 60,
+                height: 1.5,
+                backgroundColor: accentColor,
+                opacity: 0.5,
+                margin: "20px auto 0",
+              }}
+            />
+          </div>
+
+          {/* "This is to certify that" */}
           <div
             style={{
-              textAlign: "center",
-              fontSize: 48,
-              fontWeight: 700,
-              lineHeight: 1.15,
-              letterSpacing: isDark ? 1 : -1,
+              marginTop: 24,
+              fontSize: 11,
+              letterSpacing: 5,
+              textTransform: "uppercase" as const,
+              opacity: 0.4,
+              fontFamily: '"Inter",Arial,sans-serif',
               whiteSpace: "nowrap",
-              paddingLeft: 12,
-              paddingRight: 12,
+              textAlign: "center",
             }}
           >
-            {recipient.name || "Recipient Name"}
+            This is to certify that
           </div>
+
+          {/* Recipient Name */}
           <div
             style={{
-              marginTop: 14,
-              height: isDark ? 1 : 2,
-              background: isDark
-                ? `linear-gradient(90deg, transparent, ${accentColor}60, transparent)`
-                : `linear-gradient(90deg, transparent, rgba(15,23,42,0.15), transparent)`,
-              borderRadius: 1,
-              flexShrink: 0,
+              marginTop: 16,
+              display: "inline-flex",
+              flexDirection: "column",
+              alignItems: "stretch",
             }}
-          />
-        </div>
-      </Comp>
+          >
+            <div
+              style={{
+                textAlign: "center",
+                fontSize: 46,
+                fontWeight: 700,
+                lineHeight: 1.15,
+                letterSpacing: isDark ? 1 : -1,
+                whiteSpace: "nowrap",
+                paddingLeft: 12,
+                paddingRight: 12,
+              }}
+            >
+              {recipient.name || "Recipient Name"}
+            </div>
+            <div
+              style={{
+                marginTop: 12,
+                height: isDark ? 1 : 2,
+                background: isDark
+                  ? `linear-gradient(90deg, transparent, ${accentColor}60, transparent)`
+                  : `linear-gradient(90deg, transparent, rgba(15,23,42,0.15), transparent)`,
+                borderRadius: 1,
+                flexShrink: 0,
+              }}
+            />
+          </div>
 
-      {/* ── EVENT NAME ── */}
-      <Comp id="eventName" centered>
-        <div
-          style={{
-            textAlign: "center",
-            fontSize: 14,
-            opacity: 0.55,
-            fontFamily: '"Inter",Arial,sans-serif',
-            whiteSpace: "nowrap",
-          }}
-        >
-          {eventTitle || "Event Name"}
+          {/* Body Text (role-specific, includes event name) */}
+          <div
+            style={{
+              marginTop: 20,
+              textAlign: "center",
+              maxWidth: 600,
+            }}
+          >
+            {bodyText.split("\n").map((line, i) => {
+              const isEventTitle = line === eventTitle && eventTitle;
+              return (
+                <div
+                  key={i}
+                  style={{
+                    fontSize: isEventTitle ? 16 : 13,
+                    fontWeight: isEventTitle ? 700 : 400,
+                    lineHeight: 1.8,
+                    opacity: isEventTitle ? 1 : 0.6,
+                    color: isEventTitle ? accentColor : textColor,
+                    fontFamily: isEventTitle ? fontFamily : '"Inter",Arial,sans-serif',
+                    letterSpacing: isEventTitle ? 0.5 : 0,
+                  }}
+                >
+                  {line || "\u00A0"}
+                </div>
+              );
+            })}
+          </div>
         </div>
       </Comp>
 

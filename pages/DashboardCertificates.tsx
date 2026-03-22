@@ -34,9 +34,9 @@ interface Cert {
   prevHash: string;
   templateId?: string;
   bgDataUrl?: string;
-  user: { id: string; name: string; email: string };
+  user: { id: string; fullName: string; email: string };
   event?: { id: string; title: string } | null;
-  issuedBy: { id: string; name: string };
+  issuedBy: { id: string; fullName: string };
 }
 
 // -- Helpers ----------------------------------------------------
@@ -113,13 +113,13 @@ async function downloadCertPDF(cert: Cert, qrDataUrl: string): Promise<void> {
       design={buildDesign(cert)}
       template={getTemplate(cert.templateId)}
       recipient={{
-        name: cert.user?.name ?? "Recipient",
+        name: cert.user?.fullName ?? "Recipient",
         awardType: cert.awardType,
         rankLabel: cert.rankLabel,
         customTitle: cert.customTitle,
       }}
       certCode={cert.certCode}
-      issuerName={cert.issuedBy?.name ?? "GIVA Administrator"}
+      issuerName={cert.issuedBy?.fullName ?? "GIVA Administrator"}
       eventTitle={cert.event?.title ?? ""}
       issuedAt={cert.issuedAt}
       scale={1}
@@ -263,13 +263,13 @@ const PreviewModal: React.FC<{
               design={buildDesign(cert)}
               template={getTemplate(cert.templateId)}
               recipient={{
-                name: cert.user?.name ?? "Recipient",
+                name: cert.user?.fullName ?? "Recipient",
                 awardType: cert.awardType,
                 rankLabel: cert.rankLabel,
                 customTitle: cert.customTitle,
               }}
               certCode={cert.certCode}
-              issuerName={cert.issuedBy?.name ?? "GIVA Administrator"}
+              issuerName={cert.issuedBy?.fullName ?? "GIVA Administrator"}
               eventTitle={cert.event?.title ?? ""}
               issuedAt={cert.issuedAt}
               scale={MODAL_SCALE}
