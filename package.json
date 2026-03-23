@@ -6,7 +6,14 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "build:all": "vite build && pnpm -F giva-backend run build",
+    "preview": "vite preview",
+    "start": "pnpm -F giva-backend run start",
+    "db:migrate": "pnpm -F giva-backend prisma migrate deploy",
+    "db:seed": "pnpm -F giva-backend prisma db seed",
+    "db:push": "pnpm -F giva-backend prisma db push",
+    "prisma:generate": "pnpm -F giva-backend prisma generate",
+    "prisma:studio": "pnpm -F giva-backend prisma studio"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

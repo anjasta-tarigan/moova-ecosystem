@@ -1,0 +1,56 @@
+# Version control
+.git
+.gitignore
+.gitattributes
+
+# Development
+node_modules
+.DS_Store
+.env.local
+.env.*.local
+.pnpm-debug.log
+pnpm-debug.log
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Documentation & Config
+README.md
+CHANGELOG.md
+DEPLOYMENT.md
+BACKEND_PROMPT_AGENT.md
+FRONTEND_ADMIN_PROMPT.md
+GIVA_CONTEXT.md
+*.instructions.md
+*.agent.md
+*.prompt.md
+
+# Testing
+coverage
+.jest
+test
+
+# Build outputs (not needed, will be built)
+dist
+build
+*.tsbuildinfo
+
+# Logs
+*.log
+logs
+
+# OS
+Thumbs.db
+thumbs.db
+
+# Backend-specific (for frontend build)
+backend/dist
+backend/node_modules
+
+# Frontend-specific (for backend build)
+public
+assets

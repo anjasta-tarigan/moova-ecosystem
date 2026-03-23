@@ -7,7 +7,9 @@
     "dev": "pnpm prisma generate && ts-node-dev --respawn --transpile-only src/server.ts",
     "build": "pnpm prisma generate && tsc -p tsconfig.json",
     "start": "node dist/server.js",
-    "seed": "pnpm prisma db push --skip-generate && ts-node prisma/seed.ts"
+    "seed": "pnpm prisma db push --skip-generate && ts-node prisma/seed.ts",
+    "db:migrate": "prisma migrate deploy",
+    "db:push": "prisma db push"
   },
   "dependencies": {
     "@prisma/client": "^5.12.1",

@@ -1,0 +1,49 @@
+{
+  "version": 2,
+  "name": "moova-ecosystem",
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/static-builds",
+      "config": {
+        "distDir": "dist"
+      }
+    },
+    {
+      "src": "backend/dist/server.js",
+      "use": "@vercel/node",
+      "config": {
+        "excludeFiles": "**"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "backend/dist/server.js",
+      "methods": ["GET", "HEAD", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"]
+    },
+    {
+      "src": "/(.*)",
+      "dest": "dist/$1"
+    },
+    {
+      "handle": "error",
+      "status": 404,
+      "src": "/(.*)",
+      "dest": "dist/index.html"
+    }
+  ],
+  "env": {
+    "DATABASE_URL": "@DATABASE_URL",
+    "JWT_SECRET": "@JWT_SECRET",
+    "CORS_ORIGIN": "@CORS_ORIGIN",
+    "PORT": "3000",
+    "NODE_ENV": "production",
+    "GEMINI_API_KEY": "@GEMINI_API_KEY",
+    "ADMIN_EMAIL": "@ADMIN_EMAIL",
+    "ADMIN_PASSWORD": "@ADMIN_PASSWORD"
+  },
+  "buildCommand": "pnpm install && pnpm prisma:generate && pnpm run build:all && pnpm -F giva-backend run db:migrate || true",
+  "publicSource": "./dist"
+}
