@@ -28,7 +28,6 @@
       "dest": "dist/$1"
     },
     {
-      "handle": "error",
       "status": 404,
       "src": "/(.*)",
       "dest": "dist/index.html"
