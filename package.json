@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "build:all": "vite build && pnpm -F giva-backend run build",
+    "build": "vite build && pnpm -F giva-backend run build",
+    "build:all": "pnpm run build",
     "preview": "vite preview",
     "start": "pnpm -F giva-backend run start",
     "db:migrate": "pnpm -F giva-backend prisma migrate deploy",

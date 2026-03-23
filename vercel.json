@@ -43,5 +43,5 @@
     "ADMIN_EMAIL": "@ADMIN_EMAIL",
     "ADMIN_PASSWORD": "@ADMIN_PASSWORD"
   },
-  "buildCommand": "pnpm install && pnpm prisma:generate && pnpm run build:all && pnpm -F giva-backend run db:migrate || true"
+  "buildCommand": "pnpm install && pnpm prisma:generate && pnpm run build && pnpm -F giva-backend run db:migrate || true"
 }
