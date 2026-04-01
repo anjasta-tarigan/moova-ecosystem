@@ -2,43 +2,48 @@
 
 ## Overview
 
-GIVA is a global platform connecting students, researchers, and organizations through science and innovation competitions.
+GIVA is a pnpm monorepo (Vite frontend + Express/Prisma backend) that connects students, researchers, and organizations through science and innovation competitions. Development runs on `http://localhost:3000` (frontend) and `http://localhost:5000` (backend), backed by PostgreSQL.
 
 ## Tech Stack
 
 - Frontend: React 19, TypeScript, Vite 6, Tailwind v4
-- Backend: Express, TypeScript, Prisma, PostgreSQL
+- Backend: Express, TypeScript, Prisma v7 (PrismaPg adapter) on PostgreSQL
 - Auth: JWT (access + refresh tokens)
 
 ## Prerequisites
 
 - Node.js >= 20
-- PostgreSQL >= 14
+- PostgreSQL >= 14 with a database named `giva_db`
 - pnpm >= 10
 
 ## Setup
 
-### Backend
+1. Install dependencies (workspace root)
 
 ```bash
-cd backend
 pnpm install
-cp .env.example .env
-# Edit .env with your database credentials
-pnpm prisma db push
-pnpm prisma db seed
-pnpm dev
 ```
 
-### Frontend
+2. Configure environment variables
+
+- Copy `.env.example` to `.env` at the workspace root for shared/frontend variables (e.g., `VITE_API_URL`, `DATABASE_URL=postgresql://postgres:@localhost:5432/giva_db`).
+- Copy `backend/.env.example` to `backend/.env` for backend runtime variables (`DATABASE_URL`, JWT secrets, CORS origin, port).
+
+3. Provision the database
 
 ```bash
-# At workspace root
-pnpm install
-cp .env.example .env.local
-# Edit .env.local with your API URL
-pnpm dev
+# Creates or updates giva_db schema and seeds default accounts
+pnpm run db:push
+pnpm run db:seed
 ```
+
+4. Run the full stack locally
+
+```bash
+pnpm run dev
+```
+
+This starts frontend (Vite) and backend (Express + Prisma) concurrently.
 
 ## Default Accounts
 
@@ -49,7 +54,7 @@ pnpm dev
 | Judge       | juri1@giva.test      | juri123       |
 | Student     | siswa@giva.test      | siswa123      |
 
-## Available Routes
+## Common Routes
 
 | Path             | Access     | Description              |
 | ---------------- | ---------- | ------------------------ |
@@ -65,12 +70,12 @@ pnpm dev
 ## Build for Production
 
 ```bash
-# Frontend
-pnpm build
-pnpm preview
+# Build frontend + backend
+pnpm run build
 
-# Backend
-cd backend
-pnpm build
-pnpm start
+# Preview static frontend build
+pnpm run preview
+
+# Start compiled backend (after pnpm run build)
+pnpm run start
 ```

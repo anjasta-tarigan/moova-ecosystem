@@ -1,7 +1,14 @@
 import bcrypt from "bcryptjs";
+import "../src/config/env";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { PrismaClient } from "../src/generated/prisma/client";
 
-const { PrismaClient } = require("@prisma/client");
-const prisma = new PrismaClient();
+if (!process.env.DATABASE_URL) {
+  throw new Error("DATABASE_URL is required");
+}
+
+const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
+const prisma = new PrismaClient({ adapter });
 
 const hashPassword = async (password: string) => bcrypt.hash(password, 10);
 

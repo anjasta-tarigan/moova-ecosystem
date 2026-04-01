@@ -1,4 +1,4 @@
-import { AwardType, CertStatus } from "@prisma/client";
+import { AwardType, CertStatus } from "../../generated/prisma/client";
 import * as crypto from "crypto";
 import prisma from "../../config/database";
 

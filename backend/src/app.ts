@@ -1,7 +1,6 @@
 import express from "express";
 import cors from "cors";
 import path from "path";
-import dotenv from "dotenv";
 import authRoutes from "./modules/auth/auth.routes";
 import siswaRoutes from "./modules/siswa/siswa.routes";
 import eventsRoutes from "./modules/events/events.routes";
@@ -13,8 +12,6 @@ import adminRoutes from "./modules/admin/admin.routes";
 import superadminRoutes from "./modules/superadmin/superadmin.routes";
 import { authenticate } from "./middlewares/auth.middleware";
 import { requireRole } from "./middlewares/role.middleware";
-
-dotenv.config();
 
 const app = express();
 

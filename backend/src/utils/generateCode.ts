@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "../generated/prisma/client";
 
 const randomSuffix = (length: number) => {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
