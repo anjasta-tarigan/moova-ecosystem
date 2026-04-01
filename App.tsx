@@ -63,6 +63,9 @@ const SuperAdminUsers = lazy(
 const SuperAdminJudgeAssignments = lazy(
   () => import("./pages/superadmin/SuperAdminJudgeAssignments"),
 );
+const SuperAdminEventForm = lazy(
+  () => import("./pages/superadmin/SuperAdminEventForm"),
+);
 
 // Helper to scroll to top on route change
 const ScrollToTop = () => {
@@ -275,7 +278,6 @@ const App: React.FC = () => {
             <Route path="/admin" element={<AdminGuard />}>
               <Route index element={<AdminDashboard />} />
               <Route path="events" element={<AdminEvents />} />
-              <Route path="events/new" element={<AdminEventForm />} />
               <Route path="events/:id/edit" element={<AdminEventForm />} />
               <Route path="submissions" element={<AdminSubmissions />} />
               <Route path="siswa" element={<AdminSiswa />} />
@@ -302,8 +304,8 @@ const App: React.FC = () => {
 
               {/* Mirror semua admin pages di bawah /superadmin/* */}
               <Route path="events" element={<AdminEvents />} />
-              <Route path="events/new" element={<AdminEventForm />} />
-              <Route path="events/:id/edit" element={<AdminEventForm />} />
+              <Route path="events/new" element={<SuperAdminEventForm />} />
+              <Route path="events/:id/edit" element={<SuperAdminEventForm />} />
               <Route path="submissions" element={<AdminSubmissions />} />
               <Route path="siswa" element={<AdminSiswa />} />
               <Route path="siswa/:id" element={<AdminSiswaDetail />} />

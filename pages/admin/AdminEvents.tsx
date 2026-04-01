@@ -1,9 +1,10 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { Plus } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { adminApi } from "../../services/api/adminApi";
 import Button from "../../components/Button";
 import Modal from "../../components/admin/Modal";
+import { useAuthContext } from "../../contexts/AuthContext";
 
 const formatDate = (dateStr?: string) => {
   if (!dateStr) return "-";
@@ -27,6 +28,14 @@ const AdminEvents: React.FC = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const navigate = useNavigate();
+  const location = useLocation();
+  const { isSuperAdmin } = useAuthContext();
+
+  const basePath = useMemo(
+    () =>
+      location.pathname.startsWith("/superadmin") ? "/superadmin" : "/admin",
+    [location.pathname],
+  );
 
   const fetchEvents = useCallback(async () => {
     try {
@@ -85,13 +94,19 @@ const AdminEvents: React.FC = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between pb-6 border-b border-slate-200">
         <h1 className="text-2xl font-bold text-slate-900">Event Management</h1>
-        <button
-          onClick={() => navigate("/admin/events/new")}
-          className="flex items-center gap-2 px-4 py-2.5 bg-slate-900 text-white rounded-xl text-sm font-bold hover:bg-black transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          Add Event
-        </button>
+        {isSuperAdmin ? (
+          <button
+            onClick={() => navigate(`${basePath}/events/new`)}
+            className="flex items-center gap-2 px-4 py-2.5 bg-slate-900 text-white rounded-xl text-sm font-bold hover:bg-black transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            Add Event
+          </button>
+        ) : (
+          <p className="text-sm text-slate-500">
+            Only Superadmins can create events.
+          </p>
+        )}
       </div>
 
       {actionMessage && (
@@ -167,7 +182,9 @@ const AdminEvents: React.FC = () => {
                     <td className="px-6 py-4">
                       <span
                         className="font-medium text-slate-900 cursor-pointer hover:underline"
-                        onClick={() => navigate(`/admin/events/${event.id}`)}
+                        onClick={() =>
+                          navigate(`${basePath}/events/${event.id}/edit`)
+                        }
                       >
                         {event?.title || "-"}
                       </span>
@@ -206,7 +223,9 @@ const AdminEvents: React.FC = () => {
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
                         <button
-                          onClick={() => navigate(`/admin/events/${event.id}`)}
+                          onClick={() =>
+                            navigate(`${basePath}/events/${event.id}/edit`)
+                          }
                           className="text-xs font-bold text-blue-600 hover:underline"
                         >
                           Edit

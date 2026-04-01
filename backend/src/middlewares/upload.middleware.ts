@@ -5,6 +5,9 @@ import fs from "fs";
 // Memory storage for avatar (compress before write)
 const avatarMemoryStorage = multer.memoryStorage();
 
+// Memory storage for event banner uploads (superadmin only)
+const bannerMemoryStorage = multer.memoryStorage();
+
 export const uploadAvatar = multer({
   storage: avatarMemoryStorage,
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB raw limit
@@ -17,6 +20,19 @@ export const uploadAvatar = multer({
     }
   },
 }).single("avatar");
+
+export const uploadEventBannerMiddleware = multer({
+  storage: bannerMemoryStorage,
+  limits: { fileSize: 2 * 1024 * 1024 }, // 2MB limit per PRD
+  fileFilter: (_req, file, cb) => {
+    const allowed = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+    if (allowed.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only JPG, PNG, and WebP images are allowed"));
+    }
+  },
+}).single("banner");
 
 // Keep existing uploadSingle for submission files (diskStorage, unchanged)
 const submissionStorage = multer.diskStorage({

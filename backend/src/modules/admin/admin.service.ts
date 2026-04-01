@@ -10,6 +10,147 @@ const SUBMISSION_STATUSES = [
   "SCORED",
 ];
 
+const EVENT_FORMATS = ["ONLINE", "IN_PERSON", "HYBRID"];
+
+const validationError = (message: string) => {
+  const err: any = new Error(message);
+  err.code = "VALIDATION_ERROR";
+  err.status = 400;
+  return err;
+};
+
+const slugify = (value: string) =>
+  value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)+/g, "");
+
+const sanitizeRichText = (value: string) =>
+  (value || "").replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "").trim();
+
+const ensureValidDates = (date: string, deadline: string) => {
+  const eventDate = new Date(date);
+  const deadlineDate = new Date(deadline);
+  if (
+    Number.isNaN(eventDate.getTime()) ||
+    Number.isNaN(deadlineDate.getTime())
+  ) {
+    throw validationError("Invalid date or deadline format");
+  }
+  if (deadlineDate > eventDate) {
+    throw validationError("Deadline must be on or before the event date");
+  }
+};
+
+const ensureLocationValid = (format: string, location: string) => {
+  const trimmed = location.trim();
+  if (!trimmed) throw validationError("Location is required");
+  if (format === "ONLINE") {
+    const urlPattern = /^https?:\/\//i;
+    if (!urlPattern.test(trimmed)) {
+      throw validationError(
+        "Online format requires a valid meeting link (https)",
+      );
+    }
+  }
+};
+
+const ensureSlugUnique = async (slug: string, eventId?: string) => {
+  let candidate = slug;
+  let attempt = 0;
+  // retry a few times with random suffix to guarantee uniqueness
+  while (attempt < 5) {
+    const existing = await prisma.event.findUnique({
+      where: { slug: candidate },
+    });
+    if (!existing || (eventId && existing.id === eventId)) return candidate;
+    candidate = `${slug}-${Math.random().toString(36).slice(2, 6)}`;
+    attempt += 1;
+  }
+  return candidate;
+};
+
+const normalizeEventPayload = async (data: any, eventId?: string) => {
+  const title = (data.title || "").trim();
+  if (title.length < 5)
+    throw validationError("Title must be at least 5 characters");
+
+  const baseSlug = (data.slug || title).trim();
+  const parsedSlug = slugify(baseSlug);
+  if (parsedSlug.length < 5)
+    throw validationError("Slug must be at least 5 characters");
+  const slug = await ensureSlugUnique(parsedSlug, eventId);
+
+  const shortDescription = (data.shortDescription || "").trim();
+  if (!shortDescription) throw validationError("Short description is required");
+  if (shortDescription.length > 250)
+    throw validationError("Short description must not exceed 250 characters");
+
+  const fullDescription = sanitizeRichText(String(data.fullDescription || ""));
+  if (fullDescription.length < 20)
+    throw validationError("Full description must be at least 20 characters");
+
+  const format = data.format;
+  if (!EVENT_FORMATS.includes(format))
+    throw validationError("Invalid event format");
+
+  const location = String(data.location || "").trim();
+  ensureLocationValid(format, location);
+
+  ensureValidDates(String(data.date || ""), String(data.deadline || ""));
+
+  const teamSizeMin = Number(data.teamSizeMin ?? 1);
+  const teamSizeMax = Number(data.teamSizeMax ?? 1);
+  if (Number.isNaN(teamSizeMin) || teamSizeMin < 1)
+    throw validationError("Min team size must be at least 1");
+  if (Number.isNaN(teamSizeMax) || teamSizeMax < teamSizeMin)
+    throw validationError(
+      "Max team size must be greater than or equal to min team size",
+    );
+
+  const normalizedSdgs = Array.isArray(data.sdgs)
+    ? data.sdgs
+        .map((value: any) => Number(value))
+        .filter((num: number) => Number.isInteger(num) && num > 0)
+    : [];
+
+  const normalizedEligibility = Array.isArray(data.eligibility)
+    ? data.eligibility.map((item: any) => String(item).trim()).filter(Boolean)
+    : typeof data.eligibility === "string"
+      ? data.eligibility
+          .split(/\r?\n/)
+          .map((item: string) => item.trim())
+          .filter(Boolean)
+      : [];
+
+  const status = EVENT_STATUSES.includes(data.status) ? data.status : "DRAFT";
+
+  return {
+    ...data,
+    title,
+    slug,
+    shortDescription,
+    fullDescription,
+    format,
+    location,
+    date: String(data.date || ""),
+    deadline: String(data.deadline || ""),
+    fee: (data.fee || "Gratis").trim() || "Gratis",
+    organizer: (data.organizer || "GIVA").trim() || "GIVA",
+    theme: data.theme || "",
+    prizePool: data.prizePool || "",
+    teamSizeMin,
+    teamSizeMax,
+    eligibility: normalizedEligibility,
+    sdgs: normalizedSdgs,
+    status,
+    timeline: Array.isArray(data.timeline) ? data.timeline : [],
+    faqs: Array.isArray(data.faqs) ? data.faqs : [],
+    categories: Array.isArray(data.categories) ? data.categories : [],
+  };
+};
+
 const parsePagination = (page?: number, limit?: number) => {
   const p = Number(page) || 1;
   const l = Number(limit) || 10;
@@ -91,18 +232,24 @@ export const listEvents = async (query: any) => {
 };
 
 export const createEvent = async (data: any, adminId: string) => {
+  const normalized = await normalizeEventPayload(data);
+  const { timeline, faqs, categories, ...base } = normalized;
+
   return prisma.event.create({
     data: {
-      ...data,
+      ...base,
       createdById: adminId,
-      timeline: { create: data.timeline || [] },
-      faqs: { create: data.faqs || [] },
-      categories: { create: data.categories || [] },
+      timeline: { create: timeline },
+      faqs: { create: faqs },
+      categories: { create: categories },
     },
   });
 };
 
 export const updateEvent = async (id: string, data: any) => {
+  const normalized = await normalizeEventPayload(data, id);
+  const { timeline, faqs, categories, ...base } = normalized;
+
   return prisma.$transaction(async (tx) => {
     await tx.eventTimeline.deleteMany({ where: { eventId: id } });
     await tx.eventFaq.deleteMany({ where: { eventId: id } });
@@ -111,16 +258,18 @@ export const updateEvent = async (id: string, data: any) => {
     return tx.event.update({
       where: { id },
       data: {
-        ...data,
-        timeline: { create: data.timeline || [] },
-        faqs: { create: data.faqs || [] },
-        categories: { create: data.categories || [] },
+        ...base,
+        timeline: { create: timeline },
+        faqs: { create: faqs },
+        categories: { create: categories },
       },
     });
   });
 };
 
 export const updateEventStatus = async (id: string, status: string) => {
+  if (!EVENT_STATUSES.includes(status))
+    throw validationError("Invalid event status");
   return prisma.event.update({
     where: { id },
     data: { status: status as any },

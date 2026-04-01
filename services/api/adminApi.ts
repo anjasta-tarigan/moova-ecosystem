@@ -12,6 +12,10 @@ export const adminApi = {
     api.post("/api/admin/events", data),
   updateEvent: (id: string, data: Record<string, any>) =>
     api.put(`/api/admin/events/${id}`, data),
+  uploadEventBanner: (data: FormData) =>
+    api.post("/api/admin/events/banner", data, {
+      headers: { "Content-Type": "multipart/form-data" },
+    }),
   updateEventStatus: (id: string, status: string) =>
     api.patch(`/api/admin/events/${id}/status`, { status }),
   deleteEvent: (id: string) => api.delete(`/api/admin/events/${id}`),

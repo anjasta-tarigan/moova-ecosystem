@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.3.3] – 2026-04-02 00:00:00 (UTC+8)
+
+- Locked event creation behind SUPERADMIN with stricter backend validation for slugs, deadlines, and format-aware locations.
+- Added 2MB-checked banner upload pipeline (WebP optimization) plus client helper for the event form.
+- Refreshed superadmin event form UI with optional labels, SDG multi-select, dynamic location handling, banner preview upload, and routing that removes admin access to create.
+
 ## [0.3.2] – 2026-04-01 00:00:00 (UTC+8)
 
 - Updated README to reflect pnpm monorepo workflow, Prisma v7/PostgreSQL `giva_db` setup, and consolidated dev/build commands.
