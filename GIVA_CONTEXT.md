@@ -7,13 +7,13 @@ Replace "MOOVA" with "GIVA" everywhere
 
 ## Roles
 Database values (NEVER change):
-  SUPERADMIN, ADMIN, JURI, SISWA
+  SUPERADMIN, ADMIN, JUDGE, STUDENT
 
 Display names in UI:
   SUPERADMIN → Super Admin
   ADMIN → Admin
-  JURI → Judge
-  SISWA → Student
+  JUDGE → Judge
+  STUDENT → Student
 
 ## Tech Stack
 
