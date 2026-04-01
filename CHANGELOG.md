@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.3.5] – 2026-04-02 00:00:00 (UTC+8)
+
+- Updated modal overlay to use a translucent blurred backdrop for status change popups, replacing the opaque dark background.
+
+## [0.3.4] – 2026-04-02 00:00:00 (UTC+8)
+
+- Added superadmin-only status change flow on the event list with modal selector and API call to update event status inline.
+- Surfaced status update success/error feedback and refreshed list after changes.
+
 ## [0.3.3] – 2026-04-02 00:00:00 (UTC+8)
 
 - Locked event creation behind SUPERADMIN with stricter backend validation for slugs, deadlines, and format-aware locations.

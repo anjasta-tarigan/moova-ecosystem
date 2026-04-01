@@ -15,6 +15,8 @@ const formatDate = (dateStr?: string) => {
   });
 };
 
+const STATUS_OPTIONS = ["DRAFT", "OPEN", "UPCOMING", "CLOSED"];
+
 const AdminEvents: React.FC = () => {
   const [events, setEvents] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -27,6 +29,10 @@ const AdminEvents: React.FC = () => {
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
+  const [statusTarget, setStatusTarget] = useState<any | null>(null);
+  const [statusValue, setStatusValue] = useState<string>("DRAFT");
+  const [statusError, setStatusError] = useState<string | null>(null);
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { isSuperAdmin } = useAuthContext();
@@ -76,6 +82,30 @@ const AdminEvents: React.FC = () => {
       setDeleteError(message);
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  const openStatusModal = (event: any) => {
+    setStatusTarget(event);
+    setStatusValue(event?.status || "DRAFT");
+    setStatusError(null);
+  };
+
+  const confirmStatusChange = async () => {
+    if (!statusTarget) return;
+    setIsUpdatingStatus(true);
+    setStatusError(null);
+    try {
+      await adminApi.updateEventStatus(statusTarget.id, statusValue);
+      setStatusTarget(null);
+      setActionMessage(`Status updated to ${statusValue}`);
+      fetchEvents();
+    } catch (err: any) {
+      const message =
+        err?.response?.data?.message || "Failed to update event status";
+      setStatusError(message);
+    } finally {
+      setIsUpdatingStatus(false);
     }
   };
 
@@ -222,6 +252,14 @@ const AdminEvents: React.FC = () => {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
+                        {isSuperAdmin && (
+                          <button
+                            onClick={() => openStatusModal(event)}
+                            className="text-xs font-bold text-emerald-600 hover:underline"
+                          >
+                            Change Status
+                          </button>
+                        )}
                         <button
                           onClick={() =>
                             navigate(`${basePath}/events/${event.id}/edit`)
@@ -308,6 +346,59 @@ const AdminEvents: React.FC = () => {
           {deleteError && (
             <div className="rounded-md bg-red-50 border border-red-100 text-red-700 px-3 py-2 text-sm">
               {deleteError}
+            </div>
+          )}
+        </div>
+      </Modal>
+
+      <Modal
+        isOpen={Boolean(statusTarget)}
+        onClose={() => {
+          setStatusTarget(null);
+          setStatusError(null);
+        }}
+        title="Change Event Status"
+        footer={
+          <>
+            <Button
+              type="button"
+              onClick={() => {
+                setStatusTarget(null);
+                setStatusError(null);
+              }}
+              className="bg-gray-200 text-gray-800"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={confirmStatusChange}
+              disabled={isUpdatingStatus}
+            >
+              {isUpdatingStatus ? "Updating..." : "Update Status"}
+            </Button>
+          </>
+        }
+      >
+        <div className="space-y-3">
+          <p className="text-sm text-slate-700 font-medium">
+            {`Update status for "${statusTarget?.title || "this event"}"`}
+          </p>
+          <select
+            value={statusValue}
+            onChange={(e) => setStatusValue(e.target.value)}
+            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
+          >
+            {STATUS_OPTIONS.map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
+            ))}
+          </select>
+          {statusError && (
+            <div className="rounded-md bg-red-50 border border-red-100 text-red-700 px-3 py-2 text-sm">
+              {statusError}
             </div>
           )}
         </div>
