@@ -2,7 +2,18 @@ import api from "../../lib/axios";
 
 export const eventsApi = {
   getEvents: (params?: Record<string, any>) =>
-    api.get("/api/events", { params }),
+    api.get("/api/events/public", { params }),
+
+  getPublicEvents: (params?: Record<string, any>) =>
+    api.get("/api/events/public", { params }),
+
+  getStudentEvents: (params?: Record<string, any>) =>
+    api.get("/api/events/student", { params }),
+
+  getJudgeEvents: () => api.get("/api/events/judge"),
+
+  getAdminEvents: (params?: Record<string, any>) =>
+    api.get("/api/events/admin", { params }),
 
   getEvent: (id: string) => api.get(`/api/events/${id}`),
 

@@ -5,8 +5,12 @@ import { validate } from "../../middlewares/validate.middleware";
 import {
   createQuestion,
   createReply,
+  getAdminEvents,
   getEventDetail,
   getEvents,
+  getJudgeEvents,
+  getPublicEvents,
+  getStudentEvents,
   getQuestions,
   registerEvent,
   toggleUpvote,
@@ -19,6 +23,15 @@ import {
 
 const router = Router();
 
+router.get("/public", getPublicEvents);
+router.get("/student", authenticate, requireRole("STUDENT"), getStudentEvents);
+router.get("/judge", authenticate, requireRole("JUDGE"), getJudgeEvents);
+router.get(
+  "/admin",
+  authenticate,
+  requireRole("ADMIN", "SUPERADMIN"),
+  getAdminEvents,
+);
 router.get("/", getEvents);
 router.get("/:id", getEventDetail);
 router.post(

@@ -1,8 +1,13 @@
 import { Request, Response } from "express";
+import jwt from "jsonwebtoken";
 import { paginated, error, success } from "../../utils/response";
 import * as eventsService from "./events.service";
 
+const ACCESS_TOKEN_SECRET =
+  process.env.ACCESS_TOKEN_SECRET || "dev_access_secret";
+
 const mapError = (err: any, res: Response) => {
+  if (err?.status === 403) return error(res, err?.message || "Forbidden", 403);
   if (err?.code === "P2025") return error(res, "Data not found", 404);
   if (err?.code === "P2002") return error(res, "Data already exists", 409);
   if (err?.message === "Profile incomplete")
@@ -16,18 +21,74 @@ const mapError = (err: any, res: Response) => {
   return error(res, "Internal server error", 500);
 };
 
-export const getEvents = async (req: Request, res: Response) => {
+const resolveRole = (req: Request) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) return undefined;
   try {
-    const result = await eventsService.listEvents(req.query);
+    const token = authHeader.split(" ")[1];
+    const payload = jwt.verify(token, ACCESS_TOKEN_SECRET) as {
+      role?: string;
+    };
+    return payload.role;
+  } catch {
+    return undefined;
+  }
+};
+
+export const getPublicEvents = async (req: Request, res: Response) => {
+  try {
+    const result = await eventsService.listPublicEvents(req.query);
     return paginated(res, result.data, result.total, result.page, result.limit);
   } catch (err) {
     return mapError(err, res);
   }
 };
 
+export const getStudentEvents = async (req: Request, res: Response) => {
+  try {
+    const result = await eventsService.listStudentEvents(
+      req.user!.id,
+      req.query,
+    );
+    return success(res, {
+      registered: result.registered,
+      discover: result.discover,
+      pagination: {
+        page: result.page,
+        limit: result.limit,
+        total: result.total,
+        totalPages: result.totalPages,
+      },
+    });
+  } catch (err) {
+    return mapError(err, res);
+  }
+};
+
+export const getJudgeEvents = async (req: Request, res: Response) => {
+  try {
+    const result = await eventsService.listJudgeEvents(req.user!.id);
+    return success(res, result);
+  } catch (err) {
+    return mapError(err, res);
+  }
+};
+
+export const getAdminEvents = async (req: Request, res: Response) => {
+  try {
+    const result = await eventsService.listAdminEvents(req.query);
+    return paginated(res, result.data, result.total, result.page, result.limit);
+  } catch (err) {
+    return mapError(err, res);
+  }
+};
+
+export const getEvents = getPublicEvents;
+
 export const getEventDetail = async (req: Request, res: Response) => {
   try {
-    const event = await eventsService.getEventById(req.params.id);
+    const role = req.user?.role ?? resolveRole(req);
+    const event = await eventsService.getEventById(req.params.id, role);
     return success(res, event);
   } catch (err) {
     return mapError(err, res);

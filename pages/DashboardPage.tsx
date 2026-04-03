@@ -11,7 +11,6 @@ import {
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Button from "../components/Button";
 import { useAuthContext } from "../contexts/AuthContext";
-import { profileApi } from "../services/api/profileApi";
 import { eventsApi } from "../services/api/eventsApi";
 import DashboardProfile from "./DashboardProfile";
 
@@ -40,8 +39,9 @@ const OverviewView = () => {
     setError(null);
     setIsLoading(true);
     try {
-      const res = await profileApi.getMyEvents();
-      setMyEvents(res.data.data || []);
+      const res = await eventsApi.getStudentEvents({ limit: 5 });
+      const payload = res.data?.data ?? res.data ?? {};
+      setMyEvents(payload.registered || []);
     } catch (err) {
       console.error("Failed to fetch events:", err);
       setError("Failed to load data");

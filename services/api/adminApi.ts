@@ -7,7 +7,7 @@ export const adminApi = {
 
   // Events CRUD
   getEvents: (params?: Record<string, any>) =>
-    api.get("/api/admin/events", { params }),
+    api.get("/api/events/admin", { params }),
   createEvent: (data: Record<string, any>) =>
     api.post("/api/admin/events", data),
   updateEvent: (id: string, data: Record<string, any>) =>
