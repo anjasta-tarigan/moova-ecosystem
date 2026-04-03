@@ -95,6 +95,18 @@ export const getEventDetail = async (req: Request, res: Response) => {
   }
 };
 
+export const getStudentEventDetail = async (req: Request, res: Response) => {
+  try {
+    const event = await eventsService.getStudentEventBySlug(
+      req.params.slug,
+      req.user!.id,
+    );
+    return success(res, event);
+  } catch (err) {
+    return mapError(err, res);
+  }
+};
+
 export const registerEvent = async (req: Request, res: Response) => {
   try {
     const created = await eventsService.registerEvent(

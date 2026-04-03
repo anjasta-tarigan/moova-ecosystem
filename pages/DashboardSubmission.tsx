@@ -52,7 +52,7 @@ interface SubmissionData {
   demoLink: string;
   consentGiven?: boolean;
   submittedAt?: string;
-  event?: { id: string; title: string; deadline?: string };
+  event?: { id: string; slug?: string; title: string; deadline?: string };
   team?: { id: string; name: string; members: TeamMember[] };
   files: SubmissionFile[];
   scores?: Array<{
@@ -291,8 +291,8 @@ const DashboardSubmission: React.FC = () => {
           <button
             onClick={() =>
               navigate(
-                submission.event?.id
-                  ? `/dashboard/event/${submission.event.id}`
+                submission.event?.slug || submission.event?.id
+                  ? `/dashboard/events/${submission.event?.slug || submission.event?.id}`
                   : "/dashboard",
               )
             }

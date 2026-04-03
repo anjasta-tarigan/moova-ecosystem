@@ -54,6 +54,7 @@ export default defineConfig(({ mode }) => {
             "pages-dashboard": [
               "./pages/DashboardPage",
               "./pages/DashboardEventHub",
+              "./pages/DashboardEventDetail",
               "./pages/DashboardTeam",
               "./pages/DashboardSubmission",
               "./pages/DashboardCertificates",

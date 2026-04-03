@@ -29,6 +29,13 @@ const baseListSelect = {
   _count: { select: { registrations: true, submissions: true } },
 } as const;
 
+const eventDetailInclude = {
+  timeline: { orderBy: { order: "asc" as const } },
+  faqs: { orderBy: { order: "asc" as const } },
+  categories: { select: { id: true, name: true, description: true } },
+  _count: { select: { registrations: true, submissions: true } },
+} as const;
+
 const buildCatalogWhere = (
   query: any,
   allowedStatuses: readonly string[] | null = null,
@@ -127,7 +134,7 @@ export const listJudgeEvents = async (judgeId: string) => {
     where: {
       judgeId,
       status: "ACTIVE",
-      event: { status: { in: PUBLIC_EVENT_STATUSES } },
+      event: { status: { in: [...PUBLIC_EVENT_STATUSES] } },
     },
     include: {
       event: { select: baseListSelect },
@@ -224,12 +231,7 @@ export const listAdminEvents = async (query: any) => {
 export const getEventById = async (id: string, role?: string) => {
   const event = await prisma.event.findUnique({
     where: { id },
-    include: {
-      timeline: true,
-      faqs: true,
-      categories: true,
-      _count: { select: { registrations: true, submissions: true } },
-    },
+    include: eventDetailInclude,
   });
   if (!event) {
     const err: any = new Error("Data not found");
@@ -246,6 +248,61 @@ export const getEventById = async (id: string, role?: string) => {
 
   const registrationCount = event._count?.registrations ?? 0;
   return { ...event, registrationCount };
+};
+
+export const getStudentEventBySlug = async (slug: string, userId: string) => {
+  const event = await prisma.event.findUnique({
+    where: { slug },
+    include: {
+      ...eventDetailInclude,
+      registrations: {
+        where: { userId },
+        select: {
+          id: true,
+          teamId: true,
+          team: { select: { id: true, name: true } },
+        },
+        take: 1,
+      },
+    },
+  });
+
+  if (!event || event.status === "DRAFT") {
+    const err: any = new Error("Data not found");
+    err.code = "P2025";
+    throw err;
+  }
+
+  const registration = event.registrations[0] ?? null;
+  let submissionId: string | null = null;
+
+  if (registration?.teamId) {
+    const submission = await prisma.submission.findFirst({
+      where: {
+        eventId: event.id,
+        teamId: registration.teamId,
+      },
+      select: { id: true },
+      orderBy: { createdAt: "desc" },
+    });
+    submissionId = submission?.id ?? null;
+  }
+
+  const { registrations, ...eventData } = event;
+
+  return {
+    ...eventData,
+    isRegistered: Boolean(registration),
+    registrationId: registration?.id ?? null,
+    registration: registration
+      ? {
+          id: registration.id,
+          teamId: registration.teamId,
+          team: registration.team ?? null,
+        }
+      : null,
+    submissionId,
+  };
 };
 
 export const registerEvent = async (

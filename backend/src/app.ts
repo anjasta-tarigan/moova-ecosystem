@@ -12,6 +12,7 @@ import adminRoutes from "./modules/admin/admin.routes";
 import superadminRoutes from "./modules/superadmin/superadmin.routes";
 import { authenticate } from "./middlewares/auth.middleware";
 import { requireRole } from "./middlewares/role.middleware";
+import { getStudentEventDetail } from "./modules/events/events.controller";
 
 const app = express();
 
@@ -28,6 +29,12 @@ app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 app.use("/api/auth", authRoutes);
 app.use("/api/siswa", siswaRoutes);
+app.get(
+  "/api/student/events/:slug",
+  authenticate,
+  requireRole("STUDENT"),
+  getStudentEventDetail,
+);
 app.use("/api/events", eventsRoutes);
 app.use("/api/teams", authenticate, requireRole("STUDENT"), teamsRoutes);
 app.use(

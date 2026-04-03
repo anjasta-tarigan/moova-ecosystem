@@ -10,6 +10,7 @@ import {
   getEvents,
   getJudgeEvents,
   getPublicEvents,
+  getStudentEventDetail,
   getStudentEvents,
   getQuestions,
   registerEvent,
@@ -25,6 +26,12 @@ const router = Router();
 
 router.get("/public", getPublicEvents);
 router.get("/student", authenticate, requireRole("STUDENT"), getStudentEvents);
+router.get(
+  "/student/:slug",
+  authenticate,
+  requireRole("STUDENT"),
+  getStudentEventDetail,
+);
 router.get("/judge", authenticate, requireRole("JUDGE"), getJudgeEvents);
 router.get(
   "/admin",

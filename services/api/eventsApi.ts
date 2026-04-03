@@ -10,6 +10,9 @@ export const eventsApi = {
   getStudentEvents: (params?: Record<string, any>) =>
     api.get("/api/events/student", { params }),
 
+  getStudentEventBySlug: (slug: string) =>
+    api.get(`/api/student/events/${slug}`),
+
   getJudgeEvents: () => api.get("/api/events/judge"),
 
   getAdminEvents: (params?: Record<string, any>) =>

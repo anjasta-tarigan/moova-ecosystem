@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.3.7] – 2026-04-03 13:27:09 (UTC+8)
+
+- Expanded student dashboard event detail page to match the legacy public detail completeness (quick info counters, core theme/tracks, judging criteria, requirements, rules tabs, resources, public Q&A, sticky sidebar, and mobile action bar).
+- Preserved dashboard-specific registration CTA behavior (`Register`, `Pending Team Invite`, `Go to Submission`, `View Registration / Team`) while keeping navigation inside the student dashboard.
+
+## [0.3.6] – 2026-04-03 13:18:45 (UTC+8)
+
+- Implemented student dashboard event detail flow with new protected route `/dashboard/events/:slug` and a dedicated `DashboardEventDetail` page that keeps users inside dashboard layout.
+- Added authenticated event detail endpoint `GET /api/student/events/:slug` (plus `/api/events/student/:slug`) returning event details together with registration state, registration metadata, and submission linkage in one payload.
+- Updated student navigation and links (`DashboardLayout`, `DashboardPage`, `DashboardEventHub`, `DashboardSubmission`) from legacy `/dashboard/event/*` paths to the new `/dashboard/events/*` structure.
+
 ## [0.3.5] – 2026-04-02 00:00:00 (UTC+8)
 
 - Updated modal overlay to use a translucent blurred backdrop for status change popups, replacing the opaque dark background.

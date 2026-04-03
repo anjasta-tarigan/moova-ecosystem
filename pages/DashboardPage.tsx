@@ -18,6 +18,7 @@ interface RegistrationItem {
   id: string;
   event: {
     id: string;
+    slug?: string;
     title: string;
     deadline?: string;
     format?: string;
@@ -134,7 +135,7 @@ const OverviewView = () => {
             Active Competitions
           </h2>
           <button
-            onClick={() => navigate("/dashboard/event/list")}
+            onClick={() => navigate("/dashboard/events")}
             className="text-sm font-bold text-primary-600 hover:underline flex items-center gap-1"
           >
             View All <ArrowRight size={16} />
@@ -205,7 +206,9 @@ const OverviewView = () => {
                   <Button
                     size="sm"
                     onClick={() =>
-                      navigate(`/dashboard/event/${reg.event?.id || reg.id}`)
+                      navigate(
+                        `/dashboard/events/${reg.event?.slug || reg.event?.id || reg.id}`,
+                      )
                     }
                   >
                     Open Workspace
@@ -241,7 +244,7 @@ const OverviewView = () => {
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => navigate("/dashboard/event/list")}
+                  onClick={() => navigate("/dashboard/events")}
                 >
                   Open
                 </Button>

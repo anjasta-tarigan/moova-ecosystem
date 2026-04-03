@@ -72,7 +72,7 @@ const DashboardLayout: React.FC = () => {
         {
           label: "Event",
           icon: <Calendar size={20} />,
-          href: "/dashboard/event/list",
+          href: "/dashboard/events",
           id: "event",
         },
         {

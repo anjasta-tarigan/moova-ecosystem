@@ -25,6 +25,7 @@ const CertificateVerificationPage = lazy(
 const DashboardLayout = lazy(() => import("./layouts/DashboardLayout"));
 const DashboardPage = lazy(() => import("./pages/DashboardPage"));
 const DashboardEventHub = lazy(() => import("./pages/DashboardEventHub"));
+const DashboardEventDetail = lazy(() => import("./pages/DashboardEventDetail"));
 const DashboardTeam = lazy(() => import("./pages/DashboardTeam"));
 const DashboardSubmission = lazy(() => import("./pages/DashboardSubmission"));
 const DashboardCertificates = lazy(
@@ -212,12 +213,28 @@ const App: React.FC = () => {
 
               {/* Participant Specific Routes */}
               <Route
-                path="event/:id"
+                path="events"
                 element={
                   <RoleGuard allowedRoles={["STUDENT"]}>
                     <DashboardEventHub />
                   </RoleGuard>
                 }
+              />
+              <Route
+                path="events/:slug"
+                element={
+                  <RoleGuard allowedRoles={["STUDENT"]}>
+                    <DashboardEventDetail />
+                  </RoleGuard>
+                }
+              />
+              <Route
+                path="event/list"
+                element={<Navigate to="/dashboard/events" replace />}
+              />
+              <Route
+                path="event/:id"
+                element={<Navigate to="/dashboard/events" replace />}
               />
               <Route
                 path="team/:id"
