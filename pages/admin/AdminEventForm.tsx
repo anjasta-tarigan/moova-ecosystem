@@ -322,13 +322,13 @@ const AdminEventForm = () => {
 
   if (authLoading) return <LoadingSpinner />;
 
-  if (!isSuperAdmin && !isEditMode) {
+  if (!isSuperAdmin) {
     return (
       <div className="p-8 bg-white rounded-lg shadow-sm">
         <p className="text-lg font-semibold text-slate-900">Forbidden</p>
         <p className="text-sm text-slate-600 mt-2">
-          Only Superadmins can create new events. Please contact a Superadmin
-          for access.
+          Only Superadmins can manage event configurations. Please contact a
+          Superadmin for access.
         </p>
         <Button className="mt-4" onClick={() => navigate(basePath)}>
           Go back

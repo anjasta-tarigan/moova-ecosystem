@@ -60,6 +60,56 @@ export type SiswaProfile = Prisma.SiswaProfileModel
  */
 export type Event = Prisma.EventModel
 /**
+ * Model EventTypeTaxonomy
+ * 
+ */
+export type EventTypeTaxonomy = Prisma.EventTypeTaxonomyModel
+/**
+ * Model EventEligibilityTaxonomy
+ * 
+ */
+export type EventEligibilityTaxonomy = Prisma.EventEligibilityTaxonomyModel
+/**
+ * Model EventCriteria
+ * 
+ */
+export type EventCriteria = Prisma.EventCriteriaModel
+/**
+ * Model EventStage
+ * 
+ */
+export type EventStage = Prisma.EventStageModel
+/**
+ * Model EventAward
+ * 
+ */
+export type EventAward = Prisma.EventAwardModel
+/**
+ * Model EventResource
+ * 
+ */
+export type EventResource = Prisma.EventResourceModel
+/**
+ * Model EventCommunityThread
+ * 
+ */
+export type EventCommunityThread = Prisma.EventCommunityThreadModel
+/**
+ * Model EventCommunityMessage
+ * 
+ */
+export type EventCommunityMessage = Prisma.EventCommunityMessageModel
+/**
+ * Model EventCommunityThreadLike
+ * 
+ */
+export type EventCommunityThreadLike = Prisma.EventCommunityThreadLikeModel
+/**
+ * Model EventCommunityMessageLike
+ * 
+ */
+export type EventCommunityMessageLike = Prisma.EventCommunityMessageLikeModel
+/**
  * Model SavedEvent
  * 
  */

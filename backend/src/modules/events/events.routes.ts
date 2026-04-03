@@ -4,10 +4,16 @@ import { requireRole } from "../../middlewares/role.middleware";
 import { validate } from "../../middlewares/validate.middleware";
 import {
   bookmarkEvent,
+  createCommunityMessage,
+  createCommunityThread,
   createQuestion,
   createReply,
   getAdminEvents,
+  getCommunityMessages,
+  getCommunityThreads,
+  getEventDetailBySlug,
   getEventDetail,
+  getEventRealtimeStream,
   getEvents,
   getJudgeEvents,
   getPublicEvents,
@@ -15,10 +21,14 @@ import {
   getStudentEvents,
   getQuestions,
   registerEvent,
+  toggleCommunityMessageLike,
+  toggleCommunityThreadLike,
   toggleUpvote,
   unbookmarkEvent,
 } from "./events.controller";
 import {
+  communityMessageSchema,
+  communityThreadSchema,
   questionSchema,
   registerEventSchema,
   replySchema,
@@ -42,6 +52,8 @@ router.get(
   getAdminEvents,
 );
 router.get("/", getEvents);
+router.get("/slug/:slug", getEventDetailBySlug);
+router.get("/:id/stream", getEventRealtimeStream);
 router.get("/:id", getEventDetail);
 router.post(
   "/:id/register",
@@ -81,6 +93,34 @@ router.post(
   authenticate,
   requireRole("STUDENT"),
   toggleUpvote,
+);
+router.get("/:id/community/threads", getCommunityThreads);
+router.post(
+  "/:id/community/threads",
+  authenticate,
+  requireRole("STUDENT", "ADMIN", "SUPERADMIN", "JUDGE"),
+  validate(communityThreadSchema),
+  createCommunityThread,
+);
+router.get("/:id/community/threads/:threadId/messages", getCommunityMessages);
+router.post(
+  "/:id/community/threads/:threadId/messages",
+  authenticate,
+  requireRole("STUDENT", "ADMIN", "SUPERADMIN", "JUDGE"),
+  validate(communityMessageSchema),
+  createCommunityMessage,
+);
+router.post(
+  "/:id/community/threads/:threadId/likes",
+  authenticate,
+  requireRole("STUDENT", "ADMIN", "SUPERADMIN", "JUDGE"),
+  toggleCommunityThreadLike,
+);
+router.post(
+  "/:id/community/messages/:messageId/likes",
+  authenticate,
+  requireRole("STUDENT", "ADMIN", "SUPERADMIN", "JUDGE"),
+  toggleCommunityMessageLike,
 );
 
 export default router;

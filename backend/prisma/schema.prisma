@@ -27,6 +27,25 @@ enum EventFormat {
   HYBRID
 }
 
+enum EventStageType {
+  ABSTRACT
+  PAPER
+  FINAL
+}
+
+enum EventAwardTier {
+  MAIN
+  HONORABLE_MENTION
+}
+
+enum EventResourceType {
+  GUIDEBOOK
+  SUBMISSION_TEMPLATE
+  JUDGING_RUBRIC
+  RULEBOOK
+  OTHER
+}
+
 enum SubmissionStatus {
   DRAFT
   SUBMITTED
@@ -108,6 +127,10 @@ model User {
   qaQuestions        QaQuestion[]
   qaReplies          QaReply[]
   qaUpvotes          QaUpvote[]
+  eventCommunityThreads EventCommunityThread[]
+  eventCommunityMessages EventCommunityMessage[]
+  eventCommunityThreadLikes EventCommunityThreadLike[]
+  eventCommunityMessageLikes EventCommunityMessageLike[]
   savedEvents        SavedEvent[]
   notifications      Notification[]
   mentorTeams        TeamMentor[]        @relation("MentorTeams")
@@ -170,6 +193,7 @@ model SiswaProfile {
 
 model Event {
   id                  String      @id @default(cuid())
+  customId            String      @unique
   title               String
   slug                String      @unique
   shortDescription    String
@@ -182,13 +206,19 @@ model Event {
   image               String      @default("")
   status              EventStatus @default(DRAFT)
   deadline            String
+  registrationOpenDate  DateTime?
+  registrationCloseDate DateTime?
+  capacity            Int?
   fee                 String      @default("Gratis")
   teamSizeMin         Int         @default(1)
   teamSizeMax         Int         @default(5)
   eligibility         String[]
-  sdgs                Int[]
   prizePool           String      @default("")
   organizer           String      @default("GIVA")
+  rules               String      @default("")
+  awardsEnabled       Boolean     @default(false)
+  eventTypeId         String?
+  eventType           EventTypeTaxonomy? @relation(fields: [eventTypeId], references: [id], onDelete: SetNull)
   registrationEndDate DateTime?
 
   createdById String
@@ -198,6 +228,11 @@ model Event {
   timeline         EventTimeline[]
   faqs             EventFaq[]
   categories       EventCategory[]
+  criteria         EventCriteria[]
+  stages           EventStage[]
+  awards           EventAward[]
+  resources        EventResource[]
+  communityThreads EventCommunityThread[]
   registrations    EventRegistration[]
   savedBy          SavedEvent[]
   submissions      Submission[]
@@ -206,7 +241,155 @@ model Event {
   certificates     Certificate[]
 
   @@index([registrationEndDate])
+  @@index([registrationOpenDate, registrationCloseDate])
+  @@index([status])
   @@map("events")
+}
+
+model EventTypeTaxonomy {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+
+  events Event[]
+
+  @@map("event_type_taxonomies")
+}
+
+model EventEligibilityTaxonomy {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+
+  @@map("event_eligibility_taxonomies")
+}
+
+model EventCriteria {
+  id          String   @id @default(cuid())
+  eventId     String
+  event       Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  name        String
+  description String   @default("")
+  weight      Int
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([eventId, order])
+  @@map("event_criteria")
+}
+
+model EventStage {
+  id         String         @id @default(cuid())
+  eventId    String
+  event      Event          @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  stageType  EventStageType
+  startAt    DateTime
+  deadlineAt DateTime
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+
+  @@unique([eventId, stageType])
+  @@index([eventId, startAt, deadlineAt])
+  @@map("event_stages")
+}
+
+model EventAward {
+  id          String         @id @default(cuid())
+  eventId     String
+  event       Event          @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  rank        Int
+  title       String
+  description String         @default("")
+  tier        EventAwardTier
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@unique([eventId, rank])
+  @@index([eventId, tier])
+  @@map("event_awards")
+}
+
+model EventResource {
+  id           String            @id @default(cuid())
+  eventId      String
+  event        Event             @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  title        String
+  type         EventResourceType @default(OTHER)
+  fileName     String
+  url          String
+  mimeType     String            @default("")
+  sizeBytes    Int? 
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  @@index([eventId, createdAt])
+  @@map("event_resources")
+}
+
+model EventCommunityThread {
+  id         String                  @id @default(cuid())
+  eventId    String
+  event      Event                   @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  authorId   String
+  author     User                    @relation(fields: [authorId], references: [id])
+  title      String
+  content    String
+  likeCount  Int                     @default(0)
+  replyCount Int                     @default(0)
+  viewCount  Int                     @default(0)
+  createdAt  DateTime                @default(now())
+  updatedAt  DateTime                @updatedAt
+
+  messages EventCommunityMessage[]
+  likes    EventCommunityThreadLike[]
+
+  @@index([eventId, createdAt])
+  @@index([eventId, viewCount])
+  @@map("event_community_threads")
+}
+
+model EventCommunityMessage {
+  id        String               @id @default(cuid())
+  threadId  String
+  thread    EventCommunityThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User                 @relation(fields: [authorId], references: [id])
+  content   String
+  likeCount Int                  @default(0)
+  createdAt DateTime             @default(now())
+  updatedAt DateTime             @updatedAt
+
+  likes EventCommunityMessageLike[]
+
+  @@index([threadId, createdAt])
+  @@map("event_community_messages")
+}
+
+model EventCommunityThreadLike {
+  id        String                 @id @default(cuid())
+  userId    String
+  user      User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  threadId  String
+  thread    EventCommunityThread   @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  createdAt DateTime               @default(now())
+
+  @@unique([userId, threadId])
+  @@index([threadId])
+  @@map("event_community_thread_likes")
+}
+
+model EventCommunityMessageLike {
+  id        String                @id @default(cuid())
+  userId    String
+  user      User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messageId String
+  message   EventCommunityMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  createdAt DateTime              @default(now())
+
+  @@unique([userId, messageId])
+  @@index([messageId])
+  @@map("event_community_message_likes")
 }
 
 model SavedEvent {

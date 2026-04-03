@@ -55,6 +55,16 @@ export const ModelName = {
   RefreshToken: 'RefreshToken',
   SiswaProfile: 'SiswaProfile',
   Event: 'Event',
+  EventTypeTaxonomy: 'EventTypeTaxonomy',
+  EventEligibilityTaxonomy: 'EventEligibilityTaxonomy',
+  EventCriteria: 'EventCriteria',
+  EventStage: 'EventStage',
+  EventAward: 'EventAward',
+  EventResource: 'EventResource',
+  EventCommunityThread: 'EventCommunityThread',
+  EventCommunityMessage: 'EventCommunityMessage',
+  EventCommunityThreadLike: 'EventCommunityThreadLike',
+  EventCommunityMessageLike: 'EventCommunityMessageLike',
   SavedEvent: 'SavedEvent',
   EventTimeline: 'EventTimeline',
   EventFaq: 'EventFaq',
@@ -151,6 +161,7 @@ export type SiswaProfileScalarFieldEnum = (typeof SiswaProfileScalarFieldEnum)[k
 
 export const EventScalarFieldEnum = {
   id: 'id',
+  customId: 'customId',
   title: 'title',
   slug: 'slug',
   shortDescription: 'shortDescription',
@@ -163,13 +174,18 @@ export const EventScalarFieldEnum = {
   image: 'image',
   status: 'status',
   deadline: 'deadline',
+  registrationOpenDate: 'registrationOpenDate',
+  registrationCloseDate: 'registrationCloseDate',
+  capacity: 'capacity',
   fee: 'fee',
   teamSizeMin: 'teamSizeMin',
   teamSizeMax: 'teamSizeMax',
   eligibility: 'eligibility',
-  sdgs: 'sdgs',
   prizePool: 'prizePool',
   organizer: 'organizer',
+  rules: 'rules',
+  awardsEnabled: 'awardsEnabled',
+  eventTypeId: 'eventTypeId',
   registrationEndDate: 'registrationEndDate',
   createdById: 'createdById',
   createdAt: 'createdAt',
@@ -177,6 +193,130 @@ export const EventScalarFieldEnum = {
 } as const
 
 export type EventScalarFieldEnum = (typeof EventScalarFieldEnum)[keyof typeof EventScalarFieldEnum]
+
+
+export const EventTypeTaxonomyScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  createdAt: 'createdAt'
+} as const
+
+export type EventTypeTaxonomyScalarFieldEnum = (typeof EventTypeTaxonomyScalarFieldEnum)[keyof typeof EventTypeTaxonomyScalarFieldEnum]
+
+
+export const EventEligibilityTaxonomyScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  createdAt: 'createdAt'
+} as const
+
+export type EventEligibilityTaxonomyScalarFieldEnum = (typeof EventEligibilityTaxonomyScalarFieldEnum)[keyof typeof EventEligibilityTaxonomyScalarFieldEnum]
+
+
+export const EventCriteriaScalarFieldEnum = {
+  id: 'id',
+  eventId: 'eventId',
+  name: 'name',
+  description: 'description',
+  weight: 'weight',
+  order: 'order',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type EventCriteriaScalarFieldEnum = (typeof EventCriteriaScalarFieldEnum)[keyof typeof EventCriteriaScalarFieldEnum]
+
+
+export const EventStageScalarFieldEnum = {
+  id: 'id',
+  eventId: 'eventId',
+  stageType: 'stageType',
+  startAt: 'startAt',
+  deadlineAt: 'deadlineAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type EventStageScalarFieldEnum = (typeof EventStageScalarFieldEnum)[keyof typeof EventStageScalarFieldEnum]
+
+
+export const EventAwardScalarFieldEnum = {
+  id: 'id',
+  eventId: 'eventId',
+  rank: 'rank',
+  title: 'title',
+  description: 'description',
+  tier: 'tier',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type EventAwardScalarFieldEnum = (typeof EventAwardScalarFieldEnum)[keyof typeof EventAwardScalarFieldEnum]
+
+
+export const EventResourceScalarFieldEnum = {
+  id: 'id',
+  eventId: 'eventId',
+  title: 'title',
+  type: 'type',
+  fileName: 'fileName',
+  url: 'url',
+  mimeType: 'mimeType',
+  sizeBytes: 'sizeBytes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type EventResourceScalarFieldEnum = (typeof EventResourceScalarFieldEnum)[keyof typeof EventResourceScalarFieldEnum]
+
+
+export const EventCommunityThreadScalarFieldEnum = {
+  id: 'id',
+  eventId: 'eventId',
+  authorId: 'authorId',
+  title: 'title',
+  content: 'content',
+  likeCount: 'likeCount',
+  replyCount: 'replyCount',
+  viewCount: 'viewCount',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type EventCommunityThreadScalarFieldEnum = (typeof EventCommunityThreadScalarFieldEnum)[keyof typeof EventCommunityThreadScalarFieldEnum]
+
+
+export const EventCommunityMessageScalarFieldEnum = {
+  id: 'id',
+  threadId: 'threadId',
+  authorId: 'authorId',
+  content: 'content',
+  likeCount: 'likeCount',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type EventCommunityMessageScalarFieldEnum = (typeof EventCommunityMessageScalarFieldEnum)[keyof typeof EventCommunityMessageScalarFieldEnum]
+
+
+export const EventCommunityThreadLikeScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  threadId: 'threadId',
+  createdAt: 'createdAt'
+} as const
+
+export type EventCommunityThreadLikeScalarFieldEnum = (typeof EventCommunityThreadLikeScalarFieldEnum)[keyof typeof EventCommunityThreadLikeScalarFieldEnum]
+
+
+export const EventCommunityMessageLikeScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  messageId: 'messageId',
+  createdAt: 'createdAt'
+} as const
+
+export type EventCommunityMessageLikeScalarFieldEnum = (typeof EventCommunityMessageLikeScalarFieldEnum)[keyof typeof EventCommunityMessageLikeScalarFieldEnum]
 
 
 export const SavedEventScalarFieldEnum = {

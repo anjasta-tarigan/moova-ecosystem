@@ -24,6 +24,18 @@ const mapError = (err: any, res: Response) => {
     return error(res, "Cannot withdraw at this stage", 400);
   if (err?.message === "Already scored")
     return error(res, "Submission already scored", 400);
+  if (err?.status === 403 && err?.message === "Stage not started")
+    return error(res, "This stage is locked and has not started yet", 403);
+  if (err?.status === 403 && err?.message === "Stage deadline passed")
+    return error(
+      res,
+      "This stage is now read-only because the deadline passed",
+      403,
+    );
+  if (err?.status === 403 && err?.message === "Stage not configured")
+    return error(res, "This stage is not configured for the event", 403);
+  if (err?.status === 403 && err?.message === "Stage configuration is missing")
+    return error(res, "Competition stages are not configured yet", 403);
   return error(res, "Internal server error", 500);
 };
 

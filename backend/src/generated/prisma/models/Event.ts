@@ -27,19 +27,20 @@ export type AggregateEvent = {
 }
 
 export type EventAvgAggregateOutputType = {
+  capacity: number | null
   teamSizeMin: number | null
   teamSizeMax: number | null
-  sdgs: number | null
 }
 
 export type EventSumAggregateOutputType = {
+  capacity: number | null
   teamSizeMin: number | null
   teamSizeMax: number | null
-  sdgs: number[]
 }
 
 export type EventMinAggregateOutputType = {
   id: string | null
+  customId: string | null
   title: string | null
   slug: string | null
   shortDescription: string | null
@@ -52,11 +53,17 @@ export type EventMinAggregateOutputType = {
   image: string | null
   status: $Enums.EventStatus | null
   deadline: string | null
+  registrationOpenDate: Date | null
+  registrationCloseDate: Date | null
+  capacity: number | null
   fee: string | null
   teamSizeMin: number | null
   teamSizeMax: number | null
   prizePool: string | null
   organizer: string | null
+  rules: string | null
+  awardsEnabled: boolean | null
+  eventTypeId: string | null
   registrationEndDate: Date | null
   createdById: string | null
   createdAt: Date | null
@@ -65,6 +72,7 @@ export type EventMinAggregateOutputType = {
 
 export type EventMaxAggregateOutputType = {
   id: string | null
+  customId: string | null
   title: string | null
   slug: string | null
   shortDescription: string | null
@@ -77,11 +85,17 @@ export type EventMaxAggregateOutputType = {
   image: string | null
   status: $Enums.EventStatus | null
   deadline: string | null
+  registrationOpenDate: Date | null
+  registrationCloseDate: Date | null
+  capacity: number | null
   fee: string | null
   teamSizeMin: number | null
   teamSizeMax: number | null
   prizePool: string | null
   organizer: string | null
+  rules: string | null
+  awardsEnabled: boolean | null
+  eventTypeId: string | null
   registrationEndDate: Date | null
   createdById: string | null
   createdAt: Date | null
@@ -90,6 +104,7 @@ export type EventMaxAggregateOutputType = {
 
 export type EventCountAggregateOutputType = {
   id: number
+  customId: number
   title: number
   slug: number
   shortDescription: number
@@ -102,13 +117,18 @@ export type EventCountAggregateOutputType = {
   image: number
   status: number
   deadline: number
+  registrationOpenDate: number
+  registrationCloseDate: number
+  capacity: number
   fee: number
   teamSizeMin: number
   teamSizeMax: number
   eligibility: number
-  sdgs: number
   prizePool: number
   organizer: number
+  rules: number
+  awardsEnabled: number
+  eventTypeId: number
   registrationEndDate: number
   createdById: number
   createdAt: number
@@ -118,19 +138,20 @@ export type EventCountAggregateOutputType = {
 
 
 export type EventAvgAggregateInputType = {
+  capacity?: true
   teamSizeMin?: true
   teamSizeMax?: true
-  sdgs?: true
 }
 
 export type EventSumAggregateInputType = {
+  capacity?: true
   teamSizeMin?: true
   teamSizeMax?: true
-  sdgs?: true
 }
 
 export type EventMinAggregateInputType = {
   id?: true
+  customId?: true
   title?: true
   slug?: true
   shortDescription?: true
@@ -143,11 +164,17 @@ export type EventMinAggregateInputType = {
   image?: true
   status?: true
   deadline?: true
+  registrationOpenDate?: true
+  registrationCloseDate?: true
+  capacity?: true
   fee?: true
   teamSizeMin?: true
   teamSizeMax?: true
   prizePool?: true
   organizer?: true
+  rules?: true
+  awardsEnabled?: true
+  eventTypeId?: true
   registrationEndDate?: true
   createdById?: true
   createdAt?: true
@@ -156,6 +183,7 @@ export type EventMinAggregateInputType = {
 
 export type EventMaxAggregateInputType = {
   id?: true
+  customId?: true
   title?: true
   slug?: true
   shortDescription?: true
@@ -168,11 +196,17 @@ export type EventMaxAggregateInputType = {
   image?: true
   status?: true
   deadline?: true
+  registrationOpenDate?: true
+  registrationCloseDate?: true
+  capacity?: true
   fee?: true
   teamSizeMin?: true
   teamSizeMax?: true
   prizePool?: true
   organizer?: true
+  rules?: true
+  awardsEnabled?: true
+  eventTypeId?: true
   registrationEndDate?: true
   createdById?: true
   createdAt?: true
@@ -181,6 +215,7 @@ export type EventMaxAggregateInputType = {
 
 export type EventCountAggregateInputType = {
   id?: true
+  customId?: true
   title?: true
   slug?: true
   shortDescription?: true
@@ -193,13 +228,18 @@ export type EventCountAggregateInputType = {
   image?: true
   status?: true
   deadline?: true
+  registrationOpenDate?: true
+  registrationCloseDate?: true
+  capacity?: true
   fee?: true
   teamSizeMin?: true
   teamSizeMax?: true
   eligibility?: true
-  sdgs?: true
   prizePool?: true
   organizer?: true
+  rules?: true
+  awardsEnabled?: true
+  eventTypeId?: true
   registrationEndDate?: true
   createdById?: true
   createdAt?: true
@@ -295,6 +335,7 @@ export type EventGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalAr
 
 export type EventGroupByOutputType = {
   id: string
+  customId: string
   title: string
   slug: string
   shortDescription: string
@@ -307,13 +348,18 @@ export type EventGroupByOutputType = {
   image: string
   status: $Enums.EventStatus
   deadline: string
+  registrationOpenDate: Date | null
+  registrationCloseDate: Date | null
+  capacity: number | null
   fee: string
   teamSizeMin: number
   teamSizeMax: number
   eligibility: string[]
-  sdgs: number[]
   prizePool: string
   organizer: string
+  rules: string
+  awardsEnabled: boolean
+  eventTypeId: string | null
   registrationEndDate: Date | null
   createdById: string
   createdAt: Date
@@ -345,6 +391,7 @@ export type EventWhereInput = {
   OR?: Prisma.EventWhereInput[]
   NOT?: Prisma.EventWhereInput | Prisma.EventWhereInput[]
   id?: Prisma.StringFilter<"Event"> | string
+  customId?: Prisma.StringFilter<"Event"> | string
   title?: Prisma.StringFilter<"Event"> | string
   slug?: Prisma.StringFilter<"Event"> | string
   shortDescription?: Prisma.StringFilter<"Event"> | string
@@ -357,20 +404,31 @@ export type EventWhereInput = {
   image?: Prisma.StringFilter<"Event"> | string
   status?: Prisma.EnumEventStatusFilter<"Event"> | $Enums.EventStatus
   deadline?: Prisma.StringFilter<"Event"> | string
+  registrationOpenDate?: Prisma.DateTimeNullableFilter<"Event"> | Date | string | null
+  registrationCloseDate?: Prisma.DateTimeNullableFilter<"Event"> | Date | string | null
+  capacity?: Prisma.IntNullableFilter<"Event"> | number | null
   fee?: Prisma.StringFilter<"Event"> | string
   teamSizeMin?: Prisma.IntFilter<"Event"> | number
   teamSizeMax?: Prisma.IntFilter<"Event"> | number
   eligibility?: Prisma.StringNullableListFilter<"Event">
-  sdgs?: Prisma.IntNullableListFilter<"Event">
   prizePool?: Prisma.StringFilter<"Event"> | string
   organizer?: Prisma.StringFilter<"Event"> | string
+  rules?: Prisma.StringFilter<"Event"> | string
+  awardsEnabled?: Prisma.BoolFilter<"Event"> | boolean
+  eventTypeId?: Prisma.StringNullableFilter<"Event"> | string | null
   registrationEndDate?: Prisma.DateTimeNullableFilter<"Event"> | Date | string | null
   createdById?: Prisma.StringFilter<"Event"> | string
   createdAt?: Prisma.DateTimeFilter<"Event"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Event"> | Date | string
+  eventType?: Prisma.XOR<Prisma.EventTypeTaxonomyNullableScalarRelationFilter, Prisma.EventTypeTaxonomyWhereInput> | null
   timeline?: Prisma.EventTimelineListRelationFilter
   faqs?: Prisma.EventFaqListRelationFilter
   categories?: Prisma.EventCategoryListRelationFilter
+  criteria?: Prisma.EventCriteriaListRelationFilter
+  stages?: Prisma.EventStageListRelationFilter
+  awards?: Prisma.EventAwardListRelationFilter
+  resources?: Prisma.EventResourceListRelationFilter
+  communityThreads?: Prisma.EventCommunityThreadListRelationFilter
   registrations?: Prisma.EventRegistrationListRelationFilter
   savedBy?: Prisma.SavedEventListRelationFilter
   submissions?: Prisma.SubmissionListRelationFilter
@@ -381,6 +439,7 @@ export type EventWhereInput = {
 
 export type EventOrderByWithRelationInput = {
   id?: Prisma.SortOrder
+  customId?: Prisma.SortOrder
   title?: Prisma.SortOrder
   slug?: Prisma.SortOrder
   shortDescription?: Prisma.SortOrder
@@ -393,20 +452,31 @@ export type EventOrderByWithRelationInput = {
   image?: Prisma.SortOrder
   status?: Prisma.SortOrder
   deadline?: Prisma.SortOrder
+  registrationOpenDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  registrationCloseDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  capacity?: Prisma.SortOrderInput | Prisma.SortOrder
   fee?: Prisma.SortOrder
   teamSizeMin?: Prisma.SortOrder
   teamSizeMax?: Prisma.SortOrder
   eligibility?: Prisma.SortOrder
-  sdgs?: Prisma.SortOrder
   prizePool?: Prisma.SortOrder
   organizer?: Prisma.SortOrder
+  rules?: Prisma.SortOrder
+  awardsEnabled?: Prisma.SortOrder
+  eventTypeId?: Prisma.SortOrderInput | Prisma.SortOrder
   registrationEndDate?: Prisma.SortOrderInput | Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  eventType?: Prisma.EventTypeTaxonomyOrderByWithRelationInput
   timeline?: Prisma.EventTimelineOrderByRelationAggregateInput
   faqs?: Prisma.EventFaqOrderByRelationAggregateInput
   categories?: Prisma.EventCategoryOrderByRelationAggregateInput
+  criteria?: Prisma.EventCriteriaOrderByRelationAggregateInput
+  stages?: Prisma.EventStageOrderByRelationAggregateInput
+  awards?: Prisma.EventAwardOrderByRelationAggregateInput
+  resources?: Prisma.EventResourceOrderByRelationAggregateInput
+  communityThreads?: Prisma.EventCommunityThreadOrderByRelationAggregateInput
   registrations?: Prisma.EventRegistrationOrderByRelationAggregateInput
   savedBy?: Prisma.SavedEventOrderByRelationAggregateInput
   submissions?: Prisma.SubmissionOrderByRelationAggregateInput
@@ -417,6 +487,7 @@ export type EventOrderByWithRelationInput = {
 
 export type EventWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  customId?: string
   slug?: string
   AND?: Prisma.EventWhereInput | Prisma.EventWhereInput[]
   OR?: Prisma.EventWhereInput[]
@@ -432,30 +503,42 @@ export type EventWhereUniqueInput = Prisma.AtLeast<{
   image?: Prisma.StringFilter<"Event"> | string
   status?: Prisma.EnumEventStatusFilter<"Event"> | $Enums.EventStatus
   deadline?: Prisma.StringFilter<"Event"> | string
+  registrationOpenDate?: Prisma.DateTimeNullableFilter<"Event"> | Date | string | null
+  registrationCloseDate?: Prisma.DateTimeNullableFilter<"Event"> | Date | string | null
+  capacity?: Prisma.IntNullableFilter<"Event"> | number | null
   fee?: Prisma.StringFilter<"Event"> | string
   teamSizeMin?: Prisma.IntFilter<"Event"> | number
   teamSizeMax?: Prisma.IntFilter<"Event"> | number
   eligibility?: Prisma.StringNullableListFilter<"Event">
-  sdgs?: Prisma.IntNullableListFilter<"Event">
   prizePool?: Prisma.StringFilter<"Event"> | string
   organizer?: Prisma.StringFilter<"Event"> | string
+  rules?: Prisma.StringFilter<"Event"> | string
+  awardsEnabled?: Prisma.BoolFilter<"Event"> | boolean
+  eventTypeId?: Prisma.StringNullableFilter<"Event"> | string | null
   registrationEndDate?: Prisma.DateTimeNullableFilter<"Event"> | Date | string | null
   createdById?: Prisma.StringFilter<"Event"> | string
   createdAt?: Prisma.DateTimeFilter<"Event"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Event"> | Date | string
+  eventType?: Prisma.XOR<Prisma.EventTypeTaxonomyNullableScalarRelationFilter, Prisma.EventTypeTaxonomyWhereInput> | null
   timeline?: Prisma.EventTimelineListRelationFilter
   faqs?: Prisma.EventFaqListRelationFilter
   categories?: Prisma.EventCategoryListRelationFilter
+  criteria?: Prisma.EventCriteriaListRelationFilter
+  stages?: Prisma.EventStageListRelationFilter
+  awards?: Prisma.EventAwardListRelationFilter
+  resources?: Prisma.EventResourceListRelationFilter
+  communityThreads?: Prisma.EventCommunityThreadListRelationFilter
   registrations?: Prisma.EventRegistrationListRelationFilter
   savedBy?: Prisma.SavedEventListRelationFilter
   submissions?: Prisma.SubmissionListRelationFilter
   judgeAssignments?: Prisma.JudgeAssignmentListRelationFilter
   qaQuestions?: Prisma.QaQuestionListRelationFilter
   certificates?: Prisma.CertificateListRelationFilter
-}, "id" | "slug">
+}, "id" | "customId" | "slug">
 
 export type EventOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
+  customId?: Prisma.SortOrder
   title?: Prisma.SortOrder
   slug?: Prisma.SortOrder
   shortDescription?: Prisma.SortOrder
@@ -468,13 +551,18 @@ export type EventOrderByWithAggregationInput = {
   image?: Prisma.SortOrder
   status?: Prisma.SortOrder
   deadline?: Prisma.SortOrder
+  registrationOpenDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  registrationCloseDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  capacity?: Prisma.SortOrderInput | Prisma.SortOrder
   fee?: Prisma.SortOrder
   teamSizeMin?: Prisma.SortOrder
   teamSizeMax?: Prisma.SortOrder
   eligibility?: Prisma.SortOrder
-  sdgs?: Prisma.SortOrder
   prizePool?: Prisma.SortOrder
   organizer?: Prisma.SortOrder
+  rules?: Prisma.SortOrder
+  awardsEnabled?: Prisma.SortOrder
+  eventTypeId?: Prisma.SortOrderInput | Prisma.SortOrder
   registrationEndDate?: Prisma.SortOrderInput | Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -491,6 +579,7 @@ export type EventScalarWhereWithAggregatesInput = {
   OR?: Prisma.EventScalarWhereWithAggregatesInput[]
   NOT?: Prisma.EventScalarWhereWithAggregatesInput | Prisma.EventScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"Event"> | string
+  customId?: Prisma.StringWithAggregatesFilter<"Event"> | string
   title?: Prisma.StringWithAggregatesFilter<"Event"> | string
   slug?: Prisma.StringWithAggregatesFilter<"Event"> | string
   shortDescription?: Prisma.StringWithAggregatesFilter<"Event"> | string
@@ -503,13 +592,18 @@ export type EventScalarWhereWithAggregatesInput = {
   image?: Prisma.StringWithAggregatesFilter<"Event"> | string
   status?: Prisma.EnumEventStatusWithAggregatesFilter<"Event"> | $Enums.EventStatus
   deadline?: Prisma.StringWithAggregatesFilter<"Event"> | string
+  registrationOpenDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Event"> | Date | string | null
+  registrationCloseDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Event"> | Date | string | null
+  capacity?: Prisma.IntNullableWithAggregatesFilter<"Event"> | number | null
   fee?: Prisma.StringWithAggregatesFilter<"Event"> | string
   teamSizeMin?: Prisma.IntWithAggregatesFilter<"Event"> | number
   teamSizeMax?: Prisma.IntWithAggregatesFilter<"Event"> | number
   eligibility?: Prisma.StringNullableListFilter<"Event">
-  sdgs?: Prisma.IntNullableListFilter<"Event">
   prizePool?: Prisma.StringWithAggregatesFilter<"Event"> | string
   organizer?: Prisma.StringWithAggregatesFilter<"Event"> | string
+  rules?: Prisma.StringWithAggregatesFilter<"Event"> | string
+  awardsEnabled?: Prisma.BoolWithAggregatesFilter<"Event"> | boolean
+  eventTypeId?: Prisma.StringNullableWithAggregatesFilter<"Event"> | string | null
   registrationEndDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Event"> | Date | string | null
   createdById?: Prisma.StringWithAggregatesFilter<"Event"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Event"> | Date | string
@@ -518,6 +612,7 @@ export type EventScalarWhereWithAggregatesInput = {
 
 export type EventCreateInput = {
   id?: string
+  customId: string
   title: string
   slug: string
   shortDescription: string
@@ -530,20 +625,30 @@ export type EventCreateInput = {
   image?: string
   status?: $Enums.EventStatus
   deadline: string
+  registrationOpenDate?: Date | string | null
+  registrationCloseDate?: Date | string | null
+  capacity?: number | null
   fee?: string
   teamSizeMin?: number
   teamSizeMax?: number
   eligibility?: Prisma.EventCreateeligibilityInput | string[]
-  sdgs?: Prisma.EventCreatesdgsInput | number[]
   prizePool?: string
   organizer?: string
+  rules?: string
+  awardsEnabled?: boolean
   registrationEndDate?: Date | string | null
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  eventType?: Prisma.EventTypeTaxonomyCreateNestedOneWithoutEventsInput
   timeline?: Prisma.EventTimelineCreateNestedManyWithoutEventInput
   faqs?: Prisma.EventFaqCreateNestedManyWithoutEventInput
   categories?: Prisma.EventCategoryCreateNestedManyWithoutEventInput
+  criteria?: Prisma.EventCriteriaCreateNestedManyWithoutEventInput
+  stages?: Prisma.EventStageCreateNestedManyWithoutEventInput
+  awards?: Prisma.EventAwardCreateNestedManyWithoutEventInput
+  resources?: Prisma.EventResourceCreateNestedManyWithoutEventInput
+  communityThreads?: Prisma.EventCommunityThreadCreateNestedManyWithoutEventInput
   registrations?: Prisma.EventRegistrationCreateNestedManyWithoutEventInput
   savedBy?: Prisma.SavedEventCreateNestedManyWithoutEventInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutEventInput
@@ -554,6 +659,7 @@ export type EventCreateInput = {
 
 export type EventUncheckedCreateInput = {
   id?: string
+  customId: string
   title: string
   slug: string
   shortDescription: string
@@ -566,13 +672,18 @@ export type EventUncheckedCreateInput = {
   image?: string
   status?: $Enums.EventStatus
   deadline: string
+  registrationOpenDate?: Date | string | null
+  registrationCloseDate?: Date | string | null
+  capacity?: number | null
   fee?: string
   teamSizeMin?: number
   teamSizeMax?: number
   eligibility?: Prisma.EventCreateeligibilityInput | string[]
-  sdgs?: Prisma.EventCreatesdgsInput | number[]
   prizePool?: string
   organizer?: string
+  rules?: string
+  awardsEnabled?: boolean
+  eventTypeId?: string | null
   registrationEndDate?: Date | string | null
   createdById: string
   createdAt?: Date | string
@@ -580,6 +691,11 @@ export type EventUncheckedCreateInput = {
   timeline?: Prisma.EventTimelineUncheckedCreateNestedManyWithoutEventInput
   faqs?: Prisma.EventFaqUncheckedCreateNestedManyWithoutEventInput
   categories?: Prisma.EventCategoryUncheckedCreateNestedManyWithoutEventInput
+  criteria?: Prisma.EventCriteriaUncheckedCreateNestedManyWithoutEventInput
+  stages?: Prisma.EventStageUncheckedCreateNestedManyWithoutEventInput
+  awards?: Prisma.EventAwardUncheckedCreateNestedManyWithoutEventInput
+  resources?: Prisma.EventResourceUncheckedCreateNestedManyWithoutEventInput
+  communityThreads?: Prisma.EventCommunityThreadUncheckedCreateNestedManyWithoutEventInput
   registrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutEventInput
   savedBy?: Prisma.SavedEventUncheckedCreateNestedManyWithoutEventInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutEventInput
@@ -590,6 +706,7 @@ export type EventUncheckedCreateInput = {
 
 export type EventUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  customId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   shortDescription?: Prisma.StringFieldUpdateOperationsInput | string
@@ -602,20 +719,30 @@ export type EventUpdateInput = {
   image?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumEventStatusFieldUpdateOperationsInput | $Enums.EventStatus
   deadline?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationOpenDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  registrationCloseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   fee?: Prisma.StringFieldUpdateOperationsInput | string
   teamSizeMin?: Prisma.IntFieldUpdateOperationsInput | number
   teamSizeMax?: Prisma.IntFieldUpdateOperationsInput | number
   eligibility?: Prisma.EventUpdateeligibilityInput | string[]
-  sdgs?: Prisma.EventUpdatesdgsInput | number[]
   prizePool?: Prisma.StringFieldUpdateOperationsInput | string
   organizer?: Prisma.StringFieldUpdateOperationsInput | string
+  rules?: Prisma.StringFieldUpdateOperationsInput | string
+  awardsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   registrationEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  eventType?: Prisma.EventTypeTaxonomyUpdateOneWithoutEventsNestedInput
   timeline?: Prisma.EventTimelineUpdateManyWithoutEventNestedInput
   faqs?: Prisma.EventFaqUpdateManyWithoutEventNestedInput
   categories?: Prisma.EventCategoryUpdateManyWithoutEventNestedInput
+  criteria?: Prisma.EventCriteriaUpdateManyWithoutEventNestedInput
+  stages?: Prisma.EventStageUpdateManyWithoutEventNestedInput
+  awards?: Prisma.EventAwardUpdateManyWithoutEventNestedInput
+  resources?: Prisma.EventResourceUpdateManyWithoutEventNestedInput
+  communityThreads?: Prisma.EventCommunityThreadUpdateManyWithoutEventNestedInput
   registrations?: Prisma.EventRegistrationUpdateManyWithoutEventNestedInput
   savedBy?: Prisma.SavedEventUpdateManyWithoutEventNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutEventNestedInput
@@ -626,6 +753,7 @@ export type EventUpdateInput = {
 
 export type EventUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  customId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   shortDescription?: Prisma.StringFieldUpdateOperationsInput | string
@@ -638,13 +766,18 @@ export type EventUncheckedUpdateInput = {
   image?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumEventStatusFieldUpdateOperationsInput | $Enums.EventStatus
   deadline?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationOpenDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  registrationCloseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   fee?: Prisma.StringFieldUpdateOperationsInput | string
   teamSizeMin?: Prisma.IntFieldUpdateOperationsInput | number
   teamSizeMax?: Prisma.IntFieldUpdateOperationsInput | number
   eligibility?: Prisma.EventUpdateeligibilityInput | string[]
-  sdgs?: Prisma.EventUpdatesdgsInput | number[]
   prizePool?: Prisma.StringFieldUpdateOperationsInput | string
   organizer?: Prisma.StringFieldUpdateOperationsInput | string
+  rules?: Prisma.StringFieldUpdateOperationsInput | string
+  awardsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  eventTypeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   registrationEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -652,6 +785,11 @@ export type EventUncheckedUpdateInput = {
   timeline?: Prisma.EventTimelineUncheckedUpdateManyWithoutEventNestedInput
   faqs?: Prisma.EventFaqUncheckedUpdateManyWithoutEventNestedInput
   categories?: Prisma.EventCategoryUncheckedUpdateManyWithoutEventNestedInput
+  criteria?: Prisma.EventCriteriaUncheckedUpdateManyWithoutEventNestedInput
+  stages?: Prisma.EventStageUncheckedUpdateManyWithoutEventNestedInput
+  awards?: Prisma.EventAwardUncheckedUpdateManyWithoutEventNestedInput
+  resources?: Prisma.EventResourceUncheckedUpdateManyWithoutEventNestedInput
+  communityThreads?: Prisma.EventCommunityThreadUncheckedUpdateManyWithoutEventNestedInput
   registrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutEventNestedInput
   savedBy?: Prisma.SavedEventUncheckedUpdateManyWithoutEventNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutEventNestedInput
@@ -662,6 +800,7 @@ export type EventUncheckedUpdateInput = {
 
 export type EventCreateManyInput = {
   id?: string
+  customId: string
   title: string
   slug: string
   shortDescription: string
@@ -674,13 +813,18 @@ export type EventCreateManyInput = {
   image?: string
   status?: $Enums.EventStatus
   deadline: string
+  registrationOpenDate?: Date | string | null
+  registrationCloseDate?: Date | string | null
+  capacity?: number | null
   fee?: string
   teamSizeMin?: number
   teamSizeMax?: number
   eligibility?: Prisma.EventCreateeligibilityInput | string[]
-  sdgs?: Prisma.EventCreatesdgsInput | number[]
   prizePool?: string
   organizer?: string
+  rules?: string
+  awardsEnabled?: boolean
+  eventTypeId?: string | null
   registrationEndDate?: Date | string | null
   createdById: string
   createdAt?: Date | string
@@ -689,6 +833,7 @@ export type EventCreateManyInput = {
 
 export type EventUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  customId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   shortDescription?: Prisma.StringFieldUpdateOperationsInput | string
@@ -701,13 +846,17 @@ export type EventUpdateManyMutationInput = {
   image?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumEventStatusFieldUpdateOperationsInput | $Enums.EventStatus
   deadline?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationOpenDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  registrationCloseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   fee?: Prisma.StringFieldUpdateOperationsInput | string
   teamSizeMin?: Prisma.IntFieldUpdateOperationsInput | number
   teamSizeMax?: Prisma.IntFieldUpdateOperationsInput | number
   eligibility?: Prisma.EventUpdateeligibilityInput | string[]
-  sdgs?: Prisma.EventUpdatesdgsInput | number[]
   prizePool?: Prisma.StringFieldUpdateOperationsInput | string
   organizer?: Prisma.StringFieldUpdateOperationsInput | string
+  rules?: Prisma.StringFieldUpdateOperationsInput | string
+  awardsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   registrationEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -716,6 +865,7 @@ export type EventUpdateManyMutationInput = {
 
 export type EventUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  customId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   shortDescription?: Prisma.StringFieldUpdateOperationsInput | string
@@ -728,29 +878,27 @@ export type EventUncheckedUpdateManyInput = {
   image?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumEventStatusFieldUpdateOperationsInput | $Enums.EventStatus
   deadline?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationOpenDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  registrationCloseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   fee?: Prisma.StringFieldUpdateOperationsInput | string
   teamSizeMin?: Prisma.IntFieldUpdateOperationsInput | number
   teamSizeMax?: Prisma.IntFieldUpdateOperationsInput | number
   eligibility?: Prisma.EventUpdateeligibilityInput | string[]
-  sdgs?: Prisma.EventUpdatesdgsInput | number[]
   prizePool?: Prisma.StringFieldUpdateOperationsInput | string
   organizer?: Prisma.StringFieldUpdateOperationsInput | string
+  rules?: Prisma.StringFieldUpdateOperationsInput | string
+  awardsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  eventTypeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   registrationEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
-export type IntNullableListFilter<$PrismaModel = never> = {
-  equals?: number[] | Prisma.ListIntFieldRefInput<$PrismaModel> | null
-  has?: number | Prisma.IntFieldRefInput<$PrismaModel> | null
-  hasEvery?: number[] | Prisma.ListIntFieldRefInput<$PrismaModel>
-  hasSome?: number[] | Prisma.ListIntFieldRefInput<$PrismaModel>
-  isEmpty?: boolean
-}
-
 export type EventCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  customId?: Prisma.SortOrder
   title?: Prisma.SortOrder
   slug?: Prisma.SortOrder
   shortDescription?: Prisma.SortOrder
@@ -763,13 +911,18 @@ export type EventCountOrderByAggregateInput = {
   image?: Prisma.SortOrder
   status?: Prisma.SortOrder
   deadline?: Prisma.SortOrder
+  registrationOpenDate?: Prisma.SortOrder
+  registrationCloseDate?: Prisma.SortOrder
+  capacity?: Prisma.SortOrder
   fee?: Prisma.SortOrder
   teamSizeMin?: Prisma.SortOrder
   teamSizeMax?: Prisma.SortOrder
   eligibility?: Prisma.SortOrder
-  sdgs?: Prisma.SortOrder
   prizePool?: Prisma.SortOrder
   organizer?: Prisma.SortOrder
+  rules?: Prisma.SortOrder
+  awardsEnabled?: Prisma.SortOrder
+  eventTypeId?: Prisma.SortOrder
   registrationEndDate?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -777,13 +930,14 @@ export type EventCountOrderByAggregateInput = {
 }
 
 export type EventAvgOrderByAggregateInput = {
+  capacity?: Prisma.SortOrder
   teamSizeMin?: Prisma.SortOrder
   teamSizeMax?: Prisma.SortOrder
-  sdgs?: Prisma.SortOrder
 }
 
 export type EventMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  customId?: Prisma.SortOrder
   title?: Prisma.SortOrder
   slug?: Prisma.SortOrder
   shortDescription?: Prisma.SortOrder
@@ -796,11 +950,17 @@ export type EventMaxOrderByAggregateInput = {
   image?: Prisma.SortOrder
   status?: Prisma.SortOrder
   deadline?: Prisma.SortOrder
+  registrationOpenDate?: Prisma.SortOrder
+  registrationCloseDate?: Prisma.SortOrder
+  capacity?: Prisma.SortOrder
   fee?: Prisma.SortOrder
   teamSizeMin?: Prisma.SortOrder
   teamSizeMax?: Prisma.SortOrder
   prizePool?: Prisma.SortOrder
   organizer?: Prisma.SortOrder
+  rules?: Prisma.SortOrder
+  awardsEnabled?: Prisma.SortOrder
+  eventTypeId?: Prisma.SortOrder
   registrationEndDate?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -809,6 +969,7 @@ export type EventMaxOrderByAggregateInput = {
 
 export type EventMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  customId?: Prisma.SortOrder
   title?: Prisma.SortOrder
   slug?: Prisma.SortOrder
   shortDescription?: Prisma.SortOrder
@@ -821,11 +982,17 @@ export type EventMinOrderByAggregateInput = {
   image?: Prisma.SortOrder
   status?: Prisma.SortOrder
   deadline?: Prisma.SortOrder
+  registrationOpenDate?: Prisma.SortOrder
+  registrationCloseDate?: Prisma.SortOrder
+  capacity?: Prisma.SortOrder
   fee?: Prisma.SortOrder
   teamSizeMin?: Prisma.SortOrder
   teamSizeMax?: Prisma.SortOrder
   prizePool?: Prisma.SortOrder
   organizer?: Prisma.SortOrder
+  rules?: Prisma.SortOrder
+  awardsEnabled?: Prisma.SortOrder
+  eventTypeId?: Prisma.SortOrder
   registrationEndDate?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -833,9 +1000,19 @@ export type EventMinOrderByAggregateInput = {
 }
 
 export type EventSumOrderByAggregateInput = {
+  capacity?: Prisma.SortOrder
   teamSizeMin?: Prisma.SortOrder
   teamSizeMax?: Prisma.SortOrder
-  sdgs?: Prisma.SortOrder
+}
+
+export type EventListRelationFilter = {
+  every?: Prisma.EventWhereInput
+  some?: Prisma.EventWhereInput
+  none?: Prisma.EventWhereInput
+}
+
+export type EventOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type EventScalarRelationFilter = {
@@ -852,10 +1029,6 @@ export type EventCreateeligibilityInput = {
   set: string[]
 }
 
-export type EventCreatesdgsInput = {
-  set: number[]
-}
-
 export type EnumEventFormatFieldUpdateOperationsInput = {
   set?: $Enums.EventFormat
 }
@@ -864,14 +1037,133 @@ export type EnumEventStatusFieldUpdateOperationsInput = {
   set?: $Enums.EventStatus
 }
 
+export type NullableIntFieldUpdateOperationsInput = {
+  set?: number | null
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
+}
+
 export type EventUpdateeligibilityInput = {
   set?: string[]
   push?: string | string[]
 }
 
-export type EventUpdatesdgsInput = {
-  set?: number[]
-  push?: number | number[]
+export type NullableStringFieldUpdateOperationsInput = {
+  set?: string | null
+}
+
+export type EventCreateNestedManyWithoutEventTypeInput = {
+  create?: Prisma.XOR<Prisma.EventCreateWithoutEventTypeInput, Prisma.EventUncheckedCreateWithoutEventTypeInput> | Prisma.EventCreateWithoutEventTypeInput[] | Prisma.EventUncheckedCreateWithoutEventTypeInput[]
+  connectOrCreate?: Prisma.EventCreateOrConnectWithoutEventTypeInput | Prisma.EventCreateOrConnectWithoutEventTypeInput[]
+  createMany?: Prisma.EventCreateManyEventTypeInputEnvelope
+  connect?: Prisma.EventWhereUniqueInput | Prisma.EventWhereUniqueInput[]
+}
+
+export type EventUncheckedCreateNestedManyWithoutEventTypeInput = {
+  create?: Prisma.XOR<Prisma.EventCreateWithoutEventTypeInput, Prisma.EventUncheckedCreateWithoutEventTypeInput> | Prisma.EventCreateWithoutEventTypeInput[] | Prisma.EventUncheckedCreateWithoutEventTypeInput[]
+  connectOrCreate?: Prisma.EventCreateOrConnectWithoutEventTypeInput | Prisma.EventCreateOrConnectWithoutEventTypeInput[]
+  createMany?: Prisma.EventCreateManyEventTypeInputEnvelope
+  connect?: Prisma.EventWhereUniqueInput | Prisma.EventWhereUniqueInput[]
+}
+
+export type EventUpdateManyWithoutEventTypeNestedInput = {
+  create?: Prisma.XOR<Prisma.EventCreateWithoutEventTypeInput, Prisma.EventUncheckedCreateWithoutEventTypeInput> | Prisma.EventCreateWithoutEventTypeInput[] | Prisma.EventUncheckedCreateWithoutEventTypeInput[]
+  connectOrCreate?: Prisma.EventCreateOrConnectWithoutEventTypeInput | Prisma.EventCreateOrConnectWithoutEventTypeInput[]
+  upsert?: Prisma.EventUpsertWithWhereUniqueWithoutEventTypeInput | Prisma.EventUpsertWithWhereUniqueWithoutEventTypeInput[]
+  createMany?: Prisma.EventCreateManyEventTypeInputEnvelope
+  set?: Prisma.EventWhereUniqueInput | Prisma.EventWhereUniqueInput[]
+  disconnect?: Prisma.EventWhereUniqueInput | Prisma.EventWhereUniqueInput[]
+  delete?: Prisma.EventWhereUniqueInput | Prisma.EventWhereUniqueInput[]
+  connect?: Prisma.EventWhereUniqueInput | Prisma.EventWhereUniqueInput[]
+  update?: Prisma.EventUpdateWithWhereUniqueWithoutEventTypeInput | Prisma.EventUpdateWithWhereUniqueWithoutEventTypeInput[]
+  updateMany?: Prisma.EventUpdateManyWithWhereWithoutEventTypeInput | Prisma.EventUpdateManyWithWhereWithoutEventTypeInput[]
+  deleteMany?: Prisma.EventScalarWhereInput | Prisma.EventScalarWhereInput[]
+}
+
+export type EventUncheckedUpdateManyWithoutEventTypeNestedInput = {
+  create?: Prisma.XOR<Prisma.EventCreateWithoutEventTypeInput, Prisma.EventUncheckedCreateWithoutEventTypeInput> | Prisma.EventCreateWithoutEventTypeInput[] | Prisma.EventUncheckedCreateWithoutEventTypeInput[]
+  connectOrCreate?: Prisma.EventCreateOrConnectWithoutEventTypeInput | Prisma.EventCreateOrConnectWithoutEventTypeInput[]
+  upsert?: Prisma.EventUpsertWithWhereUniqueWithoutEventTypeInput | Prisma.EventUpsertWithWhereUniqueWithoutEventTypeInput[]
+  createMany?: Prisma.EventCreateManyEventTypeInputEnvelope
+  set?: Prisma.EventWhereUniqueInput | Prisma.EventWhereUniqueInput[]
+  disconnect?: Prisma.EventWhereUniqueInput | Prisma.EventWhereUniqueInput[]
+  delete?: Prisma.EventWhereUniqueInput | Prisma.EventWhereUniqueInput[]
+  connect?: Prisma.EventWhereUniqueInput | Prisma.EventWhereUniqueInput[]
+  update?: Prisma.EventUpdateWithWhereUniqueWithoutEventTypeInput | Prisma.EventUpdateWithWhereUniqueWithoutEventTypeInput[]
+  updateMany?: Prisma.EventUpdateManyWithWhereWithoutEventTypeInput | Prisma.EventUpdateManyWithWhereWithoutEventTypeInput[]
+  deleteMany?: Prisma.EventScalarWhereInput | Prisma.EventScalarWhereInput[]
+}
+
+export type EventCreateNestedOneWithoutCriteriaInput = {
+  create?: Prisma.XOR<Prisma.EventCreateWithoutCriteriaInput, Prisma.EventUncheckedCreateWithoutCriteriaInput>
+  connectOrCreate?: Prisma.EventCreateOrConnectWithoutCriteriaInput
+  connect?: Prisma.EventWhereUniqueInput
+}
+
+export type EventUpdateOneRequiredWithoutCriteriaNestedInput = {
+  create?: Prisma.XOR<Prisma.EventCreateWithoutCriteriaInput, Prisma.EventUncheckedCreateWithoutCriteriaInput>
+  connectOrCreate?: Prisma.EventCreateOrConnectWithoutCriteriaInput
+  upsert?: Prisma.EventUpsertWithoutCriteriaInput
+  connect?: Prisma.EventWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.EventUpdateToOneWithWhereWithoutCriteriaInput, Prisma.EventUpdateWithoutCriteriaInput>, Prisma.EventUncheckedUpdateWithoutCriteriaInput>
+}
+
+export type EventCreateNestedOneWithoutStagesInput = {
+  create?: Prisma.XOR<Prisma.EventCreateWithoutStagesInput, Prisma.EventUncheckedCreateWithoutStagesInput>
+  connectOrCreate?: Prisma.EventCreateOrConnectWithoutStagesInput
+  connect?: Prisma.EventWhereUniqueInput
+}
+
+export type EventUpdateOneRequiredWithoutStagesNestedInput = {
+  create?: Prisma.XOR<Prisma.EventCreateWithoutStagesInput, Prisma.EventUncheckedCreateWithoutStagesInput>
+  connectOrCreate?: Prisma.EventCreateOrConnectWithoutStagesInput
+  upsert?: Prisma.EventUpsertWithoutStagesInput
+  connect?: Prisma.EventWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.EventUpdateToOneWithWhereWithoutStagesInput, Prisma.EventUpdateWithoutStagesInput>, Prisma.EventUncheckedUpdateWithoutStagesInput>
+}
+
+export type EventCreateNestedOneWithoutAwardsInput = {
+  create?: Prisma.XOR<Prisma.EventCreateWithoutAwardsInput, Prisma.EventUncheckedCreateWithoutAwardsInput>
+  connectOrCreate?: Prisma.EventCreateOrConnectWithoutAwardsInput
+  connect?: Prisma.EventWhereUniqueInput
+}
+
+export type EventUpdateOneRequiredWithoutAwardsNestedInput = {
+  create?: Prisma.XOR<Prisma.EventCreateWithoutAwardsInput, Prisma.EventUncheckedCreateWithoutAwardsInput>
+  connectOrCreate?: Prisma.EventCreateOrConnectWithoutAwardsInput
+  upsert?: Prisma.EventUpsertWithoutAwardsInput
+  connect?: Prisma.EventWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.EventUpdateToOneWithWhereWithoutAwardsInput, Prisma.EventUpdateWithoutAwardsInput>, Prisma.EventUncheckedUpdateWithoutAwardsInput>
+}
+
+export type EventCreateNestedOneWithoutResourcesInput = {
+  create?: Prisma.XOR<Prisma.EventCreateWithoutResourcesInput, Prisma.EventUncheckedCreateWithoutResourcesInput>
+  connectOrCreate?: Prisma.EventCreateOrConnectWithoutResourcesInput
+  connect?: Prisma.EventWhereUniqueInput
+}
+
+export type EventUpdateOneRequiredWithoutResourcesNestedInput = {
+  create?: Prisma.XOR<Prisma.EventCreateWithoutResourcesInput, Prisma.EventUncheckedCreateWithoutResourcesInput>
+  connectOrCreate?: Prisma.EventCreateOrConnectWithoutResourcesInput
+  upsert?: Prisma.EventUpsertWithoutResourcesInput
+  connect?: Prisma.EventWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.EventUpdateToOneWithWhereWithoutResourcesInput, Prisma.EventUpdateWithoutResourcesInput>, Prisma.EventUncheckedUpdateWithoutResourcesInput>
+}
+
+export type EventCreateNestedOneWithoutCommunityThreadsInput = {
+  create?: Prisma.XOR<Prisma.EventCreateWithoutCommunityThreadsInput, Prisma.EventUncheckedCreateWithoutCommunityThreadsInput>
+  connectOrCreate?: Prisma.EventCreateOrConnectWithoutCommunityThreadsInput
+  connect?: Prisma.EventWhereUniqueInput
+}
+
+export type EventUpdateOneRequiredWithoutCommunityThreadsNestedInput = {
+  create?: Prisma.XOR<Prisma.EventCreateWithoutCommunityThreadsInput, Prisma.EventUncheckedCreateWithoutCommunityThreadsInput>
+  connectOrCreate?: Prisma.EventCreateOrConnectWithoutCommunityThreadsInput
+  upsert?: Prisma.EventUpsertWithoutCommunityThreadsInput
+  connect?: Prisma.EventWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.EventUpdateToOneWithWhereWithoutCommunityThreadsInput, Prisma.EventUpdateWithoutCommunityThreadsInput>, Prisma.EventUncheckedUpdateWithoutCommunityThreadsInput>
 }
 
 export type EventCreateNestedOneWithoutSavedByInput = {
@@ -1002,8 +1294,9 @@ export type EventUpdateOneRequiredWithoutQaQuestionsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.EventUpdateToOneWithWhereWithoutQaQuestionsInput, Prisma.EventUpdateWithoutQaQuestionsInput>, Prisma.EventUncheckedUpdateWithoutQaQuestionsInput>
 }
 
-export type EventCreateWithoutSavedByInput = {
+export type EventCreateWithoutEventTypeInput = {
   id?: string
+  customId: string
   title: string
   slug: string
   shortDescription: string
@@ -1016,13 +1309,17 @@ export type EventCreateWithoutSavedByInput = {
   image?: string
   status?: $Enums.EventStatus
   deadline: string
+  registrationOpenDate?: Date | string | null
+  registrationCloseDate?: Date | string | null
+  capacity?: number | null
   fee?: string
   teamSizeMin?: number
   teamSizeMax?: number
   eligibility?: Prisma.EventCreateeligibilityInput | string[]
-  sdgs?: Prisma.EventCreatesdgsInput | number[]
   prizePool?: string
   organizer?: string
+  rules?: string
+  awardsEnabled?: boolean
   registrationEndDate?: Date | string | null
   createdById: string
   createdAt?: Date | string
@@ -1030,6 +1327,1166 @@ export type EventCreateWithoutSavedByInput = {
   timeline?: Prisma.EventTimelineCreateNestedManyWithoutEventInput
   faqs?: Prisma.EventFaqCreateNestedManyWithoutEventInput
   categories?: Prisma.EventCategoryCreateNestedManyWithoutEventInput
+  criteria?: Prisma.EventCriteriaCreateNestedManyWithoutEventInput
+  stages?: Prisma.EventStageCreateNestedManyWithoutEventInput
+  awards?: Prisma.EventAwardCreateNestedManyWithoutEventInput
+  resources?: Prisma.EventResourceCreateNestedManyWithoutEventInput
+  communityThreads?: Prisma.EventCommunityThreadCreateNestedManyWithoutEventInput
+  registrations?: Prisma.EventRegistrationCreateNestedManyWithoutEventInput
+  savedBy?: Prisma.SavedEventCreateNestedManyWithoutEventInput
+  submissions?: Prisma.SubmissionCreateNestedManyWithoutEventInput
+  judgeAssignments?: Prisma.JudgeAssignmentCreateNestedManyWithoutEventInput
+  qaQuestions?: Prisma.QaQuestionCreateNestedManyWithoutEventInput
+  certificates?: Prisma.CertificateCreateNestedManyWithoutEventInput
+}
+
+export type EventUncheckedCreateWithoutEventTypeInput = {
+  id?: string
+  customId: string
+  title: string
+  slug: string
+  shortDescription: string
+  fullDescription: string
+  theme?: string
+  date: string
+  location: string
+  format: $Enums.EventFormat
+  category: string
+  image?: string
+  status?: $Enums.EventStatus
+  deadline: string
+  registrationOpenDate?: Date | string | null
+  registrationCloseDate?: Date | string | null
+  capacity?: number | null
+  fee?: string
+  teamSizeMin?: number
+  teamSizeMax?: number
+  eligibility?: Prisma.EventCreateeligibilityInput | string[]
+  prizePool?: string
+  organizer?: string
+  rules?: string
+  awardsEnabled?: boolean
+  registrationEndDate?: Date | string | null
+  createdById: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  timeline?: Prisma.EventTimelineUncheckedCreateNestedManyWithoutEventInput
+  faqs?: Prisma.EventFaqUncheckedCreateNestedManyWithoutEventInput
+  categories?: Prisma.EventCategoryUncheckedCreateNestedManyWithoutEventInput
+  criteria?: Prisma.EventCriteriaUncheckedCreateNestedManyWithoutEventInput
+  stages?: Prisma.EventStageUncheckedCreateNestedManyWithoutEventInput
+  awards?: Prisma.EventAwardUncheckedCreateNestedManyWithoutEventInput
+  resources?: Prisma.EventResourceUncheckedCreateNestedManyWithoutEventInput
+  communityThreads?: Prisma.EventCommunityThreadUncheckedCreateNestedManyWithoutEventInput
+  registrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutEventInput
+  savedBy?: Prisma.SavedEventUncheckedCreateNestedManyWithoutEventInput
+  submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutEventInput
+  judgeAssignments?: Prisma.JudgeAssignmentUncheckedCreateNestedManyWithoutEventInput
+  qaQuestions?: Prisma.QaQuestionUncheckedCreateNestedManyWithoutEventInput
+  certificates?: Prisma.CertificateUncheckedCreateNestedManyWithoutEventInput
+}
+
+export type EventCreateOrConnectWithoutEventTypeInput = {
+  where: Prisma.EventWhereUniqueInput
+  create: Prisma.XOR<Prisma.EventCreateWithoutEventTypeInput, Prisma.EventUncheckedCreateWithoutEventTypeInput>
+}
+
+export type EventCreateManyEventTypeInputEnvelope = {
+  data: Prisma.EventCreateManyEventTypeInput | Prisma.EventCreateManyEventTypeInput[]
+  skipDuplicates?: boolean
+}
+
+export type EventUpsertWithWhereUniqueWithoutEventTypeInput = {
+  where: Prisma.EventWhereUniqueInput
+  update: Prisma.XOR<Prisma.EventUpdateWithoutEventTypeInput, Prisma.EventUncheckedUpdateWithoutEventTypeInput>
+  create: Prisma.XOR<Prisma.EventCreateWithoutEventTypeInput, Prisma.EventUncheckedCreateWithoutEventTypeInput>
+}
+
+export type EventUpdateWithWhereUniqueWithoutEventTypeInput = {
+  where: Prisma.EventWhereUniqueInput
+  data: Prisma.XOR<Prisma.EventUpdateWithoutEventTypeInput, Prisma.EventUncheckedUpdateWithoutEventTypeInput>
+}
+
+export type EventUpdateManyWithWhereWithoutEventTypeInput = {
+  where: Prisma.EventScalarWhereInput
+  data: Prisma.XOR<Prisma.EventUpdateManyMutationInput, Prisma.EventUncheckedUpdateManyWithoutEventTypeInput>
+}
+
+export type EventScalarWhereInput = {
+  AND?: Prisma.EventScalarWhereInput | Prisma.EventScalarWhereInput[]
+  OR?: Prisma.EventScalarWhereInput[]
+  NOT?: Prisma.EventScalarWhereInput | Prisma.EventScalarWhereInput[]
+  id?: Prisma.StringFilter<"Event"> | string
+  customId?: Prisma.StringFilter<"Event"> | string
+  title?: Prisma.StringFilter<"Event"> | string
+  slug?: Prisma.StringFilter<"Event"> | string
+  shortDescription?: Prisma.StringFilter<"Event"> | string
+  fullDescription?: Prisma.StringFilter<"Event"> | string
+  theme?: Prisma.StringFilter<"Event"> | string
+  date?: Prisma.StringFilter<"Event"> | string
+  location?: Prisma.StringFilter<"Event"> | string
+  format?: Prisma.EnumEventFormatFilter<"Event"> | $Enums.EventFormat
+  category?: Prisma.StringFilter<"Event"> | string
+  image?: Prisma.StringFilter<"Event"> | string
+  status?: Prisma.EnumEventStatusFilter<"Event"> | $Enums.EventStatus
+  deadline?: Prisma.StringFilter<"Event"> | string
+  registrationOpenDate?: Prisma.DateTimeNullableFilter<"Event"> | Date | string | null
+  registrationCloseDate?: Prisma.DateTimeNullableFilter<"Event"> | Date | string | null
+  capacity?: Prisma.IntNullableFilter<"Event"> | number | null
+  fee?: Prisma.StringFilter<"Event"> | string
+  teamSizeMin?: Prisma.IntFilter<"Event"> | number
+  teamSizeMax?: Prisma.IntFilter<"Event"> | number
+  eligibility?: Prisma.StringNullableListFilter<"Event">
+  prizePool?: Prisma.StringFilter<"Event"> | string
+  organizer?: Prisma.StringFilter<"Event"> | string
+  rules?: Prisma.StringFilter<"Event"> | string
+  awardsEnabled?: Prisma.BoolFilter<"Event"> | boolean
+  eventTypeId?: Prisma.StringNullableFilter<"Event"> | string | null
+  registrationEndDate?: Prisma.DateTimeNullableFilter<"Event"> | Date | string | null
+  createdById?: Prisma.StringFilter<"Event"> | string
+  createdAt?: Prisma.DateTimeFilter<"Event"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"Event"> | Date | string
+}
+
+export type EventCreateWithoutCriteriaInput = {
+  id?: string
+  customId: string
+  title: string
+  slug: string
+  shortDescription: string
+  fullDescription: string
+  theme?: string
+  date: string
+  location: string
+  format: $Enums.EventFormat
+  category: string
+  image?: string
+  status?: $Enums.EventStatus
+  deadline: string
+  registrationOpenDate?: Date | string | null
+  registrationCloseDate?: Date | string | null
+  capacity?: number | null
+  fee?: string
+  teamSizeMin?: number
+  teamSizeMax?: number
+  eligibility?: Prisma.EventCreateeligibilityInput | string[]
+  prizePool?: string
+  organizer?: string
+  rules?: string
+  awardsEnabled?: boolean
+  registrationEndDate?: Date | string | null
+  createdById: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  eventType?: Prisma.EventTypeTaxonomyCreateNestedOneWithoutEventsInput
+  timeline?: Prisma.EventTimelineCreateNestedManyWithoutEventInput
+  faqs?: Prisma.EventFaqCreateNestedManyWithoutEventInput
+  categories?: Prisma.EventCategoryCreateNestedManyWithoutEventInput
+  stages?: Prisma.EventStageCreateNestedManyWithoutEventInput
+  awards?: Prisma.EventAwardCreateNestedManyWithoutEventInput
+  resources?: Prisma.EventResourceCreateNestedManyWithoutEventInput
+  communityThreads?: Prisma.EventCommunityThreadCreateNestedManyWithoutEventInput
+  registrations?: Prisma.EventRegistrationCreateNestedManyWithoutEventInput
+  savedBy?: Prisma.SavedEventCreateNestedManyWithoutEventInput
+  submissions?: Prisma.SubmissionCreateNestedManyWithoutEventInput
+  judgeAssignments?: Prisma.JudgeAssignmentCreateNestedManyWithoutEventInput
+  qaQuestions?: Prisma.QaQuestionCreateNestedManyWithoutEventInput
+  certificates?: Prisma.CertificateCreateNestedManyWithoutEventInput
+}
+
+export type EventUncheckedCreateWithoutCriteriaInput = {
+  id?: string
+  customId: string
+  title: string
+  slug: string
+  shortDescription: string
+  fullDescription: string
+  theme?: string
+  date: string
+  location: string
+  format: $Enums.EventFormat
+  category: string
+  image?: string
+  status?: $Enums.EventStatus
+  deadline: string
+  registrationOpenDate?: Date | string | null
+  registrationCloseDate?: Date | string | null
+  capacity?: number | null
+  fee?: string
+  teamSizeMin?: number
+  teamSizeMax?: number
+  eligibility?: Prisma.EventCreateeligibilityInput | string[]
+  prizePool?: string
+  organizer?: string
+  rules?: string
+  awardsEnabled?: boolean
+  eventTypeId?: string | null
+  registrationEndDate?: Date | string | null
+  createdById: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  timeline?: Prisma.EventTimelineUncheckedCreateNestedManyWithoutEventInput
+  faqs?: Prisma.EventFaqUncheckedCreateNestedManyWithoutEventInput
+  categories?: Prisma.EventCategoryUncheckedCreateNestedManyWithoutEventInput
+  stages?: Prisma.EventStageUncheckedCreateNestedManyWithoutEventInput
+  awards?: Prisma.EventAwardUncheckedCreateNestedManyWithoutEventInput
+  resources?: Prisma.EventResourceUncheckedCreateNestedManyWithoutEventInput
+  communityThreads?: Prisma.EventCommunityThreadUncheckedCreateNestedManyWithoutEventInput
+  registrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutEventInput
+  savedBy?: Prisma.SavedEventUncheckedCreateNestedManyWithoutEventInput
+  submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutEventInput
+  judgeAssignments?: Prisma.JudgeAssignmentUncheckedCreateNestedManyWithoutEventInput
+  qaQuestions?: Prisma.QaQuestionUncheckedCreateNestedManyWithoutEventInput
+  certificates?: Prisma.CertificateUncheckedCreateNestedManyWithoutEventInput
+}
+
+export type EventCreateOrConnectWithoutCriteriaInput = {
+  where: Prisma.EventWhereUniqueInput
+  create: Prisma.XOR<Prisma.EventCreateWithoutCriteriaInput, Prisma.EventUncheckedCreateWithoutCriteriaInput>
+}
+
+export type EventUpsertWithoutCriteriaInput = {
+  update: Prisma.XOR<Prisma.EventUpdateWithoutCriteriaInput, Prisma.EventUncheckedUpdateWithoutCriteriaInput>
+  create: Prisma.XOR<Prisma.EventCreateWithoutCriteriaInput, Prisma.EventUncheckedCreateWithoutCriteriaInput>
+  where?: Prisma.EventWhereInput
+}
+
+export type EventUpdateToOneWithWhereWithoutCriteriaInput = {
+  where?: Prisma.EventWhereInput
+  data: Prisma.XOR<Prisma.EventUpdateWithoutCriteriaInput, Prisma.EventUncheckedUpdateWithoutCriteriaInput>
+}
+
+export type EventUpdateWithoutCriteriaInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  customId?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  shortDescription?: Prisma.StringFieldUpdateOperationsInput | string
+  fullDescription?: Prisma.StringFieldUpdateOperationsInput | string
+  theme?: Prisma.StringFieldUpdateOperationsInput | string
+  date?: Prisma.StringFieldUpdateOperationsInput | string
+  location?: Prisma.StringFieldUpdateOperationsInput | string
+  format?: Prisma.EnumEventFormatFieldUpdateOperationsInput | $Enums.EventFormat
+  category?: Prisma.StringFieldUpdateOperationsInput | string
+  image?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumEventStatusFieldUpdateOperationsInput | $Enums.EventStatus
+  deadline?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationOpenDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  registrationCloseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  fee?: Prisma.StringFieldUpdateOperationsInput | string
+  teamSizeMin?: Prisma.IntFieldUpdateOperationsInput | number
+  teamSizeMax?: Prisma.IntFieldUpdateOperationsInput | number
+  eligibility?: Prisma.EventUpdateeligibilityInput | string[]
+  prizePool?: Prisma.StringFieldUpdateOperationsInput | string
+  organizer?: Prisma.StringFieldUpdateOperationsInput | string
+  rules?: Prisma.StringFieldUpdateOperationsInput | string
+  awardsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  registrationEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  eventType?: Prisma.EventTypeTaxonomyUpdateOneWithoutEventsNestedInput
+  timeline?: Prisma.EventTimelineUpdateManyWithoutEventNestedInput
+  faqs?: Prisma.EventFaqUpdateManyWithoutEventNestedInput
+  categories?: Prisma.EventCategoryUpdateManyWithoutEventNestedInput
+  stages?: Prisma.EventStageUpdateManyWithoutEventNestedInput
+  awards?: Prisma.EventAwardUpdateManyWithoutEventNestedInput
+  resources?: Prisma.EventResourceUpdateManyWithoutEventNestedInput
+  communityThreads?: Prisma.EventCommunityThreadUpdateManyWithoutEventNestedInput
+  registrations?: Prisma.EventRegistrationUpdateManyWithoutEventNestedInput
+  savedBy?: Prisma.SavedEventUpdateManyWithoutEventNestedInput
+  submissions?: Prisma.SubmissionUpdateManyWithoutEventNestedInput
+  judgeAssignments?: Prisma.JudgeAssignmentUpdateManyWithoutEventNestedInput
+  qaQuestions?: Prisma.QaQuestionUpdateManyWithoutEventNestedInput
+  certificates?: Prisma.CertificateUpdateManyWithoutEventNestedInput
+}
+
+export type EventUncheckedUpdateWithoutCriteriaInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  customId?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  shortDescription?: Prisma.StringFieldUpdateOperationsInput | string
+  fullDescription?: Prisma.StringFieldUpdateOperationsInput | string
+  theme?: Prisma.StringFieldUpdateOperationsInput | string
+  date?: Prisma.StringFieldUpdateOperationsInput | string
+  location?: Prisma.StringFieldUpdateOperationsInput | string
+  format?: Prisma.EnumEventFormatFieldUpdateOperationsInput | $Enums.EventFormat
+  category?: Prisma.StringFieldUpdateOperationsInput | string
+  image?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumEventStatusFieldUpdateOperationsInput | $Enums.EventStatus
+  deadline?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationOpenDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  registrationCloseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  fee?: Prisma.StringFieldUpdateOperationsInput | string
+  teamSizeMin?: Prisma.IntFieldUpdateOperationsInput | number
+  teamSizeMax?: Prisma.IntFieldUpdateOperationsInput | number
+  eligibility?: Prisma.EventUpdateeligibilityInput | string[]
+  prizePool?: Prisma.StringFieldUpdateOperationsInput | string
+  organizer?: Prisma.StringFieldUpdateOperationsInput | string
+  rules?: Prisma.StringFieldUpdateOperationsInput | string
+  awardsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  eventTypeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  registrationEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  timeline?: Prisma.EventTimelineUncheckedUpdateManyWithoutEventNestedInput
+  faqs?: Prisma.EventFaqUncheckedUpdateManyWithoutEventNestedInput
+  categories?: Prisma.EventCategoryUncheckedUpdateManyWithoutEventNestedInput
+  stages?: Prisma.EventStageUncheckedUpdateManyWithoutEventNestedInput
+  awards?: Prisma.EventAwardUncheckedUpdateManyWithoutEventNestedInput
+  resources?: Prisma.EventResourceUncheckedUpdateManyWithoutEventNestedInput
+  communityThreads?: Prisma.EventCommunityThreadUncheckedUpdateManyWithoutEventNestedInput
+  registrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutEventNestedInput
+  savedBy?: Prisma.SavedEventUncheckedUpdateManyWithoutEventNestedInput
+  submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutEventNestedInput
+  judgeAssignments?: Prisma.JudgeAssignmentUncheckedUpdateManyWithoutEventNestedInput
+  qaQuestions?: Prisma.QaQuestionUncheckedUpdateManyWithoutEventNestedInput
+  certificates?: Prisma.CertificateUncheckedUpdateManyWithoutEventNestedInput
+}
+
+export type EventCreateWithoutStagesInput = {
+  id?: string
+  customId: string
+  title: string
+  slug: string
+  shortDescription: string
+  fullDescription: string
+  theme?: string
+  date: string
+  location: string
+  format: $Enums.EventFormat
+  category: string
+  image?: string
+  status?: $Enums.EventStatus
+  deadline: string
+  registrationOpenDate?: Date | string | null
+  registrationCloseDate?: Date | string | null
+  capacity?: number | null
+  fee?: string
+  teamSizeMin?: number
+  teamSizeMax?: number
+  eligibility?: Prisma.EventCreateeligibilityInput | string[]
+  prizePool?: string
+  organizer?: string
+  rules?: string
+  awardsEnabled?: boolean
+  registrationEndDate?: Date | string | null
+  createdById: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  eventType?: Prisma.EventTypeTaxonomyCreateNestedOneWithoutEventsInput
+  timeline?: Prisma.EventTimelineCreateNestedManyWithoutEventInput
+  faqs?: Prisma.EventFaqCreateNestedManyWithoutEventInput
+  categories?: Prisma.EventCategoryCreateNestedManyWithoutEventInput
+  criteria?: Prisma.EventCriteriaCreateNestedManyWithoutEventInput
+  awards?: Prisma.EventAwardCreateNestedManyWithoutEventInput
+  resources?: Prisma.EventResourceCreateNestedManyWithoutEventInput
+  communityThreads?: Prisma.EventCommunityThreadCreateNestedManyWithoutEventInput
+  registrations?: Prisma.EventRegistrationCreateNestedManyWithoutEventInput
+  savedBy?: Prisma.SavedEventCreateNestedManyWithoutEventInput
+  submissions?: Prisma.SubmissionCreateNestedManyWithoutEventInput
+  judgeAssignments?: Prisma.JudgeAssignmentCreateNestedManyWithoutEventInput
+  qaQuestions?: Prisma.QaQuestionCreateNestedManyWithoutEventInput
+  certificates?: Prisma.CertificateCreateNestedManyWithoutEventInput
+}
+
+export type EventUncheckedCreateWithoutStagesInput = {
+  id?: string
+  customId: string
+  title: string
+  slug: string
+  shortDescription: string
+  fullDescription: string
+  theme?: string
+  date: string
+  location: string
+  format: $Enums.EventFormat
+  category: string
+  image?: string
+  status?: $Enums.EventStatus
+  deadline: string
+  registrationOpenDate?: Date | string | null
+  registrationCloseDate?: Date | string | null
+  capacity?: number | null
+  fee?: string
+  teamSizeMin?: number
+  teamSizeMax?: number
+  eligibility?: Prisma.EventCreateeligibilityInput | string[]
+  prizePool?: string
+  organizer?: string
+  rules?: string
+  awardsEnabled?: boolean
+  eventTypeId?: string | null
+  registrationEndDate?: Date | string | null
+  createdById: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  timeline?: Prisma.EventTimelineUncheckedCreateNestedManyWithoutEventInput
+  faqs?: Prisma.EventFaqUncheckedCreateNestedManyWithoutEventInput
+  categories?: Prisma.EventCategoryUncheckedCreateNestedManyWithoutEventInput
+  criteria?: Prisma.EventCriteriaUncheckedCreateNestedManyWithoutEventInput
+  awards?: Prisma.EventAwardUncheckedCreateNestedManyWithoutEventInput
+  resources?: Prisma.EventResourceUncheckedCreateNestedManyWithoutEventInput
+  communityThreads?: Prisma.EventCommunityThreadUncheckedCreateNestedManyWithoutEventInput
+  registrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutEventInput
+  savedBy?: Prisma.SavedEventUncheckedCreateNestedManyWithoutEventInput
+  submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutEventInput
+  judgeAssignments?: Prisma.JudgeAssignmentUncheckedCreateNestedManyWithoutEventInput
+  qaQuestions?: Prisma.QaQuestionUncheckedCreateNestedManyWithoutEventInput
+  certificates?: Prisma.CertificateUncheckedCreateNestedManyWithoutEventInput
+}
+
+export type EventCreateOrConnectWithoutStagesInput = {
+  where: Prisma.EventWhereUniqueInput
+  create: Prisma.XOR<Prisma.EventCreateWithoutStagesInput, Prisma.EventUncheckedCreateWithoutStagesInput>
+}
+
+export type EventUpsertWithoutStagesInput = {
+  update: Prisma.XOR<Prisma.EventUpdateWithoutStagesInput, Prisma.EventUncheckedUpdateWithoutStagesInput>
+  create: Prisma.XOR<Prisma.EventCreateWithoutStagesInput, Prisma.EventUncheckedCreateWithoutStagesInput>
+  where?: Prisma.EventWhereInput
+}
+
+export type EventUpdateToOneWithWhereWithoutStagesInput = {
+  where?: Prisma.EventWhereInput
+  data: Prisma.XOR<Prisma.EventUpdateWithoutStagesInput, Prisma.EventUncheckedUpdateWithoutStagesInput>
+}
+
+export type EventUpdateWithoutStagesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  customId?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  shortDescription?: Prisma.StringFieldUpdateOperationsInput | string
+  fullDescription?: Prisma.StringFieldUpdateOperationsInput | string
+  theme?: Prisma.StringFieldUpdateOperationsInput | string
+  date?: Prisma.StringFieldUpdateOperationsInput | string
+  location?: Prisma.StringFieldUpdateOperationsInput | string
+  format?: Prisma.EnumEventFormatFieldUpdateOperationsInput | $Enums.EventFormat
+  category?: Prisma.StringFieldUpdateOperationsInput | string
+  image?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumEventStatusFieldUpdateOperationsInput | $Enums.EventStatus
+  deadline?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationOpenDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  registrationCloseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  fee?: Prisma.StringFieldUpdateOperationsInput | string
+  teamSizeMin?: Prisma.IntFieldUpdateOperationsInput | number
+  teamSizeMax?: Prisma.IntFieldUpdateOperationsInput | number
+  eligibility?: Prisma.EventUpdateeligibilityInput | string[]
+  prizePool?: Prisma.StringFieldUpdateOperationsInput | string
+  organizer?: Prisma.StringFieldUpdateOperationsInput | string
+  rules?: Prisma.StringFieldUpdateOperationsInput | string
+  awardsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  registrationEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  eventType?: Prisma.EventTypeTaxonomyUpdateOneWithoutEventsNestedInput
+  timeline?: Prisma.EventTimelineUpdateManyWithoutEventNestedInput
+  faqs?: Prisma.EventFaqUpdateManyWithoutEventNestedInput
+  categories?: Prisma.EventCategoryUpdateManyWithoutEventNestedInput
+  criteria?: Prisma.EventCriteriaUpdateManyWithoutEventNestedInput
+  awards?: Prisma.EventAwardUpdateManyWithoutEventNestedInput
+  resources?: Prisma.EventResourceUpdateManyWithoutEventNestedInput
+  communityThreads?: Prisma.EventCommunityThreadUpdateManyWithoutEventNestedInput
+  registrations?: Prisma.EventRegistrationUpdateManyWithoutEventNestedInput
+  savedBy?: Prisma.SavedEventUpdateManyWithoutEventNestedInput
+  submissions?: Prisma.SubmissionUpdateManyWithoutEventNestedInput
+  judgeAssignments?: Prisma.JudgeAssignmentUpdateManyWithoutEventNestedInput
+  qaQuestions?: Prisma.QaQuestionUpdateManyWithoutEventNestedInput
+  certificates?: Prisma.CertificateUpdateManyWithoutEventNestedInput
+}
+
+export type EventUncheckedUpdateWithoutStagesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  customId?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  shortDescription?: Prisma.StringFieldUpdateOperationsInput | string
+  fullDescription?: Prisma.StringFieldUpdateOperationsInput | string
+  theme?: Prisma.StringFieldUpdateOperationsInput | string
+  date?: Prisma.StringFieldUpdateOperationsInput | string
+  location?: Prisma.StringFieldUpdateOperationsInput | string
+  format?: Prisma.EnumEventFormatFieldUpdateOperationsInput | $Enums.EventFormat
+  category?: Prisma.StringFieldUpdateOperationsInput | string
+  image?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumEventStatusFieldUpdateOperationsInput | $Enums.EventStatus
+  deadline?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationOpenDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  registrationCloseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  fee?: Prisma.StringFieldUpdateOperationsInput | string
+  teamSizeMin?: Prisma.IntFieldUpdateOperationsInput | number
+  teamSizeMax?: Prisma.IntFieldUpdateOperationsInput | number
+  eligibility?: Prisma.EventUpdateeligibilityInput | string[]
+  prizePool?: Prisma.StringFieldUpdateOperationsInput | string
+  organizer?: Prisma.StringFieldUpdateOperationsInput | string
+  rules?: Prisma.StringFieldUpdateOperationsInput | string
+  awardsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  eventTypeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  registrationEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  timeline?: Prisma.EventTimelineUncheckedUpdateManyWithoutEventNestedInput
+  faqs?: Prisma.EventFaqUncheckedUpdateManyWithoutEventNestedInput
+  categories?: Prisma.EventCategoryUncheckedUpdateManyWithoutEventNestedInput
+  criteria?: Prisma.EventCriteriaUncheckedUpdateManyWithoutEventNestedInput
+  awards?: Prisma.EventAwardUncheckedUpdateManyWithoutEventNestedInput
+  resources?: Prisma.EventResourceUncheckedUpdateManyWithoutEventNestedInput
+  communityThreads?: Prisma.EventCommunityThreadUncheckedUpdateManyWithoutEventNestedInput
+  registrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutEventNestedInput
+  savedBy?: Prisma.SavedEventUncheckedUpdateManyWithoutEventNestedInput
+  submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutEventNestedInput
+  judgeAssignments?: Prisma.JudgeAssignmentUncheckedUpdateManyWithoutEventNestedInput
+  qaQuestions?: Prisma.QaQuestionUncheckedUpdateManyWithoutEventNestedInput
+  certificates?: Prisma.CertificateUncheckedUpdateManyWithoutEventNestedInput
+}
+
+export type EventCreateWithoutAwardsInput = {
+  id?: string
+  customId: string
+  title: string
+  slug: string
+  shortDescription: string
+  fullDescription: string
+  theme?: string
+  date: string
+  location: string
+  format: $Enums.EventFormat
+  category: string
+  image?: string
+  status?: $Enums.EventStatus
+  deadline: string
+  registrationOpenDate?: Date | string | null
+  registrationCloseDate?: Date | string | null
+  capacity?: number | null
+  fee?: string
+  teamSizeMin?: number
+  teamSizeMax?: number
+  eligibility?: Prisma.EventCreateeligibilityInput | string[]
+  prizePool?: string
+  organizer?: string
+  rules?: string
+  awardsEnabled?: boolean
+  registrationEndDate?: Date | string | null
+  createdById: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  eventType?: Prisma.EventTypeTaxonomyCreateNestedOneWithoutEventsInput
+  timeline?: Prisma.EventTimelineCreateNestedManyWithoutEventInput
+  faqs?: Prisma.EventFaqCreateNestedManyWithoutEventInput
+  categories?: Prisma.EventCategoryCreateNestedManyWithoutEventInput
+  criteria?: Prisma.EventCriteriaCreateNestedManyWithoutEventInput
+  stages?: Prisma.EventStageCreateNestedManyWithoutEventInput
+  resources?: Prisma.EventResourceCreateNestedManyWithoutEventInput
+  communityThreads?: Prisma.EventCommunityThreadCreateNestedManyWithoutEventInput
+  registrations?: Prisma.EventRegistrationCreateNestedManyWithoutEventInput
+  savedBy?: Prisma.SavedEventCreateNestedManyWithoutEventInput
+  submissions?: Prisma.SubmissionCreateNestedManyWithoutEventInput
+  judgeAssignments?: Prisma.JudgeAssignmentCreateNestedManyWithoutEventInput
+  qaQuestions?: Prisma.QaQuestionCreateNestedManyWithoutEventInput
+  certificates?: Prisma.CertificateCreateNestedManyWithoutEventInput
+}
+
+export type EventUncheckedCreateWithoutAwardsInput = {
+  id?: string
+  customId: string
+  title: string
+  slug: string
+  shortDescription: string
+  fullDescription: string
+  theme?: string
+  date: string
+  location: string
+  format: $Enums.EventFormat
+  category: string
+  image?: string
+  status?: $Enums.EventStatus
+  deadline: string
+  registrationOpenDate?: Date | string | null
+  registrationCloseDate?: Date | string | null
+  capacity?: number | null
+  fee?: string
+  teamSizeMin?: number
+  teamSizeMax?: number
+  eligibility?: Prisma.EventCreateeligibilityInput | string[]
+  prizePool?: string
+  organizer?: string
+  rules?: string
+  awardsEnabled?: boolean
+  eventTypeId?: string | null
+  registrationEndDate?: Date | string | null
+  createdById: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  timeline?: Prisma.EventTimelineUncheckedCreateNestedManyWithoutEventInput
+  faqs?: Prisma.EventFaqUncheckedCreateNestedManyWithoutEventInput
+  categories?: Prisma.EventCategoryUncheckedCreateNestedManyWithoutEventInput
+  criteria?: Prisma.EventCriteriaUncheckedCreateNestedManyWithoutEventInput
+  stages?: Prisma.EventStageUncheckedCreateNestedManyWithoutEventInput
+  resources?: Prisma.EventResourceUncheckedCreateNestedManyWithoutEventInput
+  communityThreads?: Prisma.EventCommunityThreadUncheckedCreateNestedManyWithoutEventInput
+  registrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutEventInput
+  savedBy?: Prisma.SavedEventUncheckedCreateNestedManyWithoutEventInput
+  submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutEventInput
+  judgeAssignments?: Prisma.JudgeAssignmentUncheckedCreateNestedManyWithoutEventInput
+  qaQuestions?: Prisma.QaQuestionUncheckedCreateNestedManyWithoutEventInput
+  certificates?: Prisma.CertificateUncheckedCreateNestedManyWithoutEventInput
+}
+
+export type EventCreateOrConnectWithoutAwardsInput = {
+  where: Prisma.EventWhereUniqueInput
+  create: Prisma.XOR<Prisma.EventCreateWithoutAwardsInput, Prisma.EventUncheckedCreateWithoutAwardsInput>
+}
+
+export type EventUpsertWithoutAwardsInput = {
+  update: Prisma.XOR<Prisma.EventUpdateWithoutAwardsInput, Prisma.EventUncheckedUpdateWithoutAwardsInput>
+  create: Prisma.XOR<Prisma.EventCreateWithoutAwardsInput, Prisma.EventUncheckedCreateWithoutAwardsInput>
+  where?: Prisma.EventWhereInput
+}
+
+export type EventUpdateToOneWithWhereWithoutAwardsInput = {
+  where?: Prisma.EventWhereInput
+  data: Prisma.XOR<Prisma.EventUpdateWithoutAwardsInput, Prisma.EventUncheckedUpdateWithoutAwardsInput>
+}
+
+export type EventUpdateWithoutAwardsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  customId?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  shortDescription?: Prisma.StringFieldUpdateOperationsInput | string
+  fullDescription?: Prisma.StringFieldUpdateOperationsInput | string
+  theme?: Prisma.StringFieldUpdateOperationsInput | string
+  date?: Prisma.StringFieldUpdateOperationsInput | string
+  location?: Prisma.StringFieldUpdateOperationsInput | string
+  format?: Prisma.EnumEventFormatFieldUpdateOperationsInput | $Enums.EventFormat
+  category?: Prisma.StringFieldUpdateOperationsInput | string
+  image?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumEventStatusFieldUpdateOperationsInput | $Enums.EventStatus
+  deadline?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationOpenDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  registrationCloseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  fee?: Prisma.StringFieldUpdateOperationsInput | string
+  teamSizeMin?: Prisma.IntFieldUpdateOperationsInput | number
+  teamSizeMax?: Prisma.IntFieldUpdateOperationsInput | number
+  eligibility?: Prisma.EventUpdateeligibilityInput | string[]
+  prizePool?: Prisma.StringFieldUpdateOperationsInput | string
+  organizer?: Prisma.StringFieldUpdateOperationsInput | string
+  rules?: Prisma.StringFieldUpdateOperationsInput | string
+  awardsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  registrationEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  eventType?: Prisma.EventTypeTaxonomyUpdateOneWithoutEventsNestedInput
+  timeline?: Prisma.EventTimelineUpdateManyWithoutEventNestedInput
+  faqs?: Prisma.EventFaqUpdateManyWithoutEventNestedInput
+  categories?: Prisma.EventCategoryUpdateManyWithoutEventNestedInput
+  criteria?: Prisma.EventCriteriaUpdateManyWithoutEventNestedInput
+  stages?: Prisma.EventStageUpdateManyWithoutEventNestedInput
+  resources?: Prisma.EventResourceUpdateManyWithoutEventNestedInput
+  communityThreads?: Prisma.EventCommunityThreadUpdateManyWithoutEventNestedInput
+  registrations?: Prisma.EventRegistrationUpdateManyWithoutEventNestedInput
+  savedBy?: Prisma.SavedEventUpdateManyWithoutEventNestedInput
+  submissions?: Prisma.SubmissionUpdateManyWithoutEventNestedInput
+  judgeAssignments?: Prisma.JudgeAssignmentUpdateManyWithoutEventNestedInput
+  qaQuestions?: Prisma.QaQuestionUpdateManyWithoutEventNestedInput
+  certificates?: Prisma.CertificateUpdateManyWithoutEventNestedInput
+}
+
+export type EventUncheckedUpdateWithoutAwardsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  customId?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  shortDescription?: Prisma.StringFieldUpdateOperationsInput | string
+  fullDescription?: Prisma.StringFieldUpdateOperationsInput | string
+  theme?: Prisma.StringFieldUpdateOperationsInput | string
+  date?: Prisma.StringFieldUpdateOperationsInput | string
+  location?: Prisma.StringFieldUpdateOperationsInput | string
+  format?: Prisma.EnumEventFormatFieldUpdateOperationsInput | $Enums.EventFormat
+  category?: Prisma.StringFieldUpdateOperationsInput | string
+  image?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumEventStatusFieldUpdateOperationsInput | $Enums.EventStatus
+  deadline?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationOpenDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  registrationCloseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  fee?: Prisma.StringFieldUpdateOperationsInput | string
+  teamSizeMin?: Prisma.IntFieldUpdateOperationsInput | number
+  teamSizeMax?: Prisma.IntFieldUpdateOperationsInput | number
+  eligibility?: Prisma.EventUpdateeligibilityInput | string[]
+  prizePool?: Prisma.StringFieldUpdateOperationsInput | string
+  organizer?: Prisma.StringFieldUpdateOperationsInput | string
+  rules?: Prisma.StringFieldUpdateOperationsInput | string
+  awardsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  eventTypeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  registrationEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  timeline?: Prisma.EventTimelineUncheckedUpdateManyWithoutEventNestedInput
+  faqs?: Prisma.EventFaqUncheckedUpdateManyWithoutEventNestedInput
+  categories?: Prisma.EventCategoryUncheckedUpdateManyWithoutEventNestedInput
+  criteria?: Prisma.EventCriteriaUncheckedUpdateManyWithoutEventNestedInput
+  stages?: Prisma.EventStageUncheckedUpdateManyWithoutEventNestedInput
+  resources?: Prisma.EventResourceUncheckedUpdateManyWithoutEventNestedInput
+  communityThreads?: Prisma.EventCommunityThreadUncheckedUpdateManyWithoutEventNestedInput
+  registrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutEventNestedInput
+  savedBy?: Prisma.SavedEventUncheckedUpdateManyWithoutEventNestedInput
+  submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutEventNestedInput
+  judgeAssignments?: Prisma.JudgeAssignmentUncheckedUpdateManyWithoutEventNestedInput
+  qaQuestions?: Prisma.QaQuestionUncheckedUpdateManyWithoutEventNestedInput
+  certificates?: Prisma.CertificateUncheckedUpdateManyWithoutEventNestedInput
+}
+
+export type EventCreateWithoutResourcesInput = {
+  id?: string
+  customId: string
+  title: string
+  slug: string
+  shortDescription: string
+  fullDescription: string
+  theme?: string
+  date: string
+  location: string
+  format: $Enums.EventFormat
+  category: string
+  image?: string
+  status?: $Enums.EventStatus
+  deadline: string
+  registrationOpenDate?: Date | string | null
+  registrationCloseDate?: Date | string | null
+  capacity?: number | null
+  fee?: string
+  teamSizeMin?: number
+  teamSizeMax?: number
+  eligibility?: Prisma.EventCreateeligibilityInput | string[]
+  prizePool?: string
+  organizer?: string
+  rules?: string
+  awardsEnabled?: boolean
+  registrationEndDate?: Date | string | null
+  createdById: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  eventType?: Prisma.EventTypeTaxonomyCreateNestedOneWithoutEventsInput
+  timeline?: Prisma.EventTimelineCreateNestedManyWithoutEventInput
+  faqs?: Prisma.EventFaqCreateNestedManyWithoutEventInput
+  categories?: Prisma.EventCategoryCreateNestedManyWithoutEventInput
+  criteria?: Prisma.EventCriteriaCreateNestedManyWithoutEventInput
+  stages?: Prisma.EventStageCreateNestedManyWithoutEventInput
+  awards?: Prisma.EventAwardCreateNestedManyWithoutEventInput
+  communityThreads?: Prisma.EventCommunityThreadCreateNestedManyWithoutEventInput
+  registrations?: Prisma.EventRegistrationCreateNestedManyWithoutEventInput
+  savedBy?: Prisma.SavedEventCreateNestedManyWithoutEventInput
+  submissions?: Prisma.SubmissionCreateNestedManyWithoutEventInput
+  judgeAssignments?: Prisma.JudgeAssignmentCreateNestedManyWithoutEventInput
+  qaQuestions?: Prisma.QaQuestionCreateNestedManyWithoutEventInput
+  certificates?: Prisma.CertificateCreateNestedManyWithoutEventInput
+}
+
+export type EventUncheckedCreateWithoutResourcesInput = {
+  id?: string
+  customId: string
+  title: string
+  slug: string
+  shortDescription: string
+  fullDescription: string
+  theme?: string
+  date: string
+  location: string
+  format: $Enums.EventFormat
+  category: string
+  image?: string
+  status?: $Enums.EventStatus
+  deadline: string
+  registrationOpenDate?: Date | string | null
+  registrationCloseDate?: Date | string | null
+  capacity?: number | null
+  fee?: string
+  teamSizeMin?: number
+  teamSizeMax?: number
+  eligibility?: Prisma.EventCreateeligibilityInput | string[]
+  prizePool?: string
+  organizer?: string
+  rules?: string
+  awardsEnabled?: boolean
+  eventTypeId?: string | null
+  registrationEndDate?: Date | string | null
+  createdById: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  timeline?: Prisma.EventTimelineUncheckedCreateNestedManyWithoutEventInput
+  faqs?: Prisma.EventFaqUncheckedCreateNestedManyWithoutEventInput
+  categories?: Prisma.EventCategoryUncheckedCreateNestedManyWithoutEventInput
+  criteria?: Prisma.EventCriteriaUncheckedCreateNestedManyWithoutEventInput
+  stages?: Prisma.EventStageUncheckedCreateNestedManyWithoutEventInput
+  awards?: Prisma.EventAwardUncheckedCreateNestedManyWithoutEventInput
+  communityThreads?: Prisma.EventCommunityThreadUncheckedCreateNestedManyWithoutEventInput
+  registrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutEventInput
+  savedBy?: Prisma.SavedEventUncheckedCreateNestedManyWithoutEventInput
+  submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutEventInput
+  judgeAssignments?: Prisma.JudgeAssignmentUncheckedCreateNestedManyWithoutEventInput
+  qaQuestions?: Prisma.QaQuestionUncheckedCreateNestedManyWithoutEventInput
+  certificates?: Prisma.CertificateUncheckedCreateNestedManyWithoutEventInput
+}
+
+export type EventCreateOrConnectWithoutResourcesInput = {
+  where: Prisma.EventWhereUniqueInput
+  create: Prisma.XOR<Prisma.EventCreateWithoutResourcesInput, Prisma.EventUncheckedCreateWithoutResourcesInput>
+}
+
+export type EventUpsertWithoutResourcesInput = {
+  update: Prisma.XOR<Prisma.EventUpdateWithoutResourcesInput, Prisma.EventUncheckedUpdateWithoutResourcesInput>
+  create: Prisma.XOR<Prisma.EventCreateWithoutResourcesInput, Prisma.EventUncheckedCreateWithoutResourcesInput>
+  where?: Prisma.EventWhereInput
+}
+
+export type EventUpdateToOneWithWhereWithoutResourcesInput = {
+  where?: Prisma.EventWhereInput
+  data: Prisma.XOR<Prisma.EventUpdateWithoutResourcesInput, Prisma.EventUncheckedUpdateWithoutResourcesInput>
+}
+
+export type EventUpdateWithoutResourcesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  customId?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  shortDescription?: Prisma.StringFieldUpdateOperationsInput | string
+  fullDescription?: Prisma.StringFieldUpdateOperationsInput | string
+  theme?: Prisma.StringFieldUpdateOperationsInput | string
+  date?: Prisma.StringFieldUpdateOperationsInput | string
+  location?: Prisma.StringFieldUpdateOperationsInput | string
+  format?: Prisma.EnumEventFormatFieldUpdateOperationsInput | $Enums.EventFormat
+  category?: Prisma.StringFieldUpdateOperationsInput | string
+  image?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumEventStatusFieldUpdateOperationsInput | $Enums.EventStatus
+  deadline?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationOpenDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  registrationCloseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  fee?: Prisma.StringFieldUpdateOperationsInput | string
+  teamSizeMin?: Prisma.IntFieldUpdateOperationsInput | number
+  teamSizeMax?: Prisma.IntFieldUpdateOperationsInput | number
+  eligibility?: Prisma.EventUpdateeligibilityInput | string[]
+  prizePool?: Prisma.StringFieldUpdateOperationsInput | string
+  organizer?: Prisma.StringFieldUpdateOperationsInput | string
+  rules?: Prisma.StringFieldUpdateOperationsInput | string
+  awardsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  registrationEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  eventType?: Prisma.EventTypeTaxonomyUpdateOneWithoutEventsNestedInput
+  timeline?: Prisma.EventTimelineUpdateManyWithoutEventNestedInput
+  faqs?: Prisma.EventFaqUpdateManyWithoutEventNestedInput
+  categories?: Prisma.EventCategoryUpdateManyWithoutEventNestedInput
+  criteria?: Prisma.EventCriteriaUpdateManyWithoutEventNestedInput
+  stages?: Prisma.EventStageUpdateManyWithoutEventNestedInput
+  awards?: Prisma.EventAwardUpdateManyWithoutEventNestedInput
+  communityThreads?: Prisma.EventCommunityThreadUpdateManyWithoutEventNestedInput
+  registrations?: Prisma.EventRegistrationUpdateManyWithoutEventNestedInput
+  savedBy?: Prisma.SavedEventUpdateManyWithoutEventNestedInput
+  submissions?: Prisma.SubmissionUpdateManyWithoutEventNestedInput
+  judgeAssignments?: Prisma.JudgeAssignmentUpdateManyWithoutEventNestedInput
+  qaQuestions?: Prisma.QaQuestionUpdateManyWithoutEventNestedInput
+  certificates?: Prisma.CertificateUpdateManyWithoutEventNestedInput
+}
+
+export type EventUncheckedUpdateWithoutResourcesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  customId?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  shortDescription?: Prisma.StringFieldUpdateOperationsInput | string
+  fullDescription?: Prisma.StringFieldUpdateOperationsInput | string
+  theme?: Prisma.StringFieldUpdateOperationsInput | string
+  date?: Prisma.StringFieldUpdateOperationsInput | string
+  location?: Prisma.StringFieldUpdateOperationsInput | string
+  format?: Prisma.EnumEventFormatFieldUpdateOperationsInput | $Enums.EventFormat
+  category?: Prisma.StringFieldUpdateOperationsInput | string
+  image?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumEventStatusFieldUpdateOperationsInput | $Enums.EventStatus
+  deadline?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationOpenDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  registrationCloseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  fee?: Prisma.StringFieldUpdateOperationsInput | string
+  teamSizeMin?: Prisma.IntFieldUpdateOperationsInput | number
+  teamSizeMax?: Prisma.IntFieldUpdateOperationsInput | number
+  eligibility?: Prisma.EventUpdateeligibilityInput | string[]
+  prizePool?: Prisma.StringFieldUpdateOperationsInput | string
+  organizer?: Prisma.StringFieldUpdateOperationsInput | string
+  rules?: Prisma.StringFieldUpdateOperationsInput | string
+  awardsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  eventTypeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  registrationEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  timeline?: Prisma.EventTimelineUncheckedUpdateManyWithoutEventNestedInput
+  faqs?: Prisma.EventFaqUncheckedUpdateManyWithoutEventNestedInput
+  categories?: Prisma.EventCategoryUncheckedUpdateManyWithoutEventNestedInput
+  criteria?: Prisma.EventCriteriaUncheckedUpdateManyWithoutEventNestedInput
+  stages?: Prisma.EventStageUncheckedUpdateManyWithoutEventNestedInput
+  awards?: Prisma.EventAwardUncheckedUpdateManyWithoutEventNestedInput
+  communityThreads?: Prisma.EventCommunityThreadUncheckedUpdateManyWithoutEventNestedInput
+  registrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutEventNestedInput
+  savedBy?: Prisma.SavedEventUncheckedUpdateManyWithoutEventNestedInput
+  submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutEventNestedInput
+  judgeAssignments?: Prisma.JudgeAssignmentUncheckedUpdateManyWithoutEventNestedInput
+  qaQuestions?: Prisma.QaQuestionUncheckedUpdateManyWithoutEventNestedInput
+  certificates?: Prisma.CertificateUncheckedUpdateManyWithoutEventNestedInput
+}
+
+export type EventCreateWithoutCommunityThreadsInput = {
+  id?: string
+  customId: string
+  title: string
+  slug: string
+  shortDescription: string
+  fullDescription: string
+  theme?: string
+  date: string
+  location: string
+  format: $Enums.EventFormat
+  category: string
+  image?: string
+  status?: $Enums.EventStatus
+  deadline: string
+  registrationOpenDate?: Date | string | null
+  registrationCloseDate?: Date | string | null
+  capacity?: number | null
+  fee?: string
+  teamSizeMin?: number
+  teamSizeMax?: number
+  eligibility?: Prisma.EventCreateeligibilityInput | string[]
+  prizePool?: string
+  organizer?: string
+  rules?: string
+  awardsEnabled?: boolean
+  registrationEndDate?: Date | string | null
+  createdById: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  eventType?: Prisma.EventTypeTaxonomyCreateNestedOneWithoutEventsInput
+  timeline?: Prisma.EventTimelineCreateNestedManyWithoutEventInput
+  faqs?: Prisma.EventFaqCreateNestedManyWithoutEventInput
+  categories?: Prisma.EventCategoryCreateNestedManyWithoutEventInput
+  criteria?: Prisma.EventCriteriaCreateNestedManyWithoutEventInput
+  stages?: Prisma.EventStageCreateNestedManyWithoutEventInput
+  awards?: Prisma.EventAwardCreateNestedManyWithoutEventInput
+  resources?: Prisma.EventResourceCreateNestedManyWithoutEventInput
+  registrations?: Prisma.EventRegistrationCreateNestedManyWithoutEventInput
+  savedBy?: Prisma.SavedEventCreateNestedManyWithoutEventInput
+  submissions?: Prisma.SubmissionCreateNestedManyWithoutEventInput
+  judgeAssignments?: Prisma.JudgeAssignmentCreateNestedManyWithoutEventInput
+  qaQuestions?: Prisma.QaQuestionCreateNestedManyWithoutEventInput
+  certificates?: Prisma.CertificateCreateNestedManyWithoutEventInput
+}
+
+export type EventUncheckedCreateWithoutCommunityThreadsInput = {
+  id?: string
+  customId: string
+  title: string
+  slug: string
+  shortDescription: string
+  fullDescription: string
+  theme?: string
+  date: string
+  location: string
+  format: $Enums.EventFormat
+  category: string
+  image?: string
+  status?: $Enums.EventStatus
+  deadline: string
+  registrationOpenDate?: Date | string | null
+  registrationCloseDate?: Date | string | null
+  capacity?: number | null
+  fee?: string
+  teamSizeMin?: number
+  teamSizeMax?: number
+  eligibility?: Prisma.EventCreateeligibilityInput | string[]
+  prizePool?: string
+  organizer?: string
+  rules?: string
+  awardsEnabled?: boolean
+  eventTypeId?: string | null
+  registrationEndDate?: Date | string | null
+  createdById: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  timeline?: Prisma.EventTimelineUncheckedCreateNestedManyWithoutEventInput
+  faqs?: Prisma.EventFaqUncheckedCreateNestedManyWithoutEventInput
+  categories?: Prisma.EventCategoryUncheckedCreateNestedManyWithoutEventInput
+  criteria?: Prisma.EventCriteriaUncheckedCreateNestedManyWithoutEventInput
+  stages?: Prisma.EventStageUncheckedCreateNestedManyWithoutEventInput
+  awards?: Prisma.EventAwardUncheckedCreateNestedManyWithoutEventInput
+  resources?: Prisma.EventResourceUncheckedCreateNestedManyWithoutEventInput
+  registrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutEventInput
+  savedBy?: Prisma.SavedEventUncheckedCreateNestedManyWithoutEventInput
+  submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutEventInput
+  judgeAssignments?: Prisma.JudgeAssignmentUncheckedCreateNestedManyWithoutEventInput
+  qaQuestions?: Prisma.QaQuestionUncheckedCreateNestedManyWithoutEventInput
+  certificates?: Prisma.CertificateUncheckedCreateNestedManyWithoutEventInput
+}
+
+export type EventCreateOrConnectWithoutCommunityThreadsInput = {
+  where: Prisma.EventWhereUniqueInput
+  create: Prisma.XOR<Prisma.EventCreateWithoutCommunityThreadsInput, Prisma.EventUncheckedCreateWithoutCommunityThreadsInput>
+}
+
+export type EventUpsertWithoutCommunityThreadsInput = {
+  update: Prisma.XOR<Prisma.EventUpdateWithoutCommunityThreadsInput, Prisma.EventUncheckedUpdateWithoutCommunityThreadsInput>
+  create: Prisma.XOR<Prisma.EventCreateWithoutCommunityThreadsInput, Prisma.EventUncheckedCreateWithoutCommunityThreadsInput>
+  where?: Prisma.EventWhereInput
+}
+
+export type EventUpdateToOneWithWhereWithoutCommunityThreadsInput = {
+  where?: Prisma.EventWhereInput
+  data: Prisma.XOR<Prisma.EventUpdateWithoutCommunityThreadsInput, Prisma.EventUncheckedUpdateWithoutCommunityThreadsInput>
+}
+
+export type EventUpdateWithoutCommunityThreadsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  customId?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  shortDescription?: Prisma.StringFieldUpdateOperationsInput | string
+  fullDescription?: Prisma.StringFieldUpdateOperationsInput | string
+  theme?: Prisma.StringFieldUpdateOperationsInput | string
+  date?: Prisma.StringFieldUpdateOperationsInput | string
+  location?: Prisma.StringFieldUpdateOperationsInput | string
+  format?: Prisma.EnumEventFormatFieldUpdateOperationsInput | $Enums.EventFormat
+  category?: Prisma.StringFieldUpdateOperationsInput | string
+  image?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumEventStatusFieldUpdateOperationsInput | $Enums.EventStatus
+  deadline?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationOpenDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  registrationCloseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  fee?: Prisma.StringFieldUpdateOperationsInput | string
+  teamSizeMin?: Prisma.IntFieldUpdateOperationsInput | number
+  teamSizeMax?: Prisma.IntFieldUpdateOperationsInput | number
+  eligibility?: Prisma.EventUpdateeligibilityInput | string[]
+  prizePool?: Prisma.StringFieldUpdateOperationsInput | string
+  organizer?: Prisma.StringFieldUpdateOperationsInput | string
+  rules?: Prisma.StringFieldUpdateOperationsInput | string
+  awardsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  registrationEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  eventType?: Prisma.EventTypeTaxonomyUpdateOneWithoutEventsNestedInput
+  timeline?: Prisma.EventTimelineUpdateManyWithoutEventNestedInput
+  faqs?: Prisma.EventFaqUpdateManyWithoutEventNestedInput
+  categories?: Prisma.EventCategoryUpdateManyWithoutEventNestedInput
+  criteria?: Prisma.EventCriteriaUpdateManyWithoutEventNestedInput
+  stages?: Prisma.EventStageUpdateManyWithoutEventNestedInput
+  awards?: Prisma.EventAwardUpdateManyWithoutEventNestedInput
+  resources?: Prisma.EventResourceUpdateManyWithoutEventNestedInput
+  registrations?: Prisma.EventRegistrationUpdateManyWithoutEventNestedInput
+  savedBy?: Prisma.SavedEventUpdateManyWithoutEventNestedInput
+  submissions?: Prisma.SubmissionUpdateManyWithoutEventNestedInput
+  judgeAssignments?: Prisma.JudgeAssignmentUpdateManyWithoutEventNestedInput
+  qaQuestions?: Prisma.QaQuestionUpdateManyWithoutEventNestedInput
+  certificates?: Prisma.CertificateUpdateManyWithoutEventNestedInput
+}
+
+export type EventUncheckedUpdateWithoutCommunityThreadsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  customId?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  shortDescription?: Prisma.StringFieldUpdateOperationsInput | string
+  fullDescription?: Prisma.StringFieldUpdateOperationsInput | string
+  theme?: Prisma.StringFieldUpdateOperationsInput | string
+  date?: Prisma.StringFieldUpdateOperationsInput | string
+  location?: Prisma.StringFieldUpdateOperationsInput | string
+  format?: Prisma.EnumEventFormatFieldUpdateOperationsInput | $Enums.EventFormat
+  category?: Prisma.StringFieldUpdateOperationsInput | string
+  image?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumEventStatusFieldUpdateOperationsInput | $Enums.EventStatus
+  deadline?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationOpenDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  registrationCloseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  fee?: Prisma.StringFieldUpdateOperationsInput | string
+  teamSizeMin?: Prisma.IntFieldUpdateOperationsInput | number
+  teamSizeMax?: Prisma.IntFieldUpdateOperationsInput | number
+  eligibility?: Prisma.EventUpdateeligibilityInput | string[]
+  prizePool?: Prisma.StringFieldUpdateOperationsInput | string
+  organizer?: Prisma.StringFieldUpdateOperationsInput | string
+  rules?: Prisma.StringFieldUpdateOperationsInput | string
+  awardsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  eventTypeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  registrationEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  timeline?: Prisma.EventTimelineUncheckedUpdateManyWithoutEventNestedInput
+  faqs?: Prisma.EventFaqUncheckedUpdateManyWithoutEventNestedInput
+  categories?: Prisma.EventCategoryUncheckedUpdateManyWithoutEventNestedInput
+  criteria?: Prisma.EventCriteriaUncheckedUpdateManyWithoutEventNestedInput
+  stages?: Prisma.EventStageUncheckedUpdateManyWithoutEventNestedInput
+  awards?: Prisma.EventAwardUncheckedUpdateManyWithoutEventNestedInput
+  resources?: Prisma.EventResourceUncheckedUpdateManyWithoutEventNestedInput
+  registrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutEventNestedInput
+  savedBy?: Prisma.SavedEventUncheckedUpdateManyWithoutEventNestedInput
+  submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutEventNestedInput
+  judgeAssignments?: Prisma.JudgeAssignmentUncheckedUpdateManyWithoutEventNestedInput
+  qaQuestions?: Prisma.QaQuestionUncheckedUpdateManyWithoutEventNestedInput
+  certificates?: Prisma.CertificateUncheckedUpdateManyWithoutEventNestedInput
+}
+
+export type EventCreateWithoutSavedByInput = {
+  id?: string
+  customId: string
+  title: string
+  slug: string
+  shortDescription: string
+  fullDescription: string
+  theme?: string
+  date: string
+  location: string
+  format: $Enums.EventFormat
+  category: string
+  image?: string
+  status?: $Enums.EventStatus
+  deadline: string
+  registrationOpenDate?: Date | string | null
+  registrationCloseDate?: Date | string | null
+  capacity?: number | null
+  fee?: string
+  teamSizeMin?: number
+  teamSizeMax?: number
+  eligibility?: Prisma.EventCreateeligibilityInput | string[]
+  prizePool?: string
+  organizer?: string
+  rules?: string
+  awardsEnabled?: boolean
+  registrationEndDate?: Date | string | null
+  createdById: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  eventType?: Prisma.EventTypeTaxonomyCreateNestedOneWithoutEventsInput
+  timeline?: Prisma.EventTimelineCreateNestedManyWithoutEventInput
+  faqs?: Prisma.EventFaqCreateNestedManyWithoutEventInput
+  categories?: Prisma.EventCategoryCreateNestedManyWithoutEventInput
+  criteria?: Prisma.EventCriteriaCreateNestedManyWithoutEventInput
+  stages?: Prisma.EventStageCreateNestedManyWithoutEventInput
+  awards?: Prisma.EventAwardCreateNestedManyWithoutEventInput
+  resources?: Prisma.EventResourceCreateNestedManyWithoutEventInput
+  communityThreads?: Prisma.EventCommunityThreadCreateNestedManyWithoutEventInput
   registrations?: Prisma.EventRegistrationCreateNestedManyWithoutEventInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutEventInput
   judgeAssignments?: Prisma.JudgeAssignmentCreateNestedManyWithoutEventInput
@@ -1039,6 +2496,7 @@ export type EventCreateWithoutSavedByInput = {
 
 export type EventUncheckedCreateWithoutSavedByInput = {
   id?: string
+  customId: string
   title: string
   slug: string
   shortDescription: string
@@ -1051,13 +2509,18 @@ export type EventUncheckedCreateWithoutSavedByInput = {
   image?: string
   status?: $Enums.EventStatus
   deadline: string
+  registrationOpenDate?: Date | string | null
+  registrationCloseDate?: Date | string | null
+  capacity?: number | null
   fee?: string
   teamSizeMin?: number
   teamSizeMax?: number
   eligibility?: Prisma.EventCreateeligibilityInput | string[]
-  sdgs?: Prisma.EventCreatesdgsInput | number[]
   prizePool?: string
   organizer?: string
+  rules?: string
+  awardsEnabled?: boolean
+  eventTypeId?: string | null
   registrationEndDate?: Date | string | null
   createdById: string
   createdAt?: Date | string
@@ -1065,6 +2528,11 @@ export type EventUncheckedCreateWithoutSavedByInput = {
   timeline?: Prisma.EventTimelineUncheckedCreateNestedManyWithoutEventInput
   faqs?: Prisma.EventFaqUncheckedCreateNestedManyWithoutEventInput
   categories?: Prisma.EventCategoryUncheckedCreateNestedManyWithoutEventInput
+  criteria?: Prisma.EventCriteriaUncheckedCreateNestedManyWithoutEventInput
+  stages?: Prisma.EventStageUncheckedCreateNestedManyWithoutEventInput
+  awards?: Prisma.EventAwardUncheckedCreateNestedManyWithoutEventInput
+  resources?: Prisma.EventResourceUncheckedCreateNestedManyWithoutEventInput
+  communityThreads?: Prisma.EventCommunityThreadUncheckedCreateNestedManyWithoutEventInput
   registrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutEventInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutEventInput
   judgeAssignments?: Prisma.JudgeAssignmentUncheckedCreateNestedManyWithoutEventInput
@@ -1090,6 +2558,7 @@ export type EventUpdateToOneWithWhereWithoutSavedByInput = {
 
 export type EventUpdateWithoutSavedByInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  customId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   shortDescription?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1102,20 +2571,30 @@ export type EventUpdateWithoutSavedByInput = {
   image?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumEventStatusFieldUpdateOperationsInput | $Enums.EventStatus
   deadline?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationOpenDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  registrationCloseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   fee?: Prisma.StringFieldUpdateOperationsInput | string
   teamSizeMin?: Prisma.IntFieldUpdateOperationsInput | number
   teamSizeMax?: Prisma.IntFieldUpdateOperationsInput | number
   eligibility?: Prisma.EventUpdateeligibilityInput | string[]
-  sdgs?: Prisma.EventUpdatesdgsInput | number[]
   prizePool?: Prisma.StringFieldUpdateOperationsInput | string
   organizer?: Prisma.StringFieldUpdateOperationsInput | string
+  rules?: Prisma.StringFieldUpdateOperationsInput | string
+  awardsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   registrationEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  eventType?: Prisma.EventTypeTaxonomyUpdateOneWithoutEventsNestedInput
   timeline?: Prisma.EventTimelineUpdateManyWithoutEventNestedInput
   faqs?: Prisma.EventFaqUpdateManyWithoutEventNestedInput
   categories?: Prisma.EventCategoryUpdateManyWithoutEventNestedInput
+  criteria?: Prisma.EventCriteriaUpdateManyWithoutEventNestedInput
+  stages?: Prisma.EventStageUpdateManyWithoutEventNestedInput
+  awards?: Prisma.EventAwardUpdateManyWithoutEventNestedInput
+  resources?: Prisma.EventResourceUpdateManyWithoutEventNestedInput
+  communityThreads?: Prisma.EventCommunityThreadUpdateManyWithoutEventNestedInput
   registrations?: Prisma.EventRegistrationUpdateManyWithoutEventNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutEventNestedInput
   judgeAssignments?: Prisma.JudgeAssignmentUpdateManyWithoutEventNestedInput
@@ -1125,6 +2604,7 @@ export type EventUpdateWithoutSavedByInput = {
 
 export type EventUncheckedUpdateWithoutSavedByInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  customId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   shortDescription?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1137,13 +2617,18 @@ export type EventUncheckedUpdateWithoutSavedByInput = {
   image?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumEventStatusFieldUpdateOperationsInput | $Enums.EventStatus
   deadline?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationOpenDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  registrationCloseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   fee?: Prisma.StringFieldUpdateOperationsInput | string
   teamSizeMin?: Prisma.IntFieldUpdateOperationsInput | number
   teamSizeMax?: Prisma.IntFieldUpdateOperationsInput | number
   eligibility?: Prisma.EventUpdateeligibilityInput | string[]
-  sdgs?: Prisma.EventUpdatesdgsInput | number[]
   prizePool?: Prisma.StringFieldUpdateOperationsInput | string
   organizer?: Prisma.StringFieldUpdateOperationsInput | string
+  rules?: Prisma.StringFieldUpdateOperationsInput | string
+  awardsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  eventTypeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   registrationEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1151,6 +2636,11 @@ export type EventUncheckedUpdateWithoutSavedByInput = {
   timeline?: Prisma.EventTimelineUncheckedUpdateManyWithoutEventNestedInput
   faqs?: Prisma.EventFaqUncheckedUpdateManyWithoutEventNestedInput
   categories?: Prisma.EventCategoryUncheckedUpdateManyWithoutEventNestedInput
+  criteria?: Prisma.EventCriteriaUncheckedUpdateManyWithoutEventNestedInput
+  stages?: Prisma.EventStageUncheckedUpdateManyWithoutEventNestedInput
+  awards?: Prisma.EventAwardUncheckedUpdateManyWithoutEventNestedInput
+  resources?: Prisma.EventResourceUncheckedUpdateManyWithoutEventNestedInput
+  communityThreads?: Prisma.EventCommunityThreadUncheckedUpdateManyWithoutEventNestedInput
   registrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutEventNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutEventNestedInput
   judgeAssignments?: Prisma.JudgeAssignmentUncheckedUpdateManyWithoutEventNestedInput
@@ -1160,6 +2650,7 @@ export type EventUncheckedUpdateWithoutSavedByInput = {
 
 export type EventCreateWithoutTimelineInput = {
   id?: string
+  customId: string
   title: string
   slug: string
   shortDescription: string
@@ -1172,19 +2663,29 @@ export type EventCreateWithoutTimelineInput = {
   image?: string
   status?: $Enums.EventStatus
   deadline: string
+  registrationOpenDate?: Date | string | null
+  registrationCloseDate?: Date | string | null
+  capacity?: number | null
   fee?: string
   teamSizeMin?: number
   teamSizeMax?: number
   eligibility?: Prisma.EventCreateeligibilityInput | string[]
-  sdgs?: Prisma.EventCreatesdgsInput | number[]
   prizePool?: string
   organizer?: string
+  rules?: string
+  awardsEnabled?: boolean
   registrationEndDate?: Date | string | null
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  eventType?: Prisma.EventTypeTaxonomyCreateNestedOneWithoutEventsInput
   faqs?: Prisma.EventFaqCreateNestedManyWithoutEventInput
   categories?: Prisma.EventCategoryCreateNestedManyWithoutEventInput
+  criteria?: Prisma.EventCriteriaCreateNestedManyWithoutEventInput
+  stages?: Prisma.EventStageCreateNestedManyWithoutEventInput
+  awards?: Prisma.EventAwardCreateNestedManyWithoutEventInput
+  resources?: Prisma.EventResourceCreateNestedManyWithoutEventInput
+  communityThreads?: Prisma.EventCommunityThreadCreateNestedManyWithoutEventInput
   registrations?: Prisma.EventRegistrationCreateNestedManyWithoutEventInput
   savedBy?: Prisma.SavedEventCreateNestedManyWithoutEventInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutEventInput
@@ -1195,6 +2696,7 @@ export type EventCreateWithoutTimelineInput = {
 
 export type EventUncheckedCreateWithoutTimelineInput = {
   id?: string
+  customId: string
   title: string
   slug: string
   shortDescription: string
@@ -1207,19 +2709,29 @@ export type EventUncheckedCreateWithoutTimelineInput = {
   image?: string
   status?: $Enums.EventStatus
   deadline: string
+  registrationOpenDate?: Date | string | null
+  registrationCloseDate?: Date | string | null
+  capacity?: number | null
   fee?: string
   teamSizeMin?: number
   teamSizeMax?: number
   eligibility?: Prisma.EventCreateeligibilityInput | string[]
-  sdgs?: Prisma.EventCreatesdgsInput | number[]
   prizePool?: string
   organizer?: string
+  rules?: string
+  awardsEnabled?: boolean
+  eventTypeId?: string | null
   registrationEndDate?: Date | string | null
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
   faqs?: Prisma.EventFaqUncheckedCreateNestedManyWithoutEventInput
   categories?: Prisma.EventCategoryUncheckedCreateNestedManyWithoutEventInput
+  criteria?: Prisma.EventCriteriaUncheckedCreateNestedManyWithoutEventInput
+  stages?: Prisma.EventStageUncheckedCreateNestedManyWithoutEventInput
+  awards?: Prisma.EventAwardUncheckedCreateNestedManyWithoutEventInput
+  resources?: Prisma.EventResourceUncheckedCreateNestedManyWithoutEventInput
+  communityThreads?: Prisma.EventCommunityThreadUncheckedCreateNestedManyWithoutEventInput
   registrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutEventInput
   savedBy?: Prisma.SavedEventUncheckedCreateNestedManyWithoutEventInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutEventInput
@@ -1246,6 +2758,7 @@ export type EventUpdateToOneWithWhereWithoutTimelineInput = {
 
 export type EventUpdateWithoutTimelineInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  customId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   shortDescription?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1258,19 +2771,29 @@ export type EventUpdateWithoutTimelineInput = {
   image?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumEventStatusFieldUpdateOperationsInput | $Enums.EventStatus
   deadline?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationOpenDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  registrationCloseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   fee?: Prisma.StringFieldUpdateOperationsInput | string
   teamSizeMin?: Prisma.IntFieldUpdateOperationsInput | number
   teamSizeMax?: Prisma.IntFieldUpdateOperationsInput | number
   eligibility?: Prisma.EventUpdateeligibilityInput | string[]
-  sdgs?: Prisma.EventUpdatesdgsInput | number[]
   prizePool?: Prisma.StringFieldUpdateOperationsInput | string
   organizer?: Prisma.StringFieldUpdateOperationsInput | string
+  rules?: Prisma.StringFieldUpdateOperationsInput | string
+  awardsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   registrationEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  eventType?: Prisma.EventTypeTaxonomyUpdateOneWithoutEventsNestedInput
   faqs?: Prisma.EventFaqUpdateManyWithoutEventNestedInput
   categories?: Prisma.EventCategoryUpdateManyWithoutEventNestedInput
+  criteria?: Prisma.EventCriteriaUpdateManyWithoutEventNestedInput
+  stages?: Prisma.EventStageUpdateManyWithoutEventNestedInput
+  awards?: Prisma.EventAwardUpdateManyWithoutEventNestedInput
+  resources?: Prisma.EventResourceUpdateManyWithoutEventNestedInput
+  communityThreads?: Prisma.EventCommunityThreadUpdateManyWithoutEventNestedInput
   registrations?: Prisma.EventRegistrationUpdateManyWithoutEventNestedInput
   savedBy?: Prisma.SavedEventUpdateManyWithoutEventNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutEventNestedInput
@@ -1281,6 +2804,7 @@ export type EventUpdateWithoutTimelineInput = {
 
 export type EventUncheckedUpdateWithoutTimelineInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  customId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   shortDescription?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1293,19 +2817,29 @@ export type EventUncheckedUpdateWithoutTimelineInput = {
   image?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumEventStatusFieldUpdateOperationsInput | $Enums.EventStatus
   deadline?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationOpenDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  registrationCloseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   fee?: Prisma.StringFieldUpdateOperationsInput | string
   teamSizeMin?: Prisma.IntFieldUpdateOperationsInput | number
   teamSizeMax?: Prisma.IntFieldUpdateOperationsInput | number
   eligibility?: Prisma.EventUpdateeligibilityInput | string[]
-  sdgs?: Prisma.EventUpdatesdgsInput | number[]
   prizePool?: Prisma.StringFieldUpdateOperationsInput | string
   organizer?: Prisma.StringFieldUpdateOperationsInput | string
+  rules?: Prisma.StringFieldUpdateOperationsInput | string
+  awardsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  eventTypeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   registrationEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   faqs?: Prisma.EventFaqUncheckedUpdateManyWithoutEventNestedInput
   categories?: Prisma.EventCategoryUncheckedUpdateManyWithoutEventNestedInput
+  criteria?: Prisma.EventCriteriaUncheckedUpdateManyWithoutEventNestedInput
+  stages?: Prisma.EventStageUncheckedUpdateManyWithoutEventNestedInput
+  awards?: Prisma.EventAwardUncheckedUpdateManyWithoutEventNestedInput
+  resources?: Prisma.EventResourceUncheckedUpdateManyWithoutEventNestedInput
+  communityThreads?: Prisma.EventCommunityThreadUncheckedUpdateManyWithoutEventNestedInput
   registrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutEventNestedInput
   savedBy?: Prisma.SavedEventUncheckedUpdateManyWithoutEventNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutEventNestedInput
@@ -1316,6 +2850,7 @@ export type EventUncheckedUpdateWithoutTimelineInput = {
 
 export type EventCreateWithoutFaqsInput = {
   id?: string
+  customId: string
   title: string
   slug: string
   shortDescription: string
@@ -1328,19 +2863,29 @@ export type EventCreateWithoutFaqsInput = {
   image?: string
   status?: $Enums.EventStatus
   deadline: string
+  registrationOpenDate?: Date | string | null
+  registrationCloseDate?: Date | string | null
+  capacity?: number | null
   fee?: string
   teamSizeMin?: number
   teamSizeMax?: number
   eligibility?: Prisma.EventCreateeligibilityInput | string[]
-  sdgs?: Prisma.EventCreatesdgsInput | number[]
   prizePool?: string
   organizer?: string
+  rules?: string
+  awardsEnabled?: boolean
   registrationEndDate?: Date | string | null
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  eventType?: Prisma.EventTypeTaxonomyCreateNestedOneWithoutEventsInput
   timeline?: Prisma.EventTimelineCreateNestedManyWithoutEventInput
   categories?: Prisma.EventCategoryCreateNestedManyWithoutEventInput
+  criteria?: Prisma.EventCriteriaCreateNestedManyWithoutEventInput
+  stages?: Prisma.EventStageCreateNestedManyWithoutEventInput
+  awards?: Prisma.EventAwardCreateNestedManyWithoutEventInput
+  resources?: Prisma.EventResourceCreateNestedManyWithoutEventInput
+  communityThreads?: Prisma.EventCommunityThreadCreateNestedManyWithoutEventInput
   registrations?: Prisma.EventRegistrationCreateNestedManyWithoutEventInput
   savedBy?: Prisma.SavedEventCreateNestedManyWithoutEventInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutEventInput
@@ -1351,6 +2896,7 @@ export type EventCreateWithoutFaqsInput = {
 
 export type EventUncheckedCreateWithoutFaqsInput = {
   id?: string
+  customId: string
   title: string
   slug: string
   shortDescription: string
@@ -1363,19 +2909,29 @@ export type EventUncheckedCreateWithoutFaqsInput = {
   image?: string
   status?: $Enums.EventStatus
   deadline: string
+  registrationOpenDate?: Date | string | null
+  registrationCloseDate?: Date | string | null
+  capacity?: number | null
   fee?: string
   teamSizeMin?: number
   teamSizeMax?: number
   eligibility?: Prisma.EventCreateeligibilityInput | string[]
-  sdgs?: Prisma.EventCreatesdgsInput | number[]
   prizePool?: string
   organizer?: string
+  rules?: string
+  awardsEnabled?: boolean
+  eventTypeId?: string | null
   registrationEndDate?: Date | string | null
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
   timeline?: Prisma.EventTimelineUncheckedCreateNestedManyWithoutEventInput
   categories?: Prisma.EventCategoryUncheckedCreateNestedManyWithoutEventInput
+  criteria?: Prisma.EventCriteriaUncheckedCreateNestedManyWithoutEventInput
+  stages?: Prisma.EventStageUncheckedCreateNestedManyWithoutEventInput
+  awards?: Prisma.EventAwardUncheckedCreateNestedManyWithoutEventInput
+  resources?: Prisma.EventResourceUncheckedCreateNestedManyWithoutEventInput
+  communityThreads?: Prisma.EventCommunityThreadUncheckedCreateNestedManyWithoutEventInput
   registrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutEventInput
   savedBy?: Prisma.SavedEventUncheckedCreateNestedManyWithoutEventInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutEventInput
@@ -1402,6 +2958,7 @@ export type EventUpdateToOneWithWhereWithoutFaqsInput = {
 
 export type EventUpdateWithoutFaqsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  customId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   shortDescription?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1414,19 +2971,29 @@ export type EventUpdateWithoutFaqsInput = {
   image?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumEventStatusFieldUpdateOperationsInput | $Enums.EventStatus
   deadline?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationOpenDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  registrationCloseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   fee?: Prisma.StringFieldUpdateOperationsInput | string
   teamSizeMin?: Prisma.IntFieldUpdateOperationsInput | number
   teamSizeMax?: Prisma.IntFieldUpdateOperationsInput | number
   eligibility?: Prisma.EventUpdateeligibilityInput | string[]
-  sdgs?: Prisma.EventUpdatesdgsInput | number[]
   prizePool?: Prisma.StringFieldUpdateOperationsInput | string
   organizer?: Prisma.StringFieldUpdateOperationsInput | string
+  rules?: Prisma.StringFieldUpdateOperationsInput | string
+  awardsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   registrationEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  eventType?: Prisma.EventTypeTaxonomyUpdateOneWithoutEventsNestedInput
   timeline?: Prisma.EventTimelineUpdateManyWithoutEventNestedInput
   categories?: Prisma.EventCategoryUpdateManyWithoutEventNestedInput
+  criteria?: Prisma.EventCriteriaUpdateManyWithoutEventNestedInput
+  stages?: Prisma.EventStageUpdateManyWithoutEventNestedInput
+  awards?: Prisma.EventAwardUpdateManyWithoutEventNestedInput
+  resources?: Prisma.EventResourceUpdateManyWithoutEventNestedInput
+  communityThreads?: Prisma.EventCommunityThreadUpdateManyWithoutEventNestedInput
   registrations?: Prisma.EventRegistrationUpdateManyWithoutEventNestedInput
   savedBy?: Prisma.SavedEventUpdateManyWithoutEventNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutEventNestedInput
@@ -1437,6 +3004,7 @@ export type EventUpdateWithoutFaqsInput = {
 
 export type EventUncheckedUpdateWithoutFaqsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  customId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   shortDescription?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1449,19 +3017,29 @@ export type EventUncheckedUpdateWithoutFaqsInput = {
   image?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumEventStatusFieldUpdateOperationsInput | $Enums.EventStatus
   deadline?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationOpenDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  registrationCloseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   fee?: Prisma.StringFieldUpdateOperationsInput | string
   teamSizeMin?: Prisma.IntFieldUpdateOperationsInput | number
   teamSizeMax?: Prisma.IntFieldUpdateOperationsInput | number
   eligibility?: Prisma.EventUpdateeligibilityInput | string[]
-  sdgs?: Prisma.EventUpdatesdgsInput | number[]
   prizePool?: Prisma.StringFieldUpdateOperationsInput | string
   organizer?: Prisma.StringFieldUpdateOperationsInput | string
+  rules?: Prisma.StringFieldUpdateOperationsInput | string
+  awardsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  eventTypeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   registrationEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   timeline?: Prisma.EventTimelineUncheckedUpdateManyWithoutEventNestedInput
   categories?: Prisma.EventCategoryUncheckedUpdateManyWithoutEventNestedInput
+  criteria?: Prisma.EventCriteriaUncheckedUpdateManyWithoutEventNestedInput
+  stages?: Prisma.EventStageUncheckedUpdateManyWithoutEventNestedInput
+  awards?: Prisma.EventAwardUncheckedUpdateManyWithoutEventNestedInput
+  resources?: Prisma.EventResourceUncheckedUpdateManyWithoutEventNestedInput
+  communityThreads?: Prisma.EventCommunityThreadUncheckedUpdateManyWithoutEventNestedInput
   registrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutEventNestedInput
   savedBy?: Prisma.SavedEventUncheckedUpdateManyWithoutEventNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutEventNestedInput
@@ -1472,6 +3050,7 @@ export type EventUncheckedUpdateWithoutFaqsInput = {
 
 export type EventCreateWithoutCategoriesInput = {
   id?: string
+  customId: string
   title: string
   slug: string
   shortDescription: string
@@ -1484,19 +3063,29 @@ export type EventCreateWithoutCategoriesInput = {
   image?: string
   status?: $Enums.EventStatus
   deadline: string
+  registrationOpenDate?: Date | string | null
+  registrationCloseDate?: Date | string | null
+  capacity?: number | null
   fee?: string
   teamSizeMin?: number
   teamSizeMax?: number
   eligibility?: Prisma.EventCreateeligibilityInput | string[]
-  sdgs?: Prisma.EventCreatesdgsInput | number[]
   prizePool?: string
   organizer?: string
+  rules?: string
+  awardsEnabled?: boolean
   registrationEndDate?: Date | string | null
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  eventType?: Prisma.EventTypeTaxonomyCreateNestedOneWithoutEventsInput
   timeline?: Prisma.EventTimelineCreateNestedManyWithoutEventInput
   faqs?: Prisma.EventFaqCreateNestedManyWithoutEventInput
+  criteria?: Prisma.EventCriteriaCreateNestedManyWithoutEventInput
+  stages?: Prisma.EventStageCreateNestedManyWithoutEventInput
+  awards?: Prisma.EventAwardCreateNestedManyWithoutEventInput
+  resources?: Prisma.EventResourceCreateNestedManyWithoutEventInput
+  communityThreads?: Prisma.EventCommunityThreadCreateNestedManyWithoutEventInput
   registrations?: Prisma.EventRegistrationCreateNestedManyWithoutEventInput
   savedBy?: Prisma.SavedEventCreateNestedManyWithoutEventInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutEventInput
@@ -1507,6 +3096,7 @@ export type EventCreateWithoutCategoriesInput = {
 
 export type EventUncheckedCreateWithoutCategoriesInput = {
   id?: string
+  customId: string
   title: string
   slug: string
   shortDescription: string
@@ -1519,19 +3109,29 @@ export type EventUncheckedCreateWithoutCategoriesInput = {
   image?: string
   status?: $Enums.EventStatus
   deadline: string
+  registrationOpenDate?: Date | string | null
+  registrationCloseDate?: Date | string | null
+  capacity?: number | null
   fee?: string
   teamSizeMin?: number
   teamSizeMax?: number
   eligibility?: Prisma.EventCreateeligibilityInput | string[]
-  sdgs?: Prisma.EventCreatesdgsInput | number[]
   prizePool?: string
   organizer?: string
+  rules?: string
+  awardsEnabled?: boolean
+  eventTypeId?: string | null
   registrationEndDate?: Date | string | null
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
   timeline?: Prisma.EventTimelineUncheckedCreateNestedManyWithoutEventInput
   faqs?: Prisma.EventFaqUncheckedCreateNestedManyWithoutEventInput
+  criteria?: Prisma.EventCriteriaUncheckedCreateNestedManyWithoutEventInput
+  stages?: Prisma.EventStageUncheckedCreateNestedManyWithoutEventInput
+  awards?: Prisma.EventAwardUncheckedCreateNestedManyWithoutEventInput
+  resources?: Prisma.EventResourceUncheckedCreateNestedManyWithoutEventInput
+  communityThreads?: Prisma.EventCommunityThreadUncheckedCreateNestedManyWithoutEventInput
   registrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutEventInput
   savedBy?: Prisma.SavedEventUncheckedCreateNestedManyWithoutEventInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutEventInput
@@ -1558,6 +3158,7 @@ export type EventUpdateToOneWithWhereWithoutCategoriesInput = {
 
 export type EventUpdateWithoutCategoriesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  customId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   shortDescription?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1570,19 +3171,29 @@ export type EventUpdateWithoutCategoriesInput = {
   image?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumEventStatusFieldUpdateOperationsInput | $Enums.EventStatus
   deadline?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationOpenDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  registrationCloseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   fee?: Prisma.StringFieldUpdateOperationsInput | string
   teamSizeMin?: Prisma.IntFieldUpdateOperationsInput | number
   teamSizeMax?: Prisma.IntFieldUpdateOperationsInput | number
   eligibility?: Prisma.EventUpdateeligibilityInput | string[]
-  sdgs?: Prisma.EventUpdatesdgsInput | number[]
   prizePool?: Prisma.StringFieldUpdateOperationsInput | string
   organizer?: Prisma.StringFieldUpdateOperationsInput | string
+  rules?: Prisma.StringFieldUpdateOperationsInput | string
+  awardsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   registrationEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  eventType?: Prisma.EventTypeTaxonomyUpdateOneWithoutEventsNestedInput
   timeline?: Prisma.EventTimelineUpdateManyWithoutEventNestedInput
   faqs?: Prisma.EventFaqUpdateManyWithoutEventNestedInput
+  criteria?: Prisma.EventCriteriaUpdateManyWithoutEventNestedInput
+  stages?: Prisma.EventStageUpdateManyWithoutEventNestedInput
+  awards?: Prisma.EventAwardUpdateManyWithoutEventNestedInput
+  resources?: Prisma.EventResourceUpdateManyWithoutEventNestedInput
+  communityThreads?: Prisma.EventCommunityThreadUpdateManyWithoutEventNestedInput
   registrations?: Prisma.EventRegistrationUpdateManyWithoutEventNestedInput
   savedBy?: Prisma.SavedEventUpdateManyWithoutEventNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutEventNestedInput
@@ -1593,6 +3204,7 @@ export type EventUpdateWithoutCategoriesInput = {
 
 export type EventUncheckedUpdateWithoutCategoriesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  customId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   shortDescription?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1605,19 +3217,29 @@ export type EventUncheckedUpdateWithoutCategoriesInput = {
   image?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumEventStatusFieldUpdateOperationsInput | $Enums.EventStatus
   deadline?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationOpenDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  registrationCloseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   fee?: Prisma.StringFieldUpdateOperationsInput | string
   teamSizeMin?: Prisma.IntFieldUpdateOperationsInput | number
   teamSizeMax?: Prisma.IntFieldUpdateOperationsInput | number
   eligibility?: Prisma.EventUpdateeligibilityInput | string[]
-  sdgs?: Prisma.EventUpdatesdgsInput | number[]
   prizePool?: Prisma.StringFieldUpdateOperationsInput | string
   organizer?: Prisma.StringFieldUpdateOperationsInput | string
+  rules?: Prisma.StringFieldUpdateOperationsInput | string
+  awardsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  eventTypeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   registrationEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   timeline?: Prisma.EventTimelineUncheckedUpdateManyWithoutEventNestedInput
   faqs?: Prisma.EventFaqUncheckedUpdateManyWithoutEventNestedInput
+  criteria?: Prisma.EventCriteriaUncheckedUpdateManyWithoutEventNestedInput
+  stages?: Prisma.EventStageUncheckedUpdateManyWithoutEventNestedInput
+  awards?: Prisma.EventAwardUncheckedUpdateManyWithoutEventNestedInput
+  resources?: Prisma.EventResourceUncheckedUpdateManyWithoutEventNestedInput
+  communityThreads?: Prisma.EventCommunityThreadUncheckedUpdateManyWithoutEventNestedInput
   registrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutEventNestedInput
   savedBy?: Prisma.SavedEventUncheckedUpdateManyWithoutEventNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutEventNestedInput
@@ -1628,6 +3250,7 @@ export type EventUncheckedUpdateWithoutCategoriesInput = {
 
 export type EventCreateWithoutRegistrationsInput = {
   id?: string
+  customId: string
   title: string
   slug: string
   shortDescription: string
@@ -1640,20 +3263,30 @@ export type EventCreateWithoutRegistrationsInput = {
   image?: string
   status?: $Enums.EventStatus
   deadline: string
+  registrationOpenDate?: Date | string | null
+  registrationCloseDate?: Date | string | null
+  capacity?: number | null
   fee?: string
   teamSizeMin?: number
   teamSizeMax?: number
   eligibility?: Prisma.EventCreateeligibilityInput | string[]
-  sdgs?: Prisma.EventCreatesdgsInput | number[]
   prizePool?: string
   organizer?: string
+  rules?: string
+  awardsEnabled?: boolean
   registrationEndDate?: Date | string | null
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  eventType?: Prisma.EventTypeTaxonomyCreateNestedOneWithoutEventsInput
   timeline?: Prisma.EventTimelineCreateNestedManyWithoutEventInput
   faqs?: Prisma.EventFaqCreateNestedManyWithoutEventInput
   categories?: Prisma.EventCategoryCreateNestedManyWithoutEventInput
+  criteria?: Prisma.EventCriteriaCreateNestedManyWithoutEventInput
+  stages?: Prisma.EventStageCreateNestedManyWithoutEventInput
+  awards?: Prisma.EventAwardCreateNestedManyWithoutEventInput
+  resources?: Prisma.EventResourceCreateNestedManyWithoutEventInput
+  communityThreads?: Prisma.EventCommunityThreadCreateNestedManyWithoutEventInput
   savedBy?: Prisma.SavedEventCreateNestedManyWithoutEventInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutEventInput
   judgeAssignments?: Prisma.JudgeAssignmentCreateNestedManyWithoutEventInput
@@ -1663,6 +3296,7 @@ export type EventCreateWithoutRegistrationsInput = {
 
 export type EventUncheckedCreateWithoutRegistrationsInput = {
   id?: string
+  customId: string
   title: string
   slug: string
   shortDescription: string
@@ -1675,13 +3309,18 @@ export type EventUncheckedCreateWithoutRegistrationsInput = {
   image?: string
   status?: $Enums.EventStatus
   deadline: string
+  registrationOpenDate?: Date | string | null
+  registrationCloseDate?: Date | string | null
+  capacity?: number | null
   fee?: string
   teamSizeMin?: number
   teamSizeMax?: number
   eligibility?: Prisma.EventCreateeligibilityInput | string[]
-  sdgs?: Prisma.EventCreatesdgsInput | number[]
   prizePool?: string
   organizer?: string
+  rules?: string
+  awardsEnabled?: boolean
+  eventTypeId?: string | null
   registrationEndDate?: Date | string | null
   createdById: string
   createdAt?: Date | string
@@ -1689,6 +3328,11 @@ export type EventUncheckedCreateWithoutRegistrationsInput = {
   timeline?: Prisma.EventTimelineUncheckedCreateNestedManyWithoutEventInput
   faqs?: Prisma.EventFaqUncheckedCreateNestedManyWithoutEventInput
   categories?: Prisma.EventCategoryUncheckedCreateNestedManyWithoutEventInput
+  criteria?: Prisma.EventCriteriaUncheckedCreateNestedManyWithoutEventInput
+  stages?: Prisma.EventStageUncheckedCreateNestedManyWithoutEventInput
+  awards?: Prisma.EventAwardUncheckedCreateNestedManyWithoutEventInput
+  resources?: Prisma.EventResourceUncheckedCreateNestedManyWithoutEventInput
+  communityThreads?: Prisma.EventCommunityThreadUncheckedCreateNestedManyWithoutEventInput
   savedBy?: Prisma.SavedEventUncheckedCreateNestedManyWithoutEventInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutEventInput
   judgeAssignments?: Prisma.JudgeAssignmentUncheckedCreateNestedManyWithoutEventInput
@@ -1714,6 +3358,7 @@ export type EventUpdateToOneWithWhereWithoutRegistrationsInput = {
 
 export type EventUpdateWithoutRegistrationsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  customId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   shortDescription?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1726,20 +3371,30 @@ export type EventUpdateWithoutRegistrationsInput = {
   image?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumEventStatusFieldUpdateOperationsInput | $Enums.EventStatus
   deadline?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationOpenDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  registrationCloseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   fee?: Prisma.StringFieldUpdateOperationsInput | string
   teamSizeMin?: Prisma.IntFieldUpdateOperationsInput | number
   teamSizeMax?: Prisma.IntFieldUpdateOperationsInput | number
   eligibility?: Prisma.EventUpdateeligibilityInput | string[]
-  sdgs?: Prisma.EventUpdatesdgsInput | number[]
   prizePool?: Prisma.StringFieldUpdateOperationsInput | string
   organizer?: Prisma.StringFieldUpdateOperationsInput | string
+  rules?: Prisma.StringFieldUpdateOperationsInput | string
+  awardsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   registrationEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  eventType?: Prisma.EventTypeTaxonomyUpdateOneWithoutEventsNestedInput
   timeline?: Prisma.EventTimelineUpdateManyWithoutEventNestedInput
   faqs?: Prisma.EventFaqUpdateManyWithoutEventNestedInput
   categories?: Prisma.EventCategoryUpdateManyWithoutEventNestedInput
+  criteria?: Prisma.EventCriteriaUpdateManyWithoutEventNestedInput
+  stages?: Prisma.EventStageUpdateManyWithoutEventNestedInput
+  awards?: Prisma.EventAwardUpdateManyWithoutEventNestedInput
+  resources?: Prisma.EventResourceUpdateManyWithoutEventNestedInput
+  communityThreads?: Prisma.EventCommunityThreadUpdateManyWithoutEventNestedInput
   savedBy?: Prisma.SavedEventUpdateManyWithoutEventNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutEventNestedInput
   judgeAssignments?: Prisma.JudgeAssignmentUpdateManyWithoutEventNestedInput
@@ -1749,6 +3404,7 @@ export type EventUpdateWithoutRegistrationsInput = {
 
 export type EventUncheckedUpdateWithoutRegistrationsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  customId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   shortDescription?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1761,13 +3417,18 @@ export type EventUncheckedUpdateWithoutRegistrationsInput = {
   image?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumEventStatusFieldUpdateOperationsInput | $Enums.EventStatus
   deadline?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationOpenDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  registrationCloseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   fee?: Prisma.StringFieldUpdateOperationsInput | string
   teamSizeMin?: Prisma.IntFieldUpdateOperationsInput | number
   teamSizeMax?: Prisma.IntFieldUpdateOperationsInput | number
   eligibility?: Prisma.EventUpdateeligibilityInput | string[]
-  sdgs?: Prisma.EventUpdatesdgsInput | number[]
   prizePool?: Prisma.StringFieldUpdateOperationsInput | string
   organizer?: Prisma.StringFieldUpdateOperationsInput | string
+  rules?: Prisma.StringFieldUpdateOperationsInput | string
+  awardsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  eventTypeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   registrationEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1775,6 +3436,11 @@ export type EventUncheckedUpdateWithoutRegistrationsInput = {
   timeline?: Prisma.EventTimelineUncheckedUpdateManyWithoutEventNestedInput
   faqs?: Prisma.EventFaqUncheckedUpdateManyWithoutEventNestedInput
   categories?: Prisma.EventCategoryUncheckedUpdateManyWithoutEventNestedInput
+  criteria?: Prisma.EventCriteriaUncheckedUpdateManyWithoutEventNestedInput
+  stages?: Prisma.EventStageUncheckedUpdateManyWithoutEventNestedInput
+  awards?: Prisma.EventAwardUncheckedUpdateManyWithoutEventNestedInput
+  resources?: Prisma.EventResourceUncheckedUpdateManyWithoutEventNestedInput
+  communityThreads?: Prisma.EventCommunityThreadUncheckedUpdateManyWithoutEventNestedInput
   savedBy?: Prisma.SavedEventUncheckedUpdateManyWithoutEventNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutEventNestedInput
   judgeAssignments?: Prisma.JudgeAssignmentUncheckedUpdateManyWithoutEventNestedInput
@@ -1784,6 +3450,7 @@ export type EventUncheckedUpdateWithoutRegistrationsInput = {
 
 export type EventCreateWithoutSubmissionsInput = {
   id?: string
+  customId: string
   title: string
   slug: string
   shortDescription: string
@@ -1796,20 +3463,30 @@ export type EventCreateWithoutSubmissionsInput = {
   image?: string
   status?: $Enums.EventStatus
   deadline: string
+  registrationOpenDate?: Date | string | null
+  registrationCloseDate?: Date | string | null
+  capacity?: number | null
   fee?: string
   teamSizeMin?: number
   teamSizeMax?: number
   eligibility?: Prisma.EventCreateeligibilityInput | string[]
-  sdgs?: Prisma.EventCreatesdgsInput | number[]
   prizePool?: string
   organizer?: string
+  rules?: string
+  awardsEnabled?: boolean
   registrationEndDate?: Date | string | null
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  eventType?: Prisma.EventTypeTaxonomyCreateNestedOneWithoutEventsInput
   timeline?: Prisma.EventTimelineCreateNestedManyWithoutEventInput
   faqs?: Prisma.EventFaqCreateNestedManyWithoutEventInput
   categories?: Prisma.EventCategoryCreateNestedManyWithoutEventInput
+  criteria?: Prisma.EventCriteriaCreateNestedManyWithoutEventInput
+  stages?: Prisma.EventStageCreateNestedManyWithoutEventInput
+  awards?: Prisma.EventAwardCreateNestedManyWithoutEventInput
+  resources?: Prisma.EventResourceCreateNestedManyWithoutEventInput
+  communityThreads?: Prisma.EventCommunityThreadCreateNestedManyWithoutEventInput
   registrations?: Prisma.EventRegistrationCreateNestedManyWithoutEventInput
   savedBy?: Prisma.SavedEventCreateNestedManyWithoutEventInput
   judgeAssignments?: Prisma.JudgeAssignmentCreateNestedManyWithoutEventInput
@@ -1819,6 +3496,7 @@ export type EventCreateWithoutSubmissionsInput = {
 
 export type EventUncheckedCreateWithoutSubmissionsInput = {
   id?: string
+  customId: string
   title: string
   slug: string
   shortDescription: string
@@ -1831,13 +3509,18 @@ export type EventUncheckedCreateWithoutSubmissionsInput = {
   image?: string
   status?: $Enums.EventStatus
   deadline: string
+  registrationOpenDate?: Date | string | null
+  registrationCloseDate?: Date | string | null
+  capacity?: number | null
   fee?: string
   teamSizeMin?: number
   teamSizeMax?: number
   eligibility?: Prisma.EventCreateeligibilityInput | string[]
-  sdgs?: Prisma.EventCreatesdgsInput | number[]
   prizePool?: string
   organizer?: string
+  rules?: string
+  awardsEnabled?: boolean
+  eventTypeId?: string | null
   registrationEndDate?: Date | string | null
   createdById: string
   createdAt?: Date | string
@@ -1845,6 +3528,11 @@ export type EventUncheckedCreateWithoutSubmissionsInput = {
   timeline?: Prisma.EventTimelineUncheckedCreateNestedManyWithoutEventInput
   faqs?: Prisma.EventFaqUncheckedCreateNestedManyWithoutEventInput
   categories?: Prisma.EventCategoryUncheckedCreateNestedManyWithoutEventInput
+  criteria?: Prisma.EventCriteriaUncheckedCreateNestedManyWithoutEventInput
+  stages?: Prisma.EventStageUncheckedCreateNestedManyWithoutEventInput
+  awards?: Prisma.EventAwardUncheckedCreateNestedManyWithoutEventInput
+  resources?: Prisma.EventResourceUncheckedCreateNestedManyWithoutEventInput
+  communityThreads?: Prisma.EventCommunityThreadUncheckedCreateNestedManyWithoutEventInput
   registrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutEventInput
   savedBy?: Prisma.SavedEventUncheckedCreateNestedManyWithoutEventInput
   judgeAssignments?: Prisma.JudgeAssignmentUncheckedCreateNestedManyWithoutEventInput
@@ -1870,6 +3558,7 @@ export type EventUpdateToOneWithWhereWithoutSubmissionsInput = {
 
 export type EventUpdateWithoutSubmissionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  customId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   shortDescription?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1882,20 +3571,30 @@ export type EventUpdateWithoutSubmissionsInput = {
   image?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumEventStatusFieldUpdateOperationsInput | $Enums.EventStatus
   deadline?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationOpenDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  registrationCloseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   fee?: Prisma.StringFieldUpdateOperationsInput | string
   teamSizeMin?: Prisma.IntFieldUpdateOperationsInput | number
   teamSizeMax?: Prisma.IntFieldUpdateOperationsInput | number
   eligibility?: Prisma.EventUpdateeligibilityInput | string[]
-  sdgs?: Prisma.EventUpdatesdgsInput | number[]
   prizePool?: Prisma.StringFieldUpdateOperationsInput | string
   organizer?: Prisma.StringFieldUpdateOperationsInput | string
+  rules?: Prisma.StringFieldUpdateOperationsInput | string
+  awardsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   registrationEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  eventType?: Prisma.EventTypeTaxonomyUpdateOneWithoutEventsNestedInput
   timeline?: Prisma.EventTimelineUpdateManyWithoutEventNestedInput
   faqs?: Prisma.EventFaqUpdateManyWithoutEventNestedInput
   categories?: Prisma.EventCategoryUpdateManyWithoutEventNestedInput
+  criteria?: Prisma.EventCriteriaUpdateManyWithoutEventNestedInput
+  stages?: Prisma.EventStageUpdateManyWithoutEventNestedInput
+  awards?: Prisma.EventAwardUpdateManyWithoutEventNestedInput
+  resources?: Prisma.EventResourceUpdateManyWithoutEventNestedInput
+  communityThreads?: Prisma.EventCommunityThreadUpdateManyWithoutEventNestedInput
   registrations?: Prisma.EventRegistrationUpdateManyWithoutEventNestedInput
   savedBy?: Prisma.SavedEventUpdateManyWithoutEventNestedInput
   judgeAssignments?: Prisma.JudgeAssignmentUpdateManyWithoutEventNestedInput
@@ -1905,6 +3604,7 @@ export type EventUpdateWithoutSubmissionsInput = {
 
 export type EventUncheckedUpdateWithoutSubmissionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  customId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   shortDescription?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1917,13 +3617,18 @@ export type EventUncheckedUpdateWithoutSubmissionsInput = {
   image?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumEventStatusFieldUpdateOperationsInput | $Enums.EventStatus
   deadline?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationOpenDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  registrationCloseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   fee?: Prisma.StringFieldUpdateOperationsInput | string
   teamSizeMin?: Prisma.IntFieldUpdateOperationsInput | number
   teamSizeMax?: Prisma.IntFieldUpdateOperationsInput | number
   eligibility?: Prisma.EventUpdateeligibilityInput | string[]
-  sdgs?: Prisma.EventUpdatesdgsInput | number[]
   prizePool?: Prisma.StringFieldUpdateOperationsInput | string
   organizer?: Prisma.StringFieldUpdateOperationsInput | string
+  rules?: Prisma.StringFieldUpdateOperationsInput | string
+  awardsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  eventTypeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   registrationEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1931,6 +3636,11 @@ export type EventUncheckedUpdateWithoutSubmissionsInput = {
   timeline?: Prisma.EventTimelineUncheckedUpdateManyWithoutEventNestedInput
   faqs?: Prisma.EventFaqUncheckedUpdateManyWithoutEventNestedInput
   categories?: Prisma.EventCategoryUncheckedUpdateManyWithoutEventNestedInput
+  criteria?: Prisma.EventCriteriaUncheckedUpdateManyWithoutEventNestedInput
+  stages?: Prisma.EventStageUncheckedUpdateManyWithoutEventNestedInput
+  awards?: Prisma.EventAwardUncheckedUpdateManyWithoutEventNestedInput
+  resources?: Prisma.EventResourceUncheckedUpdateManyWithoutEventNestedInput
+  communityThreads?: Prisma.EventCommunityThreadUncheckedUpdateManyWithoutEventNestedInput
   registrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutEventNestedInput
   savedBy?: Prisma.SavedEventUncheckedUpdateManyWithoutEventNestedInput
   judgeAssignments?: Prisma.JudgeAssignmentUncheckedUpdateManyWithoutEventNestedInput
@@ -1940,6 +3650,7 @@ export type EventUncheckedUpdateWithoutSubmissionsInput = {
 
 export type EventCreateWithoutJudgeAssignmentsInput = {
   id?: string
+  customId: string
   title: string
   slug: string
   shortDescription: string
@@ -1952,20 +3663,30 @@ export type EventCreateWithoutJudgeAssignmentsInput = {
   image?: string
   status?: $Enums.EventStatus
   deadline: string
+  registrationOpenDate?: Date | string | null
+  registrationCloseDate?: Date | string | null
+  capacity?: number | null
   fee?: string
   teamSizeMin?: number
   teamSizeMax?: number
   eligibility?: Prisma.EventCreateeligibilityInput | string[]
-  sdgs?: Prisma.EventCreatesdgsInput | number[]
   prizePool?: string
   organizer?: string
+  rules?: string
+  awardsEnabled?: boolean
   registrationEndDate?: Date | string | null
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  eventType?: Prisma.EventTypeTaxonomyCreateNestedOneWithoutEventsInput
   timeline?: Prisma.EventTimelineCreateNestedManyWithoutEventInput
   faqs?: Prisma.EventFaqCreateNestedManyWithoutEventInput
   categories?: Prisma.EventCategoryCreateNestedManyWithoutEventInput
+  criteria?: Prisma.EventCriteriaCreateNestedManyWithoutEventInput
+  stages?: Prisma.EventStageCreateNestedManyWithoutEventInput
+  awards?: Prisma.EventAwardCreateNestedManyWithoutEventInput
+  resources?: Prisma.EventResourceCreateNestedManyWithoutEventInput
+  communityThreads?: Prisma.EventCommunityThreadCreateNestedManyWithoutEventInput
   registrations?: Prisma.EventRegistrationCreateNestedManyWithoutEventInput
   savedBy?: Prisma.SavedEventCreateNestedManyWithoutEventInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutEventInput
@@ -1975,6 +3696,7 @@ export type EventCreateWithoutJudgeAssignmentsInput = {
 
 export type EventUncheckedCreateWithoutJudgeAssignmentsInput = {
   id?: string
+  customId: string
   title: string
   slug: string
   shortDescription: string
@@ -1987,13 +3709,18 @@ export type EventUncheckedCreateWithoutJudgeAssignmentsInput = {
   image?: string
   status?: $Enums.EventStatus
   deadline: string
+  registrationOpenDate?: Date | string | null
+  registrationCloseDate?: Date | string | null
+  capacity?: number | null
   fee?: string
   teamSizeMin?: number
   teamSizeMax?: number
   eligibility?: Prisma.EventCreateeligibilityInput | string[]
-  sdgs?: Prisma.EventCreatesdgsInput | number[]
   prizePool?: string
   organizer?: string
+  rules?: string
+  awardsEnabled?: boolean
+  eventTypeId?: string | null
   registrationEndDate?: Date | string | null
   createdById: string
   createdAt?: Date | string
@@ -2001,6 +3728,11 @@ export type EventUncheckedCreateWithoutJudgeAssignmentsInput = {
   timeline?: Prisma.EventTimelineUncheckedCreateNestedManyWithoutEventInput
   faqs?: Prisma.EventFaqUncheckedCreateNestedManyWithoutEventInput
   categories?: Prisma.EventCategoryUncheckedCreateNestedManyWithoutEventInput
+  criteria?: Prisma.EventCriteriaUncheckedCreateNestedManyWithoutEventInput
+  stages?: Prisma.EventStageUncheckedCreateNestedManyWithoutEventInput
+  awards?: Prisma.EventAwardUncheckedCreateNestedManyWithoutEventInput
+  resources?: Prisma.EventResourceUncheckedCreateNestedManyWithoutEventInput
+  communityThreads?: Prisma.EventCommunityThreadUncheckedCreateNestedManyWithoutEventInput
   registrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutEventInput
   savedBy?: Prisma.SavedEventUncheckedCreateNestedManyWithoutEventInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutEventInput
@@ -2026,6 +3758,7 @@ export type EventUpdateToOneWithWhereWithoutJudgeAssignmentsInput = {
 
 export type EventUpdateWithoutJudgeAssignmentsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  customId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   shortDescription?: Prisma.StringFieldUpdateOperationsInput | string
@@ -2038,20 +3771,30 @@ export type EventUpdateWithoutJudgeAssignmentsInput = {
   image?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumEventStatusFieldUpdateOperationsInput | $Enums.EventStatus
   deadline?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationOpenDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  registrationCloseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   fee?: Prisma.StringFieldUpdateOperationsInput | string
   teamSizeMin?: Prisma.IntFieldUpdateOperationsInput | number
   teamSizeMax?: Prisma.IntFieldUpdateOperationsInput | number
   eligibility?: Prisma.EventUpdateeligibilityInput | string[]
-  sdgs?: Prisma.EventUpdatesdgsInput | number[]
   prizePool?: Prisma.StringFieldUpdateOperationsInput | string
   organizer?: Prisma.StringFieldUpdateOperationsInput | string
+  rules?: Prisma.StringFieldUpdateOperationsInput | string
+  awardsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   registrationEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  eventType?: Prisma.EventTypeTaxonomyUpdateOneWithoutEventsNestedInput
   timeline?: Prisma.EventTimelineUpdateManyWithoutEventNestedInput
   faqs?: Prisma.EventFaqUpdateManyWithoutEventNestedInput
   categories?: Prisma.EventCategoryUpdateManyWithoutEventNestedInput
+  criteria?: Prisma.EventCriteriaUpdateManyWithoutEventNestedInput
+  stages?: Prisma.EventStageUpdateManyWithoutEventNestedInput
+  awards?: Prisma.EventAwardUpdateManyWithoutEventNestedInput
+  resources?: Prisma.EventResourceUpdateManyWithoutEventNestedInput
+  communityThreads?: Prisma.EventCommunityThreadUpdateManyWithoutEventNestedInput
   registrations?: Prisma.EventRegistrationUpdateManyWithoutEventNestedInput
   savedBy?: Prisma.SavedEventUpdateManyWithoutEventNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutEventNestedInput
@@ -2061,6 +3804,7 @@ export type EventUpdateWithoutJudgeAssignmentsInput = {
 
 export type EventUncheckedUpdateWithoutJudgeAssignmentsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  customId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   shortDescription?: Prisma.StringFieldUpdateOperationsInput | string
@@ -2073,13 +3817,18 @@ export type EventUncheckedUpdateWithoutJudgeAssignmentsInput = {
   image?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumEventStatusFieldUpdateOperationsInput | $Enums.EventStatus
   deadline?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationOpenDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  registrationCloseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   fee?: Prisma.StringFieldUpdateOperationsInput | string
   teamSizeMin?: Prisma.IntFieldUpdateOperationsInput | number
   teamSizeMax?: Prisma.IntFieldUpdateOperationsInput | number
   eligibility?: Prisma.EventUpdateeligibilityInput | string[]
-  sdgs?: Prisma.EventUpdatesdgsInput | number[]
   prizePool?: Prisma.StringFieldUpdateOperationsInput | string
   organizer?: Prisma.StringFieldUpdateOperationsInput | string
+  rules?: Prisma.StringFieldUpdateOperationsInput | string
+  awardsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  eventTypeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   registrationEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2087,6 +3836,11 @@ export type EventUncheckedUpdateWithoutJudgeAssignmentsInput = {
   timeline?: Prisma.EventTimelineUncheckedUpdateManyWithoutEventNestedInput
   faqs?: Prisma.EventFaqUncheckedUpdateManyWithoutEventNestedInput
   categories?: Prisma.EventCategoryUncheckedUpdateManyWithoutEventNestedInput
+  criteria?: Prisma.EventCriteriaUncheckedUpdateManyWithoutEventNestedInput
+  stages?: Prisma.EventStageUncheckedUpdateManyWithoutEventNestedInput
+  awards?: Prisma.EventAwardUncheckedUpdateManyWithoutEventNestedInput
+  resources?: Prisma.EventResourceUncheckedUpdateManyWithoutEventNestedInput
+  communityThreads?: Prisma.EventCommunityThreadUncheckedUpdateManyWithoutEventNestedInput
   registrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutEventNestedInput
   savedBy?: Prisma.SavedEventUncheckedUpdateManyWithoutEventNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutEventNestedInput
@@ -2096,6 +3850,7 @@ export type EventUncheckedUpdateWithoutJudgeAssignmentsInput = {
 
 export type EventCreateWithoutCertificatesInput = {
   id?: string
+  customId: string
   title: string
   slug: string
   shortDescription: string
@@ -2108,20 +3863,30 @@ export type EventCreateWithoutCertificatesInput = {
   image?: string
   status?: $Enums.EventStatus
   deadline: string
+  registrationOpenDate?: Date | string | null
+  registrationCloseDate?: Date | string | null
+  capacity?: number | null
   fee?: string
   teamSizeMin?: number
   teamSizeMax?: number
   eligibility?: Prisma.EventCreateeligibilityInput | string[]
-  sdgs?: Prisma.EventCreatesdgsInput | number[]
   prizePool?: string
   organizer?: string
+  rules?: string
+  awardsEnabled?: boolean
   registrationEndDate?: Date | string | null
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  eventType?: Prisma.EventTypeTaxonomyCreateNestedOneWithoutEventsInput
   timeline?: Prisma.EventTimelineCreateNestedManyWithoutEventInput
   faqs?: Prisma.EventFaqCreateNestedManyWithoutEventInput
   categories?: Prisma.EventCategoryCreateNestedManyWithoutEventInput
+  criteria?: Prisma.EventCriteriaCreateNestedManyWithoutEventInput
+  stages?: Prisma.EventStageCreateNestedManyWithoutEventInput
+  awards?: Prisma.EventAwardCreateNestedManyWithoutEventInput
+  resources?: Prisma.EventResourceCreateNestedManyWithoutEventInput
+  communityThreads?: Prisma.EventCommunityThreadCreateNestedManyWithoutEventInput
   registrations?: Prisma.EventRegistrationCreateNestedManyWithoutEventInput
   savedBy?: Prisma.SavedEventCreateNestedManyWithoutEventInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutEventInput
@@ -2131,6 +3896,7 @@ export type EventCreateWithoutCertificatesInput = {
 
 export type EventUncheckedCreateWithoutCertificatesInput = {
   id?: string
+  customId: string
   title: string
   slug: string
   shortDescription: string
@@ -2143,13 +3909,18 @@ export type EventUncheckedCreateWithoutCertificatesInput = {
   image?: string
   status?: $Enums.EventStatus
   deadline: string
+  registrationOpenDate?: Date | string | null
+  registrationCloseDate?: Date | string | null
+  capacity?: number | null
   fee?: string
   teamSizeMin?: number
   teamSizeMax?: number
   eligibility?: Prisma.EventCreateeligibilityInput | string[]
-  sdgs?: Prisma.EventCreatesdgsInput | number[]
   prizePool?: string
   organizer?: string
+  rules?: string
+  awardsEnabled?: boolean
+  eventTypeId?: string | null
   registrationEndDate?: Date | string | null
   createdById: string
   createdAt?: Date | string
@@ -2157,6 +3928,11 @@ export type EventUncheckedCreateWithoutCertificatesInput = {
   timeline?: Prisma.EventTimelineUncheckedCreateNestedManyWithoutEventInput
   faqs?: Prisma.EventFaqUncheckedCreateNestedManyWithoutEventInput
   categories?: Prisma.EventCategoryUncheckedCreateNestedManyWithoutEventInput
+  criteria?: Prisma.EventCriteriaUncheckedCreateNestedManyWithoutEventInput
+  stages?: Prisma.EventStageUncheckedCreateNestedManyWithoutEventInput
+  awards?: Prisma.EventAwardUncheckedCreateNestedManyWithoutEventInput
+  resources?: Prisma.EventResourceUncheckedCreateNestedManyWithoutEventInput
+  communityThreads?: Prisma.EventCommunityThreadUncheckedCreateNestedManyWithoutEventInput
   registrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutEventInput
   savedBy?: Prisma.SavedEventUncheckedCreateNestedManyWithoutEventInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutEventInput
@@ -2182,6 +3958,7 @@ export type EventUpdateToOneWithWhereWithoutCertificatesInput = {
 
 export type EventUpdateWithoutCertificatesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  customId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   shortDescription?: Prisma.StringFieldUpdateOperationsInput | string
@@ -2194,20 +3971,30 @@ export type EventUpdateWithoutCertificatesInput = {
   image?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumEventStatusFieldUpdateOperationsInput | $Enums.EventStatus
   deadline?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationOpenDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  registrationCloseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   fee?: Prisma.StringFieldUpdateOperationsInput | string
   teamSizeMin?: Prisma.IntFieldUpdateOperationsInput | number
   teamSizeMax?: Prisma.IntFieldUpdateOperationsInput | number
   eligibility?: Prisma.EventUpdateeligibilityInput | string[]
-  sdgs?: Prisma.EventUpdatesdgsInput | number[]
   prizePool?: Prisma.StringFieldUpdateOperationsInput | string
   organizer?: Prisma.StringFieldUpdateOperationsInput | string
+  rules?: Prisma.StringFieldUpdateOperationsInput | string
+  awardsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   registrationEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  eventType?: Prisma.EventTypeTaxonomyUpdateOneWithoutEventsNestedInput
   timeline?: Prisma.EventTimelineUpdateManyWithoutEventNestedInput
   faqs?: Prisma.EventFaqUpdateManyWithoutEventNestedInput
   categories?: Prisma.EventCategoryUpdateManyWithoutEventNestedInput
+  criteria?: Prisma.EventCriteriaUpdateManyWithoutEventNestedInput
+  stages?: Prisma.EventStageUpdateManyWithoutEventNestedInput
+  awards?: Prisma.EventAwardUpdateManyWithoutEventNestedInput
+  resources?: Prisma.EventResourceUpdateManyWithoutEventNestedInput
+  communityThreads?: Prisma.EventCommunityThreadUpdateManyWithoutEventNestedInput
   registrations?: Prisma.EventRegistrationUpdateManyWithoutEventNestedInput
   savedBy?: Prisma.SavedEventUpdateManyWithoutEventNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutEventNestedInput
@@ -2217,6 +4004,7 @@ export type EventUpdateWithoutCertificatesInput = {
 
 export type EventUncheckedUpdateWithoutCertificatesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  customId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   shortDescription?: Prisma.StringFieldUpdateOperationsInput | string
@@ -2229,13 +4017,18 @@ export type EventUncheckedUpdateWithoutCertificatesInput = {
   image?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumEventStatusFieldUpdateOperationsInput | $Enums.EventStatus
   deadline?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationOpenDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  registrationCloseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   fee?: Prisma.StringFieldUpdateOperationsInput | string
   teamSizeMin?: Prisma.IntFieldUpdateOperationsInput | number
   teamSizeMax?: Prisma.IntFieldUpdateOperationsInput | number
   eligibility?: Prisma.EventUpdateeligibilityInput | string[]
-  sdgs?: Prisma.EventUpdatesdgsInput | number[]
   prizePool?: Prisma.StringFieldUpdateOperationsInput | string
   organizer?: Prisma.StringFieldUpdateOperationsInput | string
+  rules?: Prisma.StringFieldUpdateOperationsInput | string
+  awardsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  eventTypeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   registrationEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2243,6 +4036,11 @@ export type EventUncheckedUpdateWithoutCertificatesInput = {
   timeline?: Prisma.EventTimelineUncheckedUpdateManyWithoutEventNestedInput
   faqs?: Prisma.EventFaqUncheckedUpdateManyWithoutEventNestedInput
   categories?: Prisma.EventCategoryUncheckedUpdateManyWithoutEventNestedInput
+  criteria?: Prisma.EventCriteriaUncheckedUpdateManyWithoutEventNestedInput
+  stages?: Prisma.EventStageUncheckedUpdateManyWithoutEventNestedInput
+  awards?: Prisma.EventAwardUncheckedUpdateManyWithoutEventNestedInput
+  resources?: Prisma.EventResourceUncheckedUpdateManyWithoutEventNestedInput
+  communityThreads?: Prisma.EventCommunityThreadUncheckedUpdateManyWithoutEventNestedInput
   registrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutEventNestedInput
   savedBy?: Prisma.SavedEventUncheckedUpdateManyWithoutEventNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutEventNestedInput
@@ -2252,6 +4050,7 @@ export type EventUncheckedUpdateWithoutCertificatesInput = {
 
 export type EventCreateWithoutQaQuestionsInput = {
   id?: string
+  customId: string
   title: string
   slug: string
   shortDescription: string
@@ -2264,20 +4063,30 @@ export type EventCreateWithoutQaQuestionsInput = {
   image?: string
   status?: $Enums.EventStatus
   deadline: string
+  registrationOpenDate?: Date | string | null
+  registrationCloseDate?: Date | string | null
+  capacity?: number | null
   fee?: string
   teamSizeMin?: number
   teamSizeMax?: number
   eligibility?: Prisma.EventCreateeligibilityInput | string[]
-  sdgs?: Prisma.EventCreatesdgsInput | number[]
   prizePool?: string
   organizer?: string
+  rules?: string
+  awardsEnabled?: boolean
   registrationEndDate?: Date | string | null
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  eventType?: Prisma.EventTypeTaxonomyCreateNestedOneWithoutEventsInput
   timeline?: Prisma.EventTimelineCreateNestedManyWithoutEventInput
   faqs?: Prisma.EventFaqCreateNestedManyWithoutEventInput
   categories?: Prisma.EventCategoryCreateNestedManyWithoutEventInput
+  criteria?: Prisma.EventCriteriaCreateNestedManyWithoutEventInput
+  stages?: Prisma.EventStageCreateNestedManyWithoutEventInput
+  awards?: Prisma.EventAwardCreateNestedManyWithoutEventInput
+  resources?: Prisma.EventResourceCreateNestedManyWithoutEventInput
+  communityThreads?: Prisma.EventCommunityThreadCreateNestedManyWithoutEventInput
   registrations?: Prisma.EventRegistrationCreateNestedManyWithoutEventInput
   savedBy?: Prisma.SavedEventCreateNestedManyWithoutEventInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutEventInput
@@ -2287,6 +4096,7 @@ export type EventCreateWithoutQaQuestionsInput = {
 
 export type EventUncheckedCreateWithoutQaQuestionsInput = {
   id?: string
+  customId: string
   title: string
   slug: string
   shortDescription: string
@@ -2299,13 +4109,18 @@ export type EventUncheckedCreateWithoutQaQuestionsInput = {
   image?: string
   status?: $Enums.EventStatus
   deadline: string
+  registrationOpenDate?: Date | string | null
+  registrationCloseDate?: Date | string | null
+  capacity?: number | null
   fee?: string
   teamSizeMin?: number
   teamSizeMax?: number
   eligibility?: Prisma.EventCreateeligibilityInput | string[]
-  sdgs?: Prisma.EventCreatesdgsInput | number[]
   prizePool?: string
   organizer?: string
+  rules?: string
+  awardsEnabled?: boolean
+  eventTypeId?: string | null
   registrationEndDate?: Date | string | null
   createdById: string
   createdAt?: Date | string
@@ -2313,6 +4128,11 @@ export type EventUncheckedCreateWithoutQaQuestionsInput = {
   timeline?: Prisma.EventTimelineUncheckedCreateNestedManyWithoutEventInput
   faqs?: Prisma.EventFaqUncheckedCreateNestedManyWithoutEventInput
   categories?: Prisma.EventCategoryUncheckedCreateNestedManyWithoutEventInput
+  criteria?: Prisma.EventCriteriaUncheckedCreateNestedManyWithoutEventInput
+  stages?: Prisma.EventStageUncheckedCreateNestedManyWithoutEventInput
+  awards?: Prisma.EventAwardUncheckedCreateNestedManyWithoutEventInput
+  resources?: Prisma.EventResourceUncheckedCreateNestedManyWithoutEventInput
+  communityThreads?: Prisma.EventCommunityThreadUncheckedCreateNestedManyWithoutEventInput
   registrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutEventInput
   savedBy?: Prisma.SavedEventUncheckedCreateNestedManyWithoutEventInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutEventInput
@@ -2338,6 +4158,7 @@ export type EventUpdateToOneWithWhereWithoutQaQuestionsInput = {
 
 export type EventUpdateWithoutQaQuestionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  customId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   shortDescription?: Prisma.StringFieldUpdateOperationsInput | string
@@ -2350,20 +4171,30 @@ export type EventUpdateWithoutQaQuestionsInput = {
   image?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumEventStatusFieldUpdateOperationsInput | $Enums.EventStatus
   deadline?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationOpenDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  registrationCloseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   fee?: Prisma.StringFieldUpdateOperationsInput | string
   teamSizeMin?: Prisma.IntFieldUpdateOperationsInput | number
   teamSizeMax?: Prisma.IntFieldUpdateOperationsInput | number
   eligibility?: Prisma.EventUpdateeligibilityInput | string[]
-  sdgs?: Prisma.EventUpdatesdgsInput | number[]
   prizePool?: Prisma.StringFieldUpdateOperationsInput | string
   organizer?: Prisma.StringFieldUpdateOperationsInput | string
+  rules?: Prisma.StringFieldUpdateOperationsInput | string
+  awardsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   registrationEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  eventType?: Prisma.EventTypeTaxonomyUpdateOneWithoutEventsNestedInput
   timeline?: Prisma.EventTimelineUpdateManyWithoutEventNestedInput
   faqs?: Prisma.EventFaqUpdateManyWithoutEventNestedInput
   categories?: Prisma.EventCategoryUpdateManyWithoutEventNestedInput
+  criteria?: Prisma.EventCriteriaUpdateManyWithoutEventNestedInput
+  stages?: Prisma.EventStageUpdateManyWithoutEventNestedInput
+  awards?: Prisma.EventAwardUpdateManyWithoutEventNestedInput
+  resources?: Prisma.EventResourceUpdateManyWithoutEventNestedInput
+  communityThreads?: Prisma.EventCommunityThreadUpdateManyWithoutEventNestedInput
   registrations?: Prisma.EventRegistrationUpdateManyWithoutEventNestedInput
   savedBy?: Prisma.SavedEventUpdateManyWithoutEventNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutEventNestedInput
@@ -2373,6 +4204,7 @@ export type EventUpdateWithoutQaQuestionsInput = {
 
 export type EventUncheckedUpdateWithoutQaQuestionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  customId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   shortDescription?: Prisma.StringFieldUpdateOperationsInput | string
@@ -2385,13 +4217,18 @@ export type EventUncheckedUpdateWithoutQaQuestionsInput = {
   image?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumEventStatusFieldUpdateOperationsInput | $Enums.EventStatus
   deadline?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationOpenDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  registrationCloseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   fee?: Prisma.StringFieldUpdateOperationsInput | string
   teamSizeMin?: Prisma.IntFieldUpdateOperationsInput | number
   teamSizeMax?: Prisma.IntFieldUpdateOperationsInput | number
   eligibility?: Prisma.EventUpdateeligibilityInput | string[]
-  sdgs?: Prisma.EventUpdatesdgsInput | number[]
   prizePool?: Prisma.StringFieldUpdateOperationsInput | string
   organizer?: Prisma.StringFieldUpdateOperationsInput | string
+  rules?: Prisma.StringFieldUpdateOperationsInput | string
+  awardsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  eventTypeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   registrationEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2399,11 +4236,172 @@ export type EventUncheckedUpdateWithoutQaQuestionsInput = {
   timeline?: Prisma.EventTimelineUncheckedUpdateManyWithoutEventNestedInput
   faqs?: Prisma.EventFaqUncheckedUpdateManyWithoutEventNestedInput
   categories?: Prisma.EventCategoryUncheckedUpdateManyWithoutEventNestedInput
+  criteria?: Prisma.EventCriteriaUncheckedUpdateManyWithoutEventNestedInput
+  stages?: Prisma.EventStageUncheckedUpdateManyWithoutEventNestedInput
+  awards?: Prisma.EventAwardUncheckedUpdateManyWithoutEventNestedInput
+  resources?: Prisma.EventResourceUncheckedUpdateManyWithoutEventNestedInput
+  communityThreads?: Prisma.EventCommunityThreadUncheckedUpdateManyWithoutEventNestedInput
   registrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutEventNestedInput
   savedBy?: Prisma.SavedEventUncheckedUpdateManyWithoutEventNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutEventNestedInput
   judgeAssignments?: Prisma.JudgeAssignmentUncheckedUpdateManyWithoutEventNestedInput
   certificates?: Prisma.CertificateUncheckedUpdateManyWithoutEventNestedInput
+}
+
+export type EventCreateManyEventTypeInput = {
+  id?: string
+  customId: string
+  title: string
+  slug: string
+  shortDescription: string
+  fullDescription: string
+  theme?: string
+  date: string
+  location: string
+  format: $Enums.EventFormat
+  category: string
+  image?: string
+  status?: $Enums.EventStatus
+  deadline: string
+  registrationOpenDate?: Date | string | null
+  registrationCloseDate?: Date | string | null
+  capacity?: number | null
+  fee?: string
+  teamSizeMin?: number
+  teamSizeMax?: number
+  eligibility?: Prisma.EventCreateeligibilityInput | string[]
+  prizePool?: string
+  organizer?: string
+  rules?: string
+  awardsEnabled?: boolean
+  registrationEndDate?: Date | string | null
+  createdById: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type EventUpdateWithoutEventTypeInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  customId?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  shortDescription?: Prisma.StringFieldUpdateOperationsInput | string
+  fullDescription?: Prisma.StringFieldUpdateOperationsInput | string
+  theme?: Prisma.StringFieldUpdateOperationsInput | string
+  date?: Prisma.StringFieldUpdateOperationsInput | string
+  location?: Prisma.StringFieldUpdateOperationsInput | string
+  format?: Prisma.EnumEventFormatFieldUpdateOperationsInput | $Enums.EventFormat
+  category?: Prisma.StringFieldUpdateOperationsInput | string
+  image?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumEventStatusFieldUpdateOperationsInput | $Enums.EventStatus
+  deadline?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationOpenDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  registrationCloseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  fee?: Prisma.StringFieldUpdateOperationsInput | string
+  teamSizeMin?: Prisma.IntFieldUpdateOperationsInput | number
+  teamSizeMax?: Prisma.IntFieldUpdateOperationsInput | number
+  eligibility?: Prisma.EventUpdateeligibilityInput | string[]
+  prizePool?: Prisma.StringFieldUpdateOperationsInput | string
+  organizer?: Prisma.StringFieldUpdateOperationsInput | string
+  rules?: Prisma.StringFieldUpdateOperationsInput | string
+  awardsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  registrationEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  timeline?: Prisma.EventTimelineUpdateManyWithoutEventNestedInput
+  faqs?: Prisma.EventFaqUpdateManyWithoutEventNestedInput
+  categories?: Prisma.EventCategoryUpdateManyWithoutEventNestedInput
+  criteria?: Prisma.EventCriteriaUpdateManyWithoutEventNestedInput
+  stages?: Prisma.EventStageUpdateManyWithoutEventNestedInput
+  awards?: Prisma.EventAwardUpdateManyWithoutEventNestedInput
+  resources?: Prisma.EventResourceUpdateManyWithoutEventNestedInput
+  communityThreads?: Prisma.EventCommunityThreadUpdateManyWithoutEventNestedInput
+  registrations?: Prisma.EventRegistrationUpdateManyWithoutEventNestedInput
+  savedBy?: Prisma.SavedEventUpdateManyWithoutEventNestedInput
+  submissions?: Prisma.SubmissionUpdateManyWithoutEventNestedInput
+  judgeAssignments?: Prisma.JudgeAssignmentUpdateManyWithoutEventNestedInput
+  qaQuestions?: Prisma.QaQuestionUpdateManyWithoutEventNestedInput
+  certificates?: Prisma.CertificateUpdateManyWithoutEventNestedInput
+}
+
+export type EventUncheckedUpdateWithoutEventTypeInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  customId?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  shortDescription?: Prisma.StringFieldUpdateOperationsInput | string
+  fullDescription?: Prisma.StringFieldUpdateOperationsInput | string
+  theme?: Prisma.StringFieldUpdateOperationsInput | string
+  date?: Prisma.StringFieldUpdateOperationsInput | string
+  location?: Prisma.StringFieldUpdateOperationsInput | string
+  format?: Prisma.EnumEventFormatFieldUpdateOperationsInput | $Enums.EventFormat
+  category?: Prisma.StringFieldUpdateOperationsInput | string
+  image?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumEventStatusFieldUpdateOperationsInput | $Enums.EventStatus
+  deadline?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationOpenDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  registrationCloseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  fee?: Prisma.StringFieldUpdateOperationsInput | string
+  teamSizeMin?: Prisma.IntFieldUpdateOperationsInput | number
+  teamSizeMax?: Prisma.IntFieldUpdateOperationsInput | number
+  eligibility?: Prisma.EventUpdateeligibilityInput | string[]
+  prizePool?: Prisma.StringFieldUpdateOperationsInput | string
+  organizer?: Prisma.StringFieldUpdateOperationsInput | string
+  rules?: Prisma.StringFieldUpdateOperationsInput | string
+  awardsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  registrationEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  timeline?: Prisma.EventTimelineUncheckedUpdateManyWithoutEventNestedInput
+  faqs?: Prisma.EventFaqUncheckedUpdateManyWithoutEventNestedInput
+  categories?: Prisma.EventCategoryUncheckedUpdateManyWithoutEventNestedInput
+  criteria?: Prisma.EventCriteriaUncheckedUpdateManyWithoutEventNestedInput
+  stages?: Prisma.EventStageUncheckedUpdateManyWithoutEventNestedInput
+  awards?: Prisma.EventAwardUncheckedUpdateManyWithoutEventNestedInput
+  resources?: Prisma.EventResourceUncheckedUpdateManyWithoutEventNestedInput
+  communityThreads?: Prisma.EventCommunityThreadUncheckedUpdateManyWithoutEventNestedInput
+  registrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutEventNestedInput
+  savedBy?: Prisma.SavedEventUncheckedUpdateManyWithoutEventNestedInput
+  submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutEventNestedInput
+  judgeAssignments?: Prisma.JudgeAssignmentUncheckedUpdateManyWithoutEventNestedInput
+  qaQuestions?: Prisma.QaQuestionUncheckedUpdateManyWithoutEventNestedInput
+  certificates?: Prisma.CertificateUncheckedUpdateManyWithoutEventNestedInput
+}
+
+export type EventUncheckedUpdateManyWithoutEventTypeInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  customId?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  shortDescription?: Prisma.StringFieldUpdateOperationsInput | string
+  fullDescription?: Prisma.StringFieldUpdateOperationsInput | string
+  theme?: Prisma.StringFieldUpdateOperationsInput | string
+  date?: Prisma.StringFieldUpdateOperationsInput | string
+  location?: Prisma.StringFieldUpdateOperationsInput | string
+  format?: Prisma.EnumEventFormatFieldUpdateOperationsInput | $Enums.EventFormat
+  category?: Prisma.StringFieldUpdateOperationsInput | string
+  image?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumEventStatusFieldUpdateOperationsInput | $Enums.EventStatus
+  deadline?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationOpenDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  registrationCloseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  fee?: Prisma.StringFieldUpdateOperationsInput | string
+  teamSizeMin?: Prisma.IntFieldUpdateOperationsInput | number
+  teamSizeMax?: Prisma.IntFieldUpdateOperationsInput | number
+  eligibility?: Prisma.EventUpdateeligibilityInput | string[]
+  prizePool?: Prisma.StringFieldUpdateOperationsInput | string
+  organizer?: Prisma.StringFieldUpdateOperationsInput | string
+  rules?: Prisma.StringFieldUpdateOperationsInput | string
+  awardsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  registrationEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 
@@ -2415,6 +4413,11 @@ export type EventCountOutputType = {
   timeline: number
   faqs: number
   categories: number
+  criteria: number
+  stages: number
+  awards: number
+  resources: number
+  communityThreads: number
   registrations: number
   savedBy: number
   submissions: number
@@ -2427,6 +4430,11 @@ export type EventCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.
   timeline?: boolean | EventCountOutputTypeCountTimelineArgs
   faqs?: boolean | EventCountOutputTypeCountFaqsArgs
   categories?: boolean | EventCountOutputTypeCountCategoriesArgs
+  criteria?: boolean | EventCountOutputTypeCountCriteriaArgs
+  stages?: boolean | EventCountOutputTypeCountStagesArgs
+  awards?: boolean | EventCountOutputTypeCountAwardsArgs
+  resources?: boolean | EventCountOutputTypeCountResourcesArgs
+  communityThreads?: boolean | EventCountOutputTypeCountCommunityThreadsArgs
   registrations?: boolean | EventCountOutputTypeCountRegistrationsArgs
   savedBy?: boolean | EventCountOutputTypeCountSavedByArgs
   submissions?: boolean | EventCountOutputTypeCountSubmissionsArgs
@@ -2464,6 +4472,41 @@ export type EventCountOutputTypeCountFaqsArgs<ExtArgs extends runtime.Types.Exte
  */
 export type EventCountOutputTypeCountCategoriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.EventCategoryWhereInput
+}
+
+/**
+ * EventCountOutputType without action
+ */
+export type EventCountOutputTypeCountCriteriaArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.EventCriteriaWhereInput
+}
+
+/**
+ * EventCountOutputType without action
+ */
+export type EventCountOutputTypeCountStagesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.EventStageWhereInput
+}
+
+/**
+ * EventCountOutputType without action
+ */
+export type EventCountOutputTypeCountAwardsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.EventAwardWhereInput
+}
+
+/**
+ * EventCountOutputType without action
+ */
+export type EventCountOutputTypeCountResourcesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.EventResourceWhereInput
+}
+
+/**
+ * EventCountOutputType without action
+ */
+export type EventCountOutputTypeCountCommunityThreadsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.EventCommunityThreadWhereInput
 }
 
 /**
@@ -2511,6 +4554,7 @@ export type EventCountOutputTypeCountCertificatesArgs<ExtArgs extends runtime.Ty
 
 export type EventSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  customId?: boolean
   title?: boolean
   slug?: boolean
   shortDescription?: boolean
@@ -2523,20 +4567,31 @@ export type EventSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   image?: boolean
   status?: boolean
   deadline?: boolean
+  registrationOpenDate?: boolean
+  registrationCloseDate?: boolean
+  capacity?: boolean
   fee?: boolean
   teamSizeMin?: boolean
   teamSizeMax?: boolean
   eligibility?: boolean
-  sdgs?: boolean
   prizePool?: boolean
   organizer?: boolean
+  rules?: boolean
+  awardsEnabled?: boolean
+  eventTypeId?: boolean
   registrationEndDate?: boolean
   createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  eventType?: boolean | Prisma.Event$eventTypeArgs<ExtArgs>
   timeline?: boolean | Prisma.Event$timelineArgs<ExtArgs>
   faqs?: boolean | Prisma.Event$faqsArgs<ExtArgs>
   categories?: boolean | Prisma.Event$categoriesArgs<ExtArgs>
+  criteria?: boolean | Prisma.Event$criteriaArgs<ExtArgs>
+  stages?: boolean | Prisma.Event$stagesArgs<ExtArgs>
+  awards?: boolean | Prisma.Event$awardsArgs<ExtArgs>
+  resources?: boolean | Prisma.Event$resourcesArgs<ExtArgs>
+  communityThreads?: boolean | Prisma.Event$communityThreadsArgs<ExtArgs>
   registrations?: boolean | Prisma.Event$registrationsArgs<ExtArgs>
   savedBy?: boolean | Prisma.Event$savedByArgs<ExtArgs>
   submissions?: boolean | Prisma.Event$submissionsArgs<ExtArgs>
@@ -2548,6 +4603,7 @@ export type EventSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
 
 export type EventSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  customId?: boolean
   title?: boolean
   slug?: boolean
   shortDescription?: boolean
@@ -2560,21 +4616,28 @@ export type EventSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   image?: boolean
   status?: boolean
   deadline?: boolean
+  registrationOpenDate?: boolean
+  registrationCloseDate?: boolean
+  capacity?: boolean
   fee?: boolean
   teamSizeMin?: boolean
   teamSizeMax?: boolean
   eligibility?: boolean
-  sdgs?: boolean
   prizePool?: boolean
   organizer?: boolean
+  rules?: boolean
+  awardsEnabled?: boolean
+  eventTypeId?: boolean
   registrationEndDate?: boolean
   createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  eventType?: boolean | Prisma.Event$eventTypeArgs<ExtArgs>
 }, ExtArgs["result"]["event"]>
 
 export type EventSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  customId?: boolean
   title?: boolean
   slug?: boolean
   shortDescription?: boolean
@@ -2587,21 +4650,28 @@ export type EventSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   image?: boolean
   status?: boolean
   deadline?: boolean
+  registrationOpenDate?: boolean
+  registrationCloseDate?: boolean
+  capacity?: boolean
   fee?: boolean
   teamSizeMin?: boolean
   teamSizeMax?: boolean
   eligibility?: boolean
-  sdgs?: boolean
   prizePool?: boolean
   organizer?: boolean
+  rules?: boolean
+  awardsEnabled?: boolean
+  eventTypeId?: boolean
   registrationEndDate?: boolean
   createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  eventType?: boolean | Prisma.Event$eventTypeArgs<ExtArgs>
 }, ExtArgs["result"]["event"]>
 
 export type EventSelectScalar = {
   id?: boolean
+  customId?: boolean
   title?: boolean
   slug?: boolean
   shortDescription?: boolean
@@ -2614,24 +4684,35 @@ export type EventSelectScalar = {
   image?: boolean
   status?: boolean
   deadline?: boolean
+  registrationOpenDate?: boolean
+  registrationCloseDate?: boolean
+  capacity?: boolean
   fee?: boolean
   teamSizeMin?: boolean
   teamSizeMax?: boolean
   eligibility?: boolean
-  sdgs?: boolean
   prizePool?: boolean
   organizer?: boolean
+  rules?: boolean
+  awardsEnabled?: boolean
+  eventTypeId?: boolean
   registrationEndDate?: boolean
   createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type EventOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "slug" | "shortDescription" | "fullDescription" | "theme" | "date" | "location" | "format" | "category" | "image" | "status" | "deadline" | "fee" | "teamSizeMin" | "teamSizeMax" | "eligibility" | "sdgs" | "prizePool" | "organizer" | "registrationEndDate" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["event"]>
+export type EventOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "customId" | "title" | "slug" | "shortDescription" | "fullDescription" | "theme" | "date" | "location" | "format" | "category" | "image" | "status" | "deadline" | "registrationOpenDate" | "registrationCloseDate" | "capacity" | "fee" | "teamSizeMin" | "teamSizeMax" | "eligibility" | "prizePool" | "organizer" | "rules" | "awardsEnabled" | "eventTypeId" | "registrationEndDate" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["event"]>
 export type EventInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  eventType?: boolean | Prisma.Event$eventTypeArgs<ExtArgs>
   timeline?: boolean | Prisma.Event$timelineArgs<ExtArgs>
   faqs?: boolean | Prisma.Event$faqsArgs<ExtArgs>
   categories?: boolean | Prisma.Event$categoriesArgs<ExtArgs>
+  criteria?: boolean | Prisma.Event$criteriaArgs<ExtArgs>
+  stages?: boolean | Prisma.Event$stagesArgs<ExtArgs>
+  awards?: boolean | Prisma.Event$awardsArgs<ExtArgs>
+  resources?: boolean | Prisma.Event$resourcesArgs<ExtArgs>
+  communityThreads?: boolean | Prisma.Event$communityThreadsArgs<ExtArgs>
   registrations?: boolean | Prisma.Event$registrationsArgs<ExtArgs>
   savedBy?: boolean | Prisma.Event$savedByArgs<ExtArgs>
   submissions?: boolean | Prisma.Event$submissionsArgs<ExtArgs>
@@ -2640,15 +4721,25 @@ export type EventInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   certificates?: boolean | Prisma.Event$certificatesArgs<ExtArgs>
   _count?: boolean | Prisma.EventCountOutputTypeDefaultArgs<ExtArgs>
 }
-export type EventIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
-export type EventIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type EventIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  eventType?: boolean | Prisma.Event$eventTypeArgs<ExtArgs>
+}
+export type EventIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  eventType?: boolean | Prisma.Event$eventTypeArgs<ExtArgs>
+}
 
 export type $EventPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Event"
   objects: {
+    eventType: Prisma.$EventTypeTaxonomyPayload<ExtArgs> | null
     timeline: Prisma.$EventTimelinePayload<ExtArgs>[]
     faqs: Prisma.$EventFaqPayload<ExtArgs>[]
     categories: Prisma.$EventCategoryPayload<ExtArgs>[]
+    criteria: Prisma.$EventCriteriaPayload<ExtArgs>[]
+    stages: Prisma.$EventStagePayload<ExtArgs>[]
+    awards: Prisma.$EventAwardPayload<ExtArgs>[]
+    resources: Prisma.$EventResourcePayload<ExtArgs>[]
+    communityThreads: Prisma.$EventCommunityThreadPayload<ExtArgs>[]
     registrations: Prisma.$EventRegistrationPayload<ExtArgs>[]
     savedBy: Prisma.$SavedEventPayload<ExtArgs>[]
     submissions: Prisma.$SubmissionPayload<ExtArgs>[]
@@ -2658,6 +4749,7 @@ export type $EventPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
+    customId: string
     title: string
     slug: string
     shortDescription: string
@@ -2670,13 +4762,18 @@ export type $EventPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     image: string
     status: $Enums.EventStatus
     deadline: string
+    registrationOpenDate: Date | null
+    registrationCloseDate: Date | null
+    capacity: number | null
     fee: string
     teamSizeMin: number
     teamSizeMax: number
     eligibility: string[]
-    sdgs: number[]
     prizePool: string
     organizer: string
+    rules: string
+    awardsEnabled: boolean
+    eventTypeId: string | null
     registrationEndDate: Date | null
     createdById: string
     createdAt: Date
@@ -3075,9 +5172,15 @@ readonly fields: EventFieldRefs;
  */
 export interface Prisma__EventClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  eventType<T extends Prisma.Event$eventTypeArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Event$eventTypeArgs<ExtArgs>>): Prisma.Prisma__EventTypeTaxonomyClient<runtime.Types.Result.GetResult<Prisma.$EventTypeTaxonomyPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   timeline<T extends Prisma.Event$timelineArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Event$timelineArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EventTimelinePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   faqs<T extends Prisma.Event$faqsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Event$faqsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EventFaqPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   categories<T extends Prisma.Event$categoriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Event$categoriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EventCategoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  criteria<T extends Prisma.Event$criteriaArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Event$criteriaArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EventCriteriaPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  stages<T extends Prisma.Event$stagesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Event$stagesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EventStagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  awards<T extends Prisma.Event$awardsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Event$awardsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EventAwardPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  resources<T extends Prisma.Event$resourcesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Event$resourcesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EventResourcePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  communityThreads<T extends Prisma.Event$communityThreadsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Event$communityThreadsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EventCommunityThreadPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   registrations<T extends Prisma.Event$registrationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Event$registrationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EventRegistrationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   savedBy<T extends Prisma.Event$savedByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Event$savedByArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SavedEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   submissions<T extends Prisma.Event$submissionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Event$submissionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -3114,6 +5217,7 @@ export interface Prisma__EventClient<T, Null = never, ExtArgs extends runtime.Ty
  */
 export interface EventFieldRefs {
   readonly id: Prisma.FieldRef<"Event", 'String'>
+  readonly customId: Prisma.FieldRef<"Event", 'String'>
   readonly title: Prisma.FieldRef<"Event", 'String'>
   readonly slug: Prisma.FieldRef<"Event", 'String'>
   readonly shortDescription: Prisma.FieldRef<"Event", 'String'>
@@ -3126,13 +5230,18 @@ export interface EventFieldRefs {
   readonly image: Prisma.FieldRef<"Event", 'String'>
   readonly status: Prisma.FieldRef<"Event", 'EventStatus'>
   readonly deadline: Prisma.FieldRef<"Event", 'String'>
+  readonly registrationOpenDate: Prisma.FieldRef<"Event", 'DateTime'>
+  readonly registrationCloseDate: Prisma.FieldRef<"Event", 'DateTime'>
+  readonly capacity: Prisma.FieldRef<"Event", 'Int'>
   readonly fee: Prisma.FieldRef<"Event", 'String'>
   readonly teamSizeMin: Prisma.FieldRef<"Event", 'Int'>
   readonly teamSizeMax: Prisma.FieldRef<"Event", 'Int'>
   readonly eligibility: Prisma.FieldRef<"Event", 'String[]'>
-  readonly sdgs: Prisma.FieldRef<"Event", 'Int[]'>
   readonly prizePool: Prisma.FieldRef<"Event", 'String'>
   readonly organizer: Prisma.FieldRef<"Event", 'String'>
+  readonly rules: Prisma.FieldRef<"Event", 'String'>
+  readonly awardsEnabled: Prisma.FieldRef<"Event", 'Boolean'>
+  readonly eventTypeId: Prisma.FieldRef<"Event", 'String'>
   readonly registrationEndDate: Prisma.FieldRef<"Event", 'DateTime'>
   readonly createdById: Prisma.FieldRef<"Event", 'String'>
   readonly createdAt: Prisma.FieldRef<"Event", 'DateTime'>
@@ -3391,6 +5500,10 @@ export type EventCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extension
    */
   data: Prisma.EventCreateManyInput | Prisma.EventCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EventIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -3461,6 +5574,10 @@ export type EventUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extension
    * Limit how many Events to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EventIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -3527,6 +5644,25 @@ export type EventDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Interna
    * Limit how many Events to delete.
    */
   limit?: number
+}
+
+/**
+ * Event.eventType
+ */
+export type Event$eventTypeArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the EventTypeTaxonomy
+   */
+  select?: Prisma.EventTypeTaxonomySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the EventTypeTaxonomy
+   */
+  omit?: Prisma.EventTypeTaxonomyOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EventTypeTaxonomyInclude<ExtArgs> | null
+  where?: Prisma.EventTypeTaxonomyWhereInput
 }
 
 /**
@@ -3599,6 +5735,126 @@ export type Event$categoriesArgs<ExtArgs extends runtime.Types.Extensions.Intern
   take?: number
   skip?: number
   distinct?: Prisma.EventCategoryScalarFieldEnum | Prisma.EventCategoryScalarFieldEnum[]
+}
+
+/**
+ * Event.criteria
+ */
+export type Event$criteriaArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the EventCriteria
+   */
+  select?: Prisma.EventCriteriaSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the EventCriteria
+   */
+  omit?: Prisma.EventCriteriaOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EventCriteriaInclude<ExtArgs> | null
+  where?: Prisma.EventCriteriaWhereInput
+  orderBy?: Prisma.EventCriteriaOrderByWithRelationInput | Prisma.EventCriteriaOrderByWithRelationInput[]
+  cursor?: Prisma.EventCriteriaWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.EventCriteriaScalarFieldEnum | Prisma.EventCriteriaScalarFieldEnum[]
+}
+
+/**
+ * Event.stages
+ */
+export type Event$stagesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the EventStage
+   */
+  select?: Prisma.EventStageSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the EventStage
+   */
+  omit?: Prisma.EventStageOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EventStageInclude<ExtArgs> | null
+  where?: Prisma.EventStageWhereInput
+  orderBy?: Prisma.EventStageOrderByWithRelationInput | Prisma.EventStageOrderByWithRelationInput[]
+  cursor?: Prisma.EventStageWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.EventStageScalarFieldEnum | Prisma.EventStageScalarFieldEnum[]
+}
+
+/**
+ * Event.awards
+ */
+export type Event$awardsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the EventAward
+   */
+  select?: Prisma.EventAwardSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the EventAward
+   */
+  omit?: Prisma.EventAwardOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EventAwardInclude<ExtArgs> | null
+  where?: Prisma.EventAwardWhereInput
+  orderBy?: Prisma.EventAwardOrderByWithRelationInput | Prisma.EventAwardOrderByWithRelationInput[]
+  cursor?: Prisma.EventAwardWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.EventAwardScalarFieldEnum | Prisma.EventAwardScalarFieldEnum[]
+}
+
+/**
+ * Event.resources
+ */
+export type Event$resourcesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the EventResource
+   */
+  select?: Prisma.EventResourceSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the EventResource
+   */
+  omit?: Prisma.EventResourceOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EventResourceInclude<ExtArgs> | null
+  where?: Prisma.EventResourceWhereInput
+  orderBy?: Prisma.EventResourceOrderByWithRelationInput | Prisma.EventResourceOrderByWithRelationInput[]
+  cursor?: Prisma.EventResourceWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.EventResourceScalarFieldEnum | Prisma.EventResourceScalarFieldEnum[]
+}
+
+/**
+ * Event.communityThreads
+ */
+export type Event$communityThreadsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the EventCommunityThread
+   */
+  select?: Prisma.EventCommunityThreadSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the EventCommunityThread
+   */
+  omit?: Prisma.EventCommunityThreadOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EventCommunityThreadInclude<ExtArgs> | null
+  where?: Prisma.EventCommunityThreadWhereInput
+  orderBy?: Prisma.EventCommunityThreadOrderByWithRelationInput | Prisma.EventCommunityThreadOrderByWithRelationInput[]
+  cursor?: Prisma.EventCommunityThreadWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.EventCommunityThreadScalarFieldEnum | Prisma.EventCommunityThreadScalarFieldEnum[]
 }
 
 /**

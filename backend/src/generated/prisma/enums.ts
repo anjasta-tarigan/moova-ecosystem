@@ -38,6 +38,34 @@ export const EventFormat = {
 export type EventFormat = (typeof EventFormat)[keyof typeof EventFormat]
 
 
+export const EventStageType = {
+  ABSTRACT: 'ABSTRACT',
+  PAPER: 'PAPER',
+  FINAL: 'FINAL'
+} as const
+
+export type EventStageType = (typeof EventStageType)[keyof typeof EventStageType]
+
+
+export const EventAwardTier = {
+  MAIN: 'MAIN',
+  HONORABLE_MENTION: 'HONORABLE_MENTION'
+} as const
+
+export type EventAwardTier = (typeof EventAwardTier)[keyof typeof EventAwardTier]
+
+
+export const EventResourceType = {
+  GUIDEBOOK: 'GUIDEBOOK',
+  SUBMISSION_TEMPLATE: 'SUBMISSION_TEMPLATE',
+  JUDGING_RUBRIC: 'JUDGING_RUBRIC',
+  RULEBOOK: 'RULEBOOK',
+  OTHER: 'OTHER'
+} as const
+
+export type EventResourceType = (typeof EventResourceType)[keyof typeof EventResourceType]
+
+
 export const SubmissionStatus = {
   DRAFT: 'DRAFT',
   SUBMITTED: 'SUBMITTED',

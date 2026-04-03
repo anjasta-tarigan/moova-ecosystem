@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useMemo } from "react";
-import { Plus } from "lucide-react";
+import { Eye, FolderCog, Plus, RefreshCcw } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { adminApi } from "../../services/api/adminApi";
 import Button from "../../components/Button";
@@ -25,9 +25,12 @@ const AdminEvents: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState("");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
-  const [deleteError, setDeleteError] = useState<string | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [newEventName, setNewEventName] = useState("");
+  const [newEventNameError, setNewEventNameError] = useState<string | null>(
+    null,
+  );
+  const [isCreatingEvent, setIsCreatingEvent] = useState(false);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const [statusTarget, setStatusTarget] = useState<any | null>(null);
   const [statusValue, setStatusValue] = useState<string>("DRAFT");
@@ -68,20 +71,40 @@ const AdminEvents: React.FC = () => {
     fetchEvents();
   }, [fetchEvents]); // use callback fn as dep
 
-  const confirmDelete = async () => {
-    if (!deleteTarget) return;
-    setIsDeleting(true);
-    setDeleteError(null);
+  const validateNewEventName = (value: string) => {
+    const trimmed = value.trim();
+    if (!trimmed) return "Event Name is required";
+    if (trimmed.length < 3) return "Event Name must be at least 3 characters";
+    return null;
+  };
+
+  const handleCreateEvent = async () => {
+    const validationMessage = validateNewEventName(newEventName);
+    setNewEventNameError(validationMessage);
+    if (validationMessage) return;
+
     try {
-      await adminApi.deleteEvent(deleteTarget.id);
-      setDeleteTarget(null);
-      setActionMessage("Event deleted successfully");
+      setIsCreatingEvent(true);
+      const payload = {
+        name: newEventName.trim(),
+        title: newEventName.trim(),
+      };
+      const response = await adminApi.createEvent(payload);
+      const created = response.data?.data ?? response.data;
+      setIsCreateModalOpen(false);
+      setNewEventName("");
+      setNewEventNameError(null);
+      setActionMessage("Event created successfully");
+      if (created?.id) {
+        navigate(`${basePath}/events/${created.id}/edit`);
+        return;
+      }
       fetchEvents();
     } catch (err: any) {
-      const message = err?.response?.data?.message || "Failed to delete event";
-      setDeleteError(message);
+      const message = err?.response?.data?.message || "Failed to create event";
+      setNewEventNameError(message);
     } finally {
-      setIsDeleting(false);
+      setIsCreatingEvent(false);
     }
   };
 
@@ -126,11 +149,14 @@ const AdminEvents: React.FC = () => {
         <h1 className="text-2xl font-bold text-slate-900">Event Management</h1>
         {isSuperAdmin ? (
           <button
-            onClick={() => navigate(`${basePath}/events/new`)}
+            onClick={() => {
+              setIsCreateModalOpen(true);
+              setNewEventNameError(null);
+            }}
             className="flex items-center gap-2 px-4 py-2.5 bg-slate-900 text-white rounded-xl text-sm font-bold hover:bg-black transition-colors"
           >
             <Plus className="w-4 h-4" />
-            Add Event
+            Create New Event
           </button>
         ) : (
           <p className="text-sm text-slate-500">
@@ -210,12 +236,7 @@ const AdminEvents: React.FC = () => {
                     className="border-b border-slate-100 hover:bg-slate-50 transition-colors"
                   >
                     <td className="px-6 py-4">
-                      <span
-                        className="font-medium text-slate-900 cursor-pointer hover:underline"
-                        onClick={() =>
-                          navigate(`${basePath}/events/${event.id}/edit`)
-                        }
-                      >
+                      <span className="font-medium text-slate-900">
                         {event?.title || "-"}
                       </span>
                     </td>
@@ -252,31 +273,36 @@ const AdminEvents: React.FC = () => {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
+                        {isSuperAdmin ? (
+                          <button
+                            onClick={() =>
+                              navigate(`${basePath}/events/${event.id}/edit`)
+                            }
+                            className="inline-flex items-center gap-1 text-xs font-bold text-blue-700 hover:underline"
+                          >
+                            <FolderCog className="h-3.5 w-3.5" />
+                            Manage
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() =>
+                              navigate(`${basePath}/events/${event.id}/edit`)
+                            }
+                            className="inline-flex items-center gap-1 text-xs font-bold text-slate-700 hover:underline"
+                          >
+                            <Eye className="h-3.5 w-3.5" />
+                            View Detail
+                          </button>
+                        )}
                         {isSuperAdmin && (
                           <button
                             onClick={() => openStatusModal(event)}
-                            className="text-xs font-bold text-emerald-600 hover:underline"
+                            className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 hover:underline"
                           >
+                            <RefreshCcw className="h-3.5 w-3.5" />
                             Change Status
                           </button>
                         )}
-                        <button
-                          onClick={() =>
-                            navigate(`${basePath}/events/${event.id}/edit`)
-                          }
-                          className="text-xs font-bold text-blue-600 hover:underline"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => {
-                            setDeleteTarget(event);
-                            setDeleteError(null);
-                          }}
-                          className="text-xs font-bold text-red-600 hover:underline"
-                        >
-                          Delete
-                        </button>
                       </div>
                     </td>
                   </tr>
@@ -313,14 +339,20 @@ const AdminEvents: React.FC = () => {
       )}
 
       <Modal
-        isOpen={Boolean(deleteTarget)}
-        onClose={() => setDeleteTarget(null)}
-        title="Delete Event"
+        isOpen={isCreateModalOpen}
+        onClose={() => {
+          setIsCreateModalOpen(false);
+          setNewEventNameError(null);
+        }}
+        title="Create New Event"
         footer={
           <>
             <Button
               type="button"
-              onClick={() => setDeleteTarget(null)}
+              onClick={() => {
+                setIsCreateModalOpen(false);
+                setNewEventNameError(null);
+              }}
               className="bg-gray-200 text-gray-800"
             >
               Cancel
@@ -328,26 +360,41 @@ const AdminEvents: React.FC = () => {
             <Button
               type="button"
               variant="outline"
-              onClick={confirmDelete}
-              disabled={isDeleting}
+              onClick={handleCreateEvent}
+              disabled={isCreatingEvent}
             >
-              {isDeleting ? "Deleting..." : "Delete"}
+              {isCreatingEvent ? "Creating..." : "Create Event"}
             </Button>
           </>
         }
       >
         <div className="space-y-3">
-          <p className="text-sm text-slate-700">
-            {`This will permanently remove "${deleteTarget?.title || "this event"}".`}
-          </p>
-          <p className="text-sm text-slate-600">
-            Deleting is blocked if the event already has registrations.
-          </p>
-          {deleteError && (
+          <label
+            htmlFor="event-name"
+            className="block text-sm font-semibold text-slate-700"
+          >
+            Event Name
+          </label>
+          <input
+            id="event-name"
+            type="text"
+            value={newEventName}
+            onChange={(event) => {
+              const value = event.target.value;
+              setNewEventName(value);
+              setNewEventNameError(validateNewEventName(value));
+            }}
+            placeholder="Example: GIVA Deep Tech Summit 2026"
+            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
+          />
+          {newEventNameError && (
             <div className="rounded-md bg-red-50 border border-red-100 text-red-700 px-3 py-2 text-sm">
-              {deleteError}
+              {newEventNameError}
             </div>
           )}
+          <p className="text-xs text-slate-500">
+            Slug and permanent event ID will be generated automatically.
+          </p>
         </div>
       </Modal>
 

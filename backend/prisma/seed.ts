@@ -164,6 +164,7 @@ async function main() {
     where: { slug: "olimpiade-sains-dan-teknologi-nasional-2025" },
     update: {},
     create: {
+      customId: `GIVA-seed2025-${new Date().getUTCFullYear()}`,
       title: "Olimpiade Sains dan Teknologi Nasional 2025",
       slug: "olimpiade-sains-dan-teknologi-nasional-2025",
       shortDescription:
@@ -178,13 +179,16 @@ async function main() {
       image: "",
       status: "OPEN",
       deadline: "2025-06-30",
+      registrationOpenDate: new Date("2025-05-01T00:00:00.000Z"),
+      registrationCloseDate: new Date("2025-06-30T23:59:59.999Z"),
       fee: "Free",
       teamSizeMin: 1,
       teamSizeMax: 5,
       eligibility: ["Junior High", "Senior High", "College"],
-      sdgs: [4, 9],
       prizePool: "Prize pool IDR 100,000,000",
       organizer: "GIVA",
+      rules:
+        "All submissions must be original and comply with ethical standards.",
       createdById: admin.id,
       timeline: {
         create: [

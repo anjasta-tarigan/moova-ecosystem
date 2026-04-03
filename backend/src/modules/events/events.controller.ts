@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { paginated, error, success } from "../../utils/response";
 import * as eventsService from "./events.service";
+import { subscribeEventUpdates } from "./events.realtime";
 
 const ACCESS_TOKEN_SECRET =
   process.env.ACCESS_TOKEN_SECRET || "dev_access_secret";
@@ -24,6 +25,12 @@ const mapError = (err: any, res: Response) => {
     return error(res, "Already registered to this event", 400);
   if (err?.message === "Not team member")
     return error(res, "Team not found or not a member", 403);
+  if (err?.message === "Thread title too short")
+    return error(res, "Thread title must be at least 5 characters", 400);
+  if (err?.message === "Thread content too short")
+    return error(res, "Thread content must be at least 5 characters", 400);
+  if (err?.message === "Reply content too short")
+    return error(res, "Reply content must be at least 2 characters", 400);
   return error(res, "Internal server error", 500);
 };
 
@@ -107,6 +114,20 @@ export const getEventDetail = async (req: Request, res: Response) => {
     const authContext = resolveAuthContext(req);
     const event = await eventsService.getEventById(
       req.params.id,
+      authContext.role,
+      authContext.role === "STUDENT" ? authContext.userId : undefined,
+    );
+    return success(res, event);
+  } catch (err) {
+    return mapError(err, res);
+  }
+};
+
+export const getEventDetailBySlug = async (req: Request, res: Response) => {
+  try {
+    const authContext = resolveAuthContext(req);
+    const event = await eventsService.getEventBySlug(
+      req.params.slug,
       authContext.role,
       authContext.role === "STUDENT" ? authContext.userId : undefined,
     );
@@ -232,4 +253,119 @@ export const unbookmarkEvent = async (req: Request, res: Response) => {
   } catch (err) {
     return mapError(err, res);
   }
+};
+
+export const getCommunityThreads = async (req: Request, res: Response) => {
+  try {
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 20;
+    const sort = req.query.sort === "latest" ? "latest" : "top";
+    const result = await eventsService.listCommunityThreads(
+      req.params.id,
+      page,
+      limit,
+      sort,
+    );
+    return paginated(res, result.data, result.total, result.page, result.limit);
+  } catch (err) {
+    return mapError(err, res);
+  }
+};
+
+export const createCommunityThread = async (req: Request, res: Response) => {
+  try {
+    const thread = await eventsService.createCommunityThread(
+      req.params.id,
+      req.user!.id,
+      {
+        title: req.body?.title,
+        content: req.body?.content,
+      },
+    );
+    return success(res, thread, "Thread created", 201);
+  } catch (err) {
+    return mapError(err, res);
+  }
+};
+
+export const getCommunityMessages = async (req: Request, res: Response) => {
+  try {
+    const messages = await eventsService.listCommunityMessages(
+      req.params.threadId,
+    );
+    return success(res, messages);
+  } catch (err) {
+    return mapError(err, res);
+  }
+};
+
+export const createCommunityMessage = async (req: Request, res: Response) => {
+  try {
+    const message = await eventsService.createCommunityMessage(
+      req.params.threadId,
+      req.user!.id,
+      req.body?.content,
+    );
+    return success(res, message, "Reply created", 201);
+  } catch (err) {
+    return mapError(err, res);
+  }
+};
+
+export const toggleCommunityThreadLike = async (
+  req: Request,
+  res: Response,
+) => {
+  try {
+    const result = await eventsService.toggleCommunityThreadLike(
+      req.params.threadId,
+      req.user!.id,
+    );
+    return success(res, result);
+  } catch (err) {
+    return mapError(err, res);
+  }
+};
+
+export const toggleCommunityMessageLike = async (
+  req: Request,
+  res: Response,
+) => {
+  try {
+    const result = await eventsService.toggleCommunityMessageLike(
+      req.params.messageId,
+      req.user!.id,
+    );
+    return success(res, result);
+  } catch (err) {
+    return mapError(err, res);
+  }
+};
+
+export const getEventRealtimeStream = async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+  res.flushHeaders?.();
+
+  const push = (payload: any) => {
+    res.write(`event: event-update\n`);
+    res.write(`data: ${JSON.stringify(payload)}\n\n`);
+  };
+
+  push({ type: "connected", eventId: id });
+
+  const unsubscribe = subscribeEventUpdates(id, push);
+  const heartbeat = setInterval(() => {
+    res.write(`event: heartbeat\n`);
+    res.write(`data: {"ok":true}\n\n`);
+  }, 25000);
+
+  req.on("close", () => {
+    clearInterval(heartbeat);
+    unsubscribe();
+    res.end();
+  });
 };

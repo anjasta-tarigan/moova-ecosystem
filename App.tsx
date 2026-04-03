@@ -29,6 +29,9 @@ const DashboardEventDetail = lazy(() => import("./pages/DashboardEventDetail"));
 const DashboardWorkspaceEntry = lazy(
   () => import("./pages/DashboardWorkspaceEntry"),
 );
+const DashboardEventCommunity = lazy(
+  () => import("./pages/DashboardEventCommunity"),
+);
 const DashboardTeam = lazy(() => import("./pages/DashboardTeam"));
 const DashboardSubmission = lazy(() => import("./pages/DashboardSubmission"));
 const DashboardCertificates = lazy(
@@ -45,7 +48,6 @@ const JudgeCertificates = lazy(() => import("./pages/JudgeCertificates"));
 const AdminLayout = lazy(() => import("./layouts/AdminLayout"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const AdminEvents = lazy(() => import("./pages/admin/AdminEvents"));
-const AdminEventForm = lazy(() => import("./pages/admin/AdminEventForm"));
 const AdminSubmissions = lazy(() => import("./pages/admin/AdminSubmissions"));
 const AdminSiswa = lazy(() => import("./pages/admin/AdminSiswa"));
 const AdminSiswaDetail = lazy(() => import("./pages/admin/AdminSiswaDetail"));
@@ -67,8 +69,9 @@ const SuperAdminUsers = lazy(
 const SuperAdminJudgeAssignments = lazy(
   () => import("./pages/superadmin/SuperAdminJudgeAssignments"),
 );
-const SuperAdminEventForm = lazy(
-  () => import("./pages/superadmin/SuperAdminEventForm"),
+const ManageEvent = lazy(() => import("./pages/superadmin/ManageEvent"));
+const ManageEventCardForm = lazy(
+  () => import("./pages/superadmin/ManageEventCardForm"),
 );
 
 // Helper to scroll to top on route change
@@ -240,6 +243,14 @@ const App: React.FC = () => {
                 }
               />
               <Route
+                path="workspace/:slug/community"
+                element={
+                  <RoleGuard allowedRoles={["STUDENT"]}>
+                    <DashboardEventCommunity />
+                  </RoleGuard>
+                }
+              />
+              <Route
                 path="event/list"
                 element={<Navigate to="/dashboard/events" replace />}
               />
@@ -306,7 +317,11 @@ const App: React.FC = () => {
             <Route path="/admin" element={<AdminGuard />}>
               <Route index element={<AdminDashboard />} />
               <Route path="events" element={<AdminEvents />} />
-              <Route path="events/:id/edit" element={<AdminEventForm />} />
+              <Route path="events/:id/edit" element={<ManageEvent />} />
+              <Route
+                path="events/:id/edit/:cardKey"
+                element={<ManageEventCardForm />}
+              />
               <Route path="submissions" element={<AdminSubmissions />} />
               <Route path="siswa" element={<AdminSiswa />} />
               <Route path="siswa/:id" element={<AdminSiswaDetail />} />
@@ -332,8 +347,15 @@ const App: React.FC = () => {
 
               {/* Mirror semua admin pages di bawah /superadmin/* */}
               <Route path="events" element={<AdminEvents />} />
-              <Route path="events/new" element={<SuperAdminEventForm />} />
-              <Route path="events/:id/edit" element={<SuperAdminEventForm />} />
+              <Route
+                path="events/new"
+                element={<Navigate to="/superadmin/events" replace />}
+              />
+              <Route path="events/:id/edit" element={<ManageEvent />} />
+              <Route
+                path="events/:id/edit/:cardKey"
+                element={<ManageEventCardForm />}
+              />
               <Route path="submissions" element={<AdminSubmissions />} />
               <Route path="siswa" element={<AdminSiswa />} />
               <Route path="siswa/:id" element={<AdminSiswaDetail />} />

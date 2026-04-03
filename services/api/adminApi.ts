@@ -12,8 +12,50 @@ export const adminApi = {
     api.post("/api/admin/events", data),
   updateEvent: (id: string, data: Record<string, any>) =>
     api.put(`/api/admin/events/${id}`, data),
+  getManageEvent: (id: string) => api.get(`/api/admin/events/${id}/manage`),
+  patchEventConfig: (id: string, data: Record<string, any>) =>
+    api.patch(`/api/admin/events/${id}/config`, data),
+  patchEventFaqs: (id: string, data: Record<string, any>) =>
+    api.patch(`/api/admin/events/${id}/faqs`, data),
+  patchEventCriteria: (id: string, data: Record<string, any>) =>
+    api.patch(`/api/admin/events/${id}/criteria`, data),
+  patchEventTimeline: (id: string, data: Record<string, any>) =>
+    api.patch(`/api/admin/events/${id}/timeline`, data),
+  patchEventRules: (id: string, data: Record<string, any>) =>
+    api.patch(`/api/admin/events/${id}/rules`, data),
+  patchEventResources: (id: string, data: Record<string, any>) =>
+    api.patch(`/api/admin/events/${id}/resources`, data),
+  patchEventJudges: (id: string, data: Record<string, any>) =>
+    api.patch(`/api/admin/events/${id}/judges`, data),
+  patchEventStages: (id: string, data: Record<string, any>) =>
+    api.patch(`/api/admin/events/${id}/stages`, data),
+  patchEventAwards: (id: string, data: Record<string, any>) =>
+    api.patch(`/api/admin/events/${id}/awards`, data),
+  getEventTaxonomies: () => api.get("/api/admin/events/taxonomies"),
+  createEventTypeTaxonomy: (name: string) =>
+    api.post("/api/admin/events/taxonomies/types", { name }),
+  createEventEligibilityTaxonomy: (name: string) =>
+    api.post("/api/admin/events/taxonomies/eligibilities", { name }),
+  // Backward-compatible aliases used by older admin pages
+  getEventFinalization: (id: string) =>
+    api.get(`/api/admin/events/${id}/manage`),
+  updateEventStages: (id: string, stages: any[]) =>
+    api.patch(`/api/admin/events/${id}/stages`, { stages }),
+  updateEventCriteria: (id: string, criteria: any[]) =>
+    api.patch(`/api/admin/events/${id}/criteria`, { criteria }),
+  updateEventAwards: (id: string, awards: any[]) =>
+    api.patch(`/api/admin/events/${id}/awards`, {
+      awardsEnabled: true,
+      awards,
+    }),
+  updateEventResources: (id: string, resources: any[]) =>
+    api.patch(`/api/admin/events/${id}/resources`, { resources }),
   uploadEventBanner: (data: FormData) =>
     api.post("/api/admin/events/banner", data, {
+      headers: { "Content-Type": "multipart/form-data" },
+    }),
+  uploadEventResources: (data: FormData) =>
+    api.post("/api/admin/events/resources/upload", data, {
       headers: { "Content-Type": "multipart/form-data" },
     }),
   updateEventStatus: (id: string, status: string) =>

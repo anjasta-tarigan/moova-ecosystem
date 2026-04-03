@@ -1,4 +1,10 @@
 import prisma from "../../config/database";
+import { EventStageType, JudgingStage } from "../../generated/prisma/enums";
+import {
+  getStageByType,
+  hasStageDeadlinePassed,
+  isNowWithinStage,
+} from "../events/event-lifecycle";
 
 const ensureLeader = async (teamId: string, userId: string) => {
   const membership = await prisma.teamMember.findFirst({
@@ -6,6 +12,64 @@ const ensureLeader = async (teamId: string, userId: string) => {
   });
   if (!membership) throw new Error("Not team member");
   if (membership.role !== "LEADER") throw new Error("Not team leader");
+};
+
+const resolveStageType = (stage: string): EventStageType => {
+  const normalized = String(stage || "ABSTRACT").toUpperCase();
+  if (normalized === JudgingStage.ABSTRACT) return EventStageType.ABSTRACT;
+  if (normalized === JudgingStage.PAPER) return EventStageType.PAPER;
+  if (normalized === JudgingStage.FINAL) return EventStageType.FINAL;
+
+  const err: any = new Error("Stage not configured");
+  err.status = 403;
+  throw err;
+};
+
+const ensureSubmissionStageWritable = async (
+  eventId: string,
+  stage: string,
+  opts?: { allowMissingStageConfig?: boolean },
+) => {
+  const stages = await prisma.eventStage.findMany({
+    where: { eventId },
+    orderBy: { startAt: "asc" },
+  });
+
+  if (!stages.length && opts?.allowMissingStageConfig) {
+    return;
+  }
+
+  if (!stages.length) {
+    const err: any = new Error("Stage configuration is missing");
+    err.status = 403;
+    throw err;
+  }
+
+  const stageType = resolveStageType(stage);
+  const targetStage = getStageByType(stages as any, stageType);
+
+  if (!targetStage) {
+    const err: any = new Error("Stage not configured");
+    err.status = 403;
+    throw err;
+  }
+
+  const now = new Date();
+
+  if (now.getTime() < targetStage.startAt.getTime()) {
+    const err: any = new Error("Stage not started");
+    err.status = 403;
+    throw err;
+  }
+
+  if (
+    !isNowWithinStage(targetStage as any, now) ||
+    hasStageDeadlinePassed(targetStage as any, now)
+  ) {
+    const err: any = new Error("Stage deadline passed");
+    err.status = 403;
+    throw err;
+  }
 };
 
 export const listMySubmissions = async (userId: string) => {
@@ -41,6 +105,13 @@ export const getSubmission = async (id: string, userId: string) => {
 
 export const createSubmission = async (userId: string, data: any) => {
   await ensureLeader(data.teamId, userId);
+  await ensureSubmissionStageWritable(
+    data.eventId,
+    data.currentStage || "ABSTRACT",
+    {
+      allowMissingStageConfig: true,
+    },
+  );
   const registration = await prisma.eventRegistration.findUnique({
     where: { userId_eventId: { userId, eventId: data.eventId } },
   });
@@ -67,6 +138,11 @@ export const updateSubmission = async (
     throw err;
   }
   if (submission.status !== "DRAFT") throw new Error("Cannot edit");
+  await ensureSubmissionStageWritable(
+    submission.eventId,
+    data.currentStage || submission.currentStage,
+    { allowMissingStageConfig: true },
+  );
   await ensureLeader(submission.teamId, userId);
   return prisma.submission.update({ where: { id }, data });
 };
@@ -89,6 +165,11 @@ export const addFile = async (
     (m: any) => m.userId === userId,
   );
   if (!isMember) throw new Error("Not team member");
+  await ensureSubmissionStageWritable(
+    submission.eventId,
+    submission.currentStage,
+    { allowMissingStageConfig: true },
+  );
   if (submission.status !== "DRAFT" && submission.status !== "SUBMITTED") {
     throw new Error("Cannot upload file");
   }
@@ -140,6 +221,11 @@ export const submit = async (
     throw err;
   }
   await ensureLeader(submission.teamId, userId);
+  await ensureSubmissionStageWritable(
+    submission.eventId,
+    submission.currentStage,
+    { allowMissingStageConfig: true },
+  );
   if (submission.status !== "DRAFT") throw new Error("Cannot submit");
   if (!consentGiven) throw new Error("Consent required");
   if (submission.files.length === 0) throw new Error("File required");

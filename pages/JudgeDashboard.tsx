@@ -46,8 +46,12 @@ const JudgeDashboard: React.FC = () => {
           ? true
           : (a.status || "").toUpperCase() === filter.toUpperCase();
 
-      const categoryName = (a.categoryName || "").toLowerCase();
-      const eventTitle = (a.eventTitle || "").toLowerCase();
+      const categoryName = (
+        a.categoryName ||
+        a.category?.name ||
+        ""
+      ).toLowerCase();
+      const eventTitle = (a.eventTitle || a.event?.title || "").toLowerCase();
       const searchLower = (search || "").toLowerCase();
 
       const matchSearch = search
@@ -61,7 +65,7 @@ const JudgeDashboard: React.FC = () => {
   const groupedAssignments = useMemo(() => {
     return filteredAssignments.reduce(
       (acc: Record<string, any[]>, curr: any) => {
-        const key = curr?.eventTitle || "Unknown Event";
+        const key = curr?.eventTitle || curr?.event?.title || "Unknown Event";
         if (!acc[key]) acc[key] = [];
         acc[key].push(curr);
         return acc;
@@ -71,12 +75,13 @@ const JudgeDashboard: React.FC = () => {
   }, [filteredAssignments]);
 
   const getStageLabel = (stage: string) => {
-    switch (stage) {
-      case "abstract":
+    const normalized = (stage || "").toUpperCase();
+    switch (normalized) {
+      case "ABSTRACT":
         return "Phase 1: Abstract";
-      case "paper":
+      case "PAPER":
         return "Phase 2: Full Paper & Poster";
-      case "final":
+      case "FINAL":
         return "Phase 3: Final Presentation";
       default:
         return stage;

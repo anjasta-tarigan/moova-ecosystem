@@ -5,6 +5,18 @@ import sharp from "sharp";
 import { error, paginated, success } from "../../utils/response";
 import * as adminService from "./admin.service";
 
+const resolveResourceType = (mimeType: string) => {
+  const normalized = String(mimeType || "").toLowerCase();
+  if (normalized.includes("pdf")) return "PDF";
+  if (normalized.includes("word")) return "DOC";
+  if (normalized.includes("presentation")) return "PPT";
+  if (normalized.includes("sheet") || normalized.includes("excel"))
+    return "XLS";
+  if (normalized.includes("zip")) return "ZIP";
+  if (normalized.includes("image")) return "IMAGE";
+  return "OTHER";
+};
+
 const mapError = (err: any, res: Response) => {
   if (err?.status === 400 || err?.code === "VALIDATION_ERROR")
     return error(res, err?.message || "Invalid request", 400);
@@ -41,6 +53,149 @@ export const createEvent = async (req: Request, res: Response) => {
   try {
     const event = await adminService.createEvent(req.body, req.user!.id);
     return success(res, event, "Event created", 201);
+  } catch (err) {
+    return mapError(err, res);
+  }
+};
+
+export const getManageEvent = async (req: Request, res: Response) => {
+  try {
+    const event = await adminService.getManageEvent(req.params.id);
+    return success(res, event);
+  } catch (err) {
+    return mapError(err, res);
+  }
+};
+
+export const updateEventConfiguration = async (req: Request, res: Response) => {
+  try {
+    const event = await adminService.updateEventConfiguration(
+      req.params.id,
+      req.body,
+    );
+    return success(res, event);
+  } catch (err) {
+    return mapError(err, res);
+  }
+};
+
+export const replaceEventFaqs = async (req: Request, res: Response) => {
+  try {
+    const event = await adminService.replaceEventFaqs(req.params.id, req.body);
+    return success(res, event);
+  } catch (err) {
+    return mapError(err, res);
+  }
+};
+
+export const replaceEventCriteria = async (req: Request, res: Response) => {
+  try {
+    const event = await adminService.replaceEventCriteria(
+      req.params.id,
+      req.body,
+    );
+    return success(res, event);
+  } catch (err) {
+    return mapError(err, res);
+  }
+};
+
+export const replaceEventTimeline = async (req: Request, res: Response) => {
+  try {
+    const event = await adminService.replaceEventTimeline(
+      req.params.id,
+      req.body,
+    );
+    return success(res, event);
+  } catch (err) {
+    return mapError(err, res);
+  }
+};
+
+export const updateEventRules = async (req: Request, res: Response) => {
+  try {
+    const event = await adminService.updateEventRules(req.params.id, req.body);
+    return success(res, event);
+  } catch (err) {
+    return mapError(err, res);
+  }
+};
+
+export const replaceEventResources = async (req: Request, res: Response) => {
+  try {
+    const event = await adminService.replaceEventResources(
+      req.params.id,
+      req.body,
+    );
+    return success(res, event);
+  } catch (err) {
+    return mapError(err, res);
+  }
+};
+
+export const replaceEventJudges = async (req: Request, res: Response) => {
+  try {
+    const event = await adminService.replaceEventJudges(
+      req.params.id,
+      req.body,
+    );
+    return success(res, event);
+  } catch (err) {
+    return mapError(err, res);
+  }
+};
+
+export const replaceEventStages = async (req: Request, res: Response) => {
+  try {
+    const event = await adminService.replaceEventStages(
+      req.params.id,
+      req.body,
+    );
+    return success(res, event);
+  } catch (err) {
+    return mapError(err, res);
+  }
+};
+
+export const replaceEventAwards = async (req: Request, res: Response) => {
+  try {
+    const event = await adminService.replaceEventAwards(
+      req.params.id,
+      req.body,
+    );
+    return success(res, event);
+  } catch (err) {
+    return mapError(err, res);
+  }
+};
+
+export const listEventTaxonomies = async (_req: Request, res: Response) => {
+  try {
+    const payload = await adminService.listEventTaxonomies();
+    return success(res, payload);
+  } catch (err) {
+    return mapError(err, res);
+  }
+};
+
+export const createEventTypeTaxonomy = async (req: Request, res: Response) => {
+  try {
+    const payload = await adminService.createEventTypeTaxonomy(req.body?.name);
+    return success(res, payload, "Event type created", 201);
+  } catch (err) {
+    return mapError(err, res);
+  }
+};
+
+export const createEventEligibilityTaxonomy = async (
+  req: Request,
+  res: Response,
+) => {
+  try {
+    const payload = await adminService.createEventEligibilityTaxonomy(
+      req.body?.name,
+    );
+    return success(res, payload, "Eligibility category created", 201);
   } catch (err) {
     return mapError(err, res);
   }
@@ -170,6 +325,60 @@ export const uploadEventBanner = async (req: Request, res: Response) => {
   } catch (err: any) {
     if (err?.message?.includes("File too large"))
       return error(res, "Banner exceeds 2MB limit", 413);
+    return mapError(err, res);
+  }
+};
+
+export const uploadEventResources = async (req: Request, res: Response) => {
+  try {
+    const files = (req.files as Express.Multer.File[]) || [];
+    if (!files.length) return error(res, "No files uploaded", 400);
+
+    const titlesInput = req.body?.titles;
+    const typesInput = req.body?.types;
+    const titles = Array.isArray(titlesInput)
+      ? titlesInput
+      : typeof titlesInput === "string"
+        ? [titlesInput]
+        : [];
+    const types = Array.isArray(typesInput)
+      ? typesInput
+      : typeof typesInput === "string"
+        ? [typesInput]
+        : [];
+
+    const resourceDir = path.join(
+      __dirname,
+      "../../../uploads/events/resources",
+    );
+    fs.mkdirSync(resourceDir, { recursive: true });
+
+    const uploaded = files.map((file, index) => {
+      const extension = path.extname(file.originalname || "") || ".bin";
+      const filename = `resource-${Date.now()}-${Math.random().toString(36).slice(2, 8)}${extension}`;
+      const fullPath = path.join(resourceDir, filename);
+      fs.writeFileSync(fullPath, file.buffer);
+
+      const userTitle = String(titles[index] || "").trim();
+      const userType = String(types[index] || "")
+        .trim()
+        .toUpperCase();
+
+      return {
+        title: userTitle || path.parse(file.originalname || filename).name,
+        fileName: file.originalname || filename,
+        url: `/uploads/events/resources/${filename}`,
+        mimeType: file.mimetype || "",
+        sizeBytes: file.size || null,
+        type: userType || resolveResourceType(file.mimetype),
+      };
+    });
+
+    return success(res, { files: uploaded }, "Resources uploaded", 201);
+  } catch (err: any) {
+    if (err?.code === "LIMIT_FILE_SIZE") {
+      return error(res, "Resource file exceeds 25MB limit", 413);
+    }
     return mapError(err, res);
   }
 };

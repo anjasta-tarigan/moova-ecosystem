@@ -32,6 +32,8 @@ import { eventsApi } from "../services/api/eventsApi";
 import { formatDate } from "../lib/utils";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { useAuthContext } from "../contexts/AuthContext";
+import { useEventRealtime } from "../hooks/useEventRealtime";
+import AuthActionModal from "../components/AuthActionModal";
 
 type ApiTimeline = {
   id: string;
@@ -115,6 +117,8 @@ const EventDetailPage: React.FC = () => {
   const [isBookmarkPending, setIsBookmarkPending] = useState(false);
   const [copied, setCopied] = useState(false);
   const [activeRuleTab, setActiveRuleTab] = useState(0);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authActionLabel, setAuthActionLabel] = useState("this action");
 
   // Modal State
   const [selectedJudge, setSelectedJudge] = useState<Judge | null>(null);
@@ -189,13 +193,18 @@ const EventDetailPage: React.FC = () => {
     fetchQuestions();
   }, [id, fetchEvent, fetchQuestions]);
 
-  useEffect(() => {
-    const intervalId = window.setInterval(() => {
+  const handleRealtimeUpdate = useCallback(
+    (payload: { type?: string }) => {
+      if (!payload?.type) return;
       void fetchEvent({ silent: true });
-    }, 15000);
+      if (payload.type.startsWith("event.community.")) {
+        void fetchQuestions();
+      }
+    },
+    [fetchEvent, fetchQuestions],
+  );
 
-    return () => window.clearInterval(intervalId);
-  }, [fetchEvent]);
+  useEventRealtime(id, handleRealtimeUpdate, Boolean(id));
 
   const registrations =
     event?.totalParticipants ?? event?._count?.registrations ?? 0;
@@ -305,7 +314,8 @@ const EventDetailPage: React.FC = () => {
   const handleRegister = async () => {
     if (!id) return;
     if (!user) {
-      navigate("/login");
+      setAuthActionLabel("event registration");
+      setIsAuthModalOpen(true);
       return;
     }
     if (user.role !== "STUDENT") {
@@ -342,7 +352,8 @@ const EventDetailPage: React.FC = () => {
   const handlePostQuestion = async () => {
     if (!id || !newQuestion.trim()) return;
     if (!user) {
-      navigate("/login");
+      setAuthActionLabel("posting questions");
+      setIsAuthModalOpen(true);
       return;
     }
     try {
@@ -360,7 +371,8 @@ const EventDetailPage: React.FC = () => {
   const handleToggleUpvote = async (questionId: string) => {
     if (!id) return;
     if (!user) {
-      navigate("/login");
+      setAuthActionLabel("upvoting");
+      setIsAuthModalOpen(true);
       return;
     }
     try {
@@ -388,7 +400,8 @@ const EventDetailPage: React.FC = () => {
     if (!event || isBookmarkPending) return;
 
     if (!user) {
-      navigate("/login");
+      setAuthActionLabel("saving events");
+      setIsAuthModalOpen(true);
       return;
     }
 
@@ -972,7 +985,10 @@ const EventDetailPage: React.FC = () => {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => navigate("/login")}
+                        onClick={() => {
+                          setAuthActionLabel("community participation");
+                          setIsAuthModalOpen(true);
+                        }}
                       >
                         Log In
                       </Button>
@@ -1380,6 +1396,14 @@ const EventDetailPage: React.FC = () => {
           </div>
         </div>
       )}
+
+      <AuthActionModal
+        isOpen={isAuthModalOpen}
+        actionLabel={authActionLabel}
+        onClose={() => setIsAuthModalOpen(false)}
+        onLogin={() => navigate("/login")}
+        onJoin={() => navigate("/join")}
+      />
     </div>
   );
 };

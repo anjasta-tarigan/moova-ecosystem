@@ -1,4 +1,7 @@
 import prisma from "../../config/database";
+import { EventStatus } from "../../generated/prisma/enums";
+import { resolveComputedEventStatus, toUtcDayEnd } from "./event-lifecycle";
+import { publishEventUpdate } from "./events.realtime";
 
 const EVENT_STATUSES = ["DRAFT", "OPEN", "UPCOMING", "CLOSED"] as const;
 const PUBLIC_EVENT_STATUSES = ["OPEN", "UPCOMING", "CLOSED"] as const;
@@ -13,6 +16,7 @@ const parsePagination = (page?: number, limit?: number) => {
 
 const baseListSelect = {
   id: true,
+  customId: true,
   title: true,
   slug: true,
   shortDescription: true,
@@ -23,7 +27,10 @@ const baseListSelect = {
   category: true,
   image: true,
   status: true,
+  registrationOpenDate: true,
+  registrationCloseDate: true,
   registrationEndDate: true,
+  capacity: true,
   fee: true,
   teamSizeMin: true,
   teamSizeMax: true,
@@ -35,8 +42,54 @@ const eventDetailInclude = {
   timeline: { orderBy: { order: "asc" as const } },
   faqs: { orderBy: { order: "asc" as const } },
   categories: { select: { id: true, name: true, description: true } },
+  criteria: { orderBy: { order: "asc" as const } },
+  resources: { orderBy: { createdAt: "desc" as const } },
+  stages: { orderBy: { startAt: "asc" as const } },
+  communityThreads: {
+    orderBy: { viewCount: "desc" as const },
+    take: 5,
+    include: {
+      author: { select: { id: true, fullName: true, profile: true } },
+      _count: { select: { likes: true, messages: true } },
+    },
+  },
   _count: { select: { registrations: true, submissions: true } },
 } as const;
+
+const withComputedStatus = <
+  T extends {
+    status: string;
+    deadline: string;
+    registrationOpenDate?: Date | null;
+    registrationCloseDate?: Date | null;
+    registrationEndDate?: Date | null;
+    capacity?: number | null;
+    _count?: { registrations?: number };
+  },
+>(
+  event: T,
+) => {
+  const participantCount = event._count?.registrations ?? 0;
+  const computedStatus = resolveComputedEventStatus({
+    persistedStatus: event.status,
+    registrationOpenDate: event.registrationOpenDate,
+    registrationCloseDate: event.registrationCloseDate,
+    deadline: event.deadline,
+    capacity: event.capacity,
+    participantCount,
+  });
+
+  const registrationCloseDate =
+    event.registrationCloseDate ||
+    event.registrationEndDate ||
+    toUtcDayEnd(event.deadline);
+
+  return {
+    ...event,
+    status: computedStatus,
+    registrationCloseDate,
+  };
+};
 
 const buildCatalogWhere = (
   query: any,
@@ -71,30 +124,23 @@ const buildCatalogWhere = (
 
 const parseRegistrationEndDate = (
   deadline: string,
+  registrationCloseDate?: Date | null,
   registrationEndDate?: Date | null,
 ) => {
+  if (registrationCloseDate) return registrationCloseDate;
   if (registrationEndDate) return registrationEndDate;
 
-  const normalizedDeadline = (deadline || "").trim();
-  const dateOnlyMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(normalizedDeadline);
-
-  if (dateOnlyMatch) {
-    const year = Number(dateOnlyMatch[1]);
-    const month = Number(dateOnlyMatch[2]) - 1;
-    const day = Number(dateOnlyMatch[3]);
-    return new Date(Date.UTC(year, month, day, 23, 59, 59, 999));
-  }
-
-  const parsed = new Date(normalizedDeadline);
-  return Number.isNaN(parsed.getTime()) ? null : parsed;
+  return toUtcDayEnd(deadline);
 };
 
 const hasRegistrationDeadlinePassed = (event: {
   deadline: string;
+  registrationCloseDate?: Date | null;
   registrationEndDate?: Date | null;
 }) => {
   const endDate = parseRegistrationEndDate(
     event.deadline,
+    event.registrationCloseDate,
     event.registrationEndDate,
   );
   if (!endDate) return false;
@@ -104,9 +150,20 @@ const hasRegistrationDeadlinePassed = (event: {
 const isRegistrationOpen = (event: {
   status: string;
   deadline: string;
+  registrationCloseDate?: Date | null;
   registrationEndDate?: Date | null;
 }) => {
-  if (event.status !== "OPEN") return false;
+  if (String(event.status).toUpperCase() !== EventStatus.OPEN) return false;
+  return !hasRegistrationDeadlinePassed(event);
+};
+
+const isPreRegistrationOpen = (event: {
+  status: string;
+  deadline: string;
+  registrationCloseDate?: Date | null;
+  registrationEndDate?: Date | null;
+}) => {
+  if (String(event.status).toUpperCase() !== EventStatus.UPCOMING) return false;
   return !hasRegistrationDeadlinePassed(event);
 };
 
@@ -157,24 +214,31 @@ const mapEventWithLifecycle = <
     id: string;
     status: string;
     deadline: string;
+    registrationCloseDate?: Date | null;
+    registrationOpenDate?: Date | null;
     registrationEndDate?: Date | null;
+    capacity?: number | null;
     _count?: { registrations?: number };
   },
 >(
   event: T,
   options?: { totalSaves?: number; isSaved?: boolean },
 ) => {
+  const computedEvent = withComputedStatus(event);
+
   const registrationEndDate = parseRegistrationEndDate(
-    event.deadline,
-    event.registrationEndDate,
+    computedEvent.deadline,
+    computedEvent.registrationCloseDate,
+    computedEvent.registrationEndDate,
   );
 
   return {
-    ...event,
+    ...computedEvent,
     totalParticipants: event._count?.registrations ?? 0,
     totalSaves: options?.totalSaves ?? 0,
     isSaved: options?.isSaved ?? false,
-    isRegistrationOpen: isRegistrationOpen(event),
+    isRegistrationOpen: isRegistrationOpen(computedEvent),
+    isPreRegistrationOpen: isPreRegistrationOpen(computedEvent),
     registrationEndDate: registrationEndDate
       ? registrationEndDate.toISOString()
       : null,
@@ -412,7 +476,8 @@ export const listAdminEvents = async (query: any) => {
     }),
   ]);
 
-  return { data, total, page, limit };
+  const mapped = data.map((event) => mapEventWithLifecycle(event));
+  return { data: mapped, total, page, limit };
 };
 
 export const getEventById = async (
@@ -420,8 +485,82 @@ export const getEventById = async (
   role?: string,
   userId?: string,
 ) => {
-  const event = await prisma.event.findUnique({
+  const include = {
+    ...eventDetailInclude,
+    ...(userId
+      ? {
+          registrations: {
+            where: { userId },
+            select: { id: true },
+            take: 1,
+          },
+          savedBy: {
+            where: { userId },
+            select: { id: true },
+            take: 1,
+          },
+        }
+      : {}),
+  };
+
+  let event = await prisma.event.findUnique({
     where: { id },
+    include,
+  });
+
+  // Support /events/:slug compatibility by resolving slug when id lookup misses.
+  if (!event) {
+    event = await prisma.event.findUnique({
+      where: { slug: id },
+      include,
+    });
+  }
+
+  if (!event) {
+    const err: any = new Error("Data not found");
+    err.code = "P2025";
+    throw err;
+  }
+
+  const lifecycleEvent = withComputedStatus(event as any);
+
+  const canViewDraft = role === "ADMIN" || role === "SUPERADMIN";
+  if (lifecycleEvent.status === "DRAFT" && !canViewDraft) {
+    const err: any = new Error("Data not found");
+    err.code = "P2025";
+    throw err;
+  }
+
+  const registrationCount = event._count?.registrations ?? 0;
+  const totalSaves = await prisma.savedEvent.count({
+    where: { eventId: event.id },
+  });
+
+  const registrations = (event as any).registrations as
+    | { id: string }[]
+    | undefined;
+  const savedBy = (event as any).savedBy as { id: string }[] | undefined;
+  const eventData: any = { ...(lifecycleEvent as any) };
+  delete eventData.registrations;
+  delete eventData.savedBy;
+
+  return {
+    ...mapEventWithLifecycle(eventData, {
+      totalSaves,
+      isSaved: Boolean(savedBy?.length),
+    }),
+    registrationCount,
+    isRegistered: Boolean(registrations?.length),
+  };
+};
+
+export const getEventBySlug = async (
+  slug: string,
+  role?: string,
+  userId?: string,
+) => {
+  const event = await prisma.event.findUnique({
+    where: { slug },
     include: {
       ...eventDetailInclude,
       ...(userId
@@ -440,36 +579,38 @@ export const getEventById = async (
         : {}),
     },
   });
+
   if (!event) {
     const err: any = new Error("Data not found");
     err.code = "P2025";
     throw err;
   }
 
+  const lifecycleEvent = withComputedStatus(event as any);
   const canViewDraft = role === "ADMIN" || role === "SUPERADMIN";
-  if (event.status === "DRAFT" && !canViewDraft) {
+  if (lifecycleEvent.status === "DRAFT" && !canViewDraft) {
     const err: any = new Error("Data not found");
     err.code = "P2025";
     throw err;
   }
 
-  const registrationCount = event._count?.registrations ?? 0;
-  const totalSaves = await prisma.savedEvent.count({ where: { eventId: id } });
-
+  const totalSaves = await prisma.savedEvent.count({
+    where: { eventId: event.id },
+  });
   const registrations = (event as any).registrations as
     | { id: string }[]
     | undefined;
   const savedBy = (event as any).savedBy as { id: string }[] | undefined;
-  const eventData: any = { ...(event as any) };
-  delete eventData.registrations;
-  delete eventData.savedBy;
+  const payload: any = { ...(lifecycleEvent as any) };
+  delete payload.registrations;
+  delete payload.savedBy;
 
   return {
-    ...mapEventWithLifecycle(eventData, {
+    ...mapEventWithLifecycle(payload, {
       totalSaves,
       isSaved: Boolean(savedBy?.length),
     }),
-    registrationCount,
+    registrationCount: event._count?.registrations ?? 0,
     isRegistered: Boolean(registrations?.length),
   };
 };
@@ -496,7 +637,9 @@ export const getStudentEventBySlug = async (slug: string, userId: string) => {
     },
   });
 
-  if (!event || event.status === "DRAFT") {
+  const lifecycleEvent = event ? withComputedStatus(event as any) : null;
+
+  if (!event || lifecycleEvent?.status === "DRAFT") {
     const err: any = new Error("Data not found");
     err.code = "P2025";
     throw err;
@@ -518,7 +661,7 @@ export const getStudentEventBySlug = async (slug: string, userId: string) => {
     submissionId = submission?.id ?? null;
   }
 
-  const timelineActive = isWorkspaceTimelineActive(event.status);
+  const timelineActive = isWorkspaceTimelineActive(lifecycleEvent!.status);
   const canEnterWorkspace = Boolean(registration) && timelineActive;
   const workspacePath = canEnterWorkspace
     ? submissionId
@@ -530,13 +673,13 @@ export const getStudentEventBySlug = async (slug: string, userId: string) => {
     ? "Register for this event to unlock workspace access."
     : timelineActive
       ? null
-      : getWorkspaceAccessDeniedMessage(event.status);
+      : getWorkspaceAccessDeniedMessage(lifecycleEvent!.status);
 
   const totalSaves = await prisma.savedEvent.count({
     where: { eventId: event.id },
   });
 
-  const { registrations, ...eventData } = event;
+  const { registrations, ...eventData } = lifecycleEvent as any;
 
   return {
     ...mapEventWithLifecycle(eventData, {
@@ -554,7 +697,7 @@ export const getStudentEventBySlug = async (slug: string, userId: string) => {
       : null,
     submissionId,
     registrationStatus: registration ? "APPROVED" : "NOT_REGISTERED",
-    eventTimelineStatus: event.status,
+    eventTimelineStatus: lifecycleEvent!.status,
     canEnterWorkspace,
     workspacePath,
     workspaceFallbackPath,
@@ -586,6 +729,14 @@ export const getStudentWorkspaceAccessBySlug = async (
     throw err;
   }
 
+  const lifecycleEvent = withComputedStatus(event as any);
+
+  if (lifecycleEvent.status === "DRAFT") {
+    const err: any = new Error("Data not found");
+    err.code = "P2025";
+    throw err;
+  }
+
   const registration = event.registrations[0] ?? null;
   if (!registration) {
     const err: any = new Error("You are not registered for this event");
@@ -593,8 +744,10 @@ export const getStudentWorkspaceAccessBySlug = async (
     throw err;
   }
 
-  if (!isWorkspaceTimelineActive(event.status)) {
-    const err: any = new Error(getWorkspaceAccessDeniedMessage(event.status));
+  if (!isWorkspaceTimelineActive(lifecycleEvent.status)) {
+    const err: any = new Error(
+      getWorkspaceAccessDeniedMessage(lifecycleEvent.status),
+    );
     err.status = 403;
     throw err;
   }
@@ -608,7 +761,7 @@ export const getStudentWorkspaceAccessBySlug = async (
   return {
     canEnterWorkspace: true,
     registrationStatus: "APPROVED",
-    eventTimelineStatus: event.status,
+    eventTimelineStatus: lifecycleEvent.status,
     workspacePath,
     workspaceFallbackPath: buildWorkspaceFallbackPath(event.slug),
   };
@@ -625,7 +778,11 @@ export const registerEvent = async (
       id: true,
       status: true,
       deadline: true,
+      registrationOpenDate: true,
+      registrationCloseDate: true,
       registrationEndDate: true,
+      capacity: true,
+      _count: { select: { registrations: true } },
     },
   });
   if (!event) {
@@ -633,10 +790,17 @@ export const registerEvent = async (
     err.code = "P2025";
     throw err;
   }
-  if (event.status !== "OPEN") {
+
+  const lifecycleEvent = withComputedStatus(event as any);
+
+  if (
+    lifecycleEvent.status !== EventStatus.OPEN &&
+    lifecycleEvent.status !== EventStatus.UPCOMING
+  ) {
     throw new Error("Event not open");
   }
-  if (hasRegistrationDeadlinePassed(event)) {
+
+  if (hasRegistrationDeadlinePassed(lifecycleEvent as any)) {
     const err: any = new Error("Registration closed by deadline");
     err.status = 403;
     throw err;
@@ -665,9 +829,16 @@ export const registerEvent = async (
     selectedTeamId = teamId;
   }
 
-  return prisma.eventRegistration.create({
+  const registration = await prisma.eventRegistration.create({
     data: { eventId, userId, teamId: selectedTeamId },
   });
+
+  publishEventUpdate(eventId, {
+    type: "event.registration.created",
+    userId,
+  });
+
+  return registration;
 };
 
 export const bookmarkEvent = async (eventId: string, userId: string) => {
@@ -785,4 +956,235 @@ export const toggleUpvote = async (questionId: string, userId: string) => {
   await prisma.qaUpvote.create({ data: { questionId, userId } });
   const count = await prisma.qaUpvote.count({ where: { questionId } });
   return { upvoteCount: count, isUpvoted: true };
+};
+
+export const listCommunityThreads = async (
+  eventId: string,
+  page = 1,
+  limit = 20,
+  sort: "top" | "latest" = "top",
+) => {
+  const skip = (page - 1) * limit;
+
+  const [total, threads] = await Promise.all([
+    prisma.eventCommunityThread.count({ where: { eventId } }),
+    prisma.eventCommunityThread.findMany({
+      where: { eventId },
+      include: {
+        author: {
+          select: {
+            id: true,
+            fullName: true,
+            profile: { select: { avatar: true } },
+          },
+        },
+        _count: { select: { messages: true, likes: true } },
+      },
+      orderBy:
+        sort === "latest"
+          ? { createdAt: "desc" }
+          : [
+              { viewCount: "desc" },
+              { likeCount: "desc" },
+              { createdAt: "desc" },
+            ],
+      skip,
+      take: limit,
+    }),
+  ]);
+
+  return {
+    total,
+    page,
+    limit,
+    data: threads.map((thread) => ({
+      ...thread,
+      replyCount: thread._count.messages,
+      likeCount: thread._count.likes,
+    })),
+  };
+};
+
+export const createCommunityThread = async (
+  eventId: string,
+  authorId: string,
+  payload: { title: string; content: string },
+) => {
+  const title = String(payload.title || "").trim();
+  const content = String(payload.content || "").trim();
+  if (title.length < 5) throw new Error("Thread title too short");
+  if (content.length < 5) throw new Error("Thread content too short");
+
+  const thread = await prisma.eventCommunityThread.create({
+    data: {
+      eventId,
+      authorId,
+      title,
+      content,
+    },
+    include: {
+      author: {
+        select: {
+          id: true,
+          fullName: true,
+          profile: { select: { avatar: true } },
+        },
+      },
+      _count: { select: { messages: true, likes: true } },
+    },
+  });
+
+  publishEventUpdate(eventId, {
+    type: "event.community.thread.created",
+    threadId: thread.id,
+  });
+
+  return thread;
+};
+
+export const listCommunityMessages = async (threadId: string) => {
+  return prisma.eventCommunityMessage.findMany({
+    where: { threadId },
+    include: {
+      author: {
+        select: {
+          id: true,
+          fullName: true,
+          profile: { select: { avatar: true } },
+        },
+      },
+      _count: { select: { likes: true } },
+    },
+    orderBy: { createdAt: "asc" },
+  });
+};
+
+export const createCommunityMessage = async (
+  threadId: string,
+  authorId: string,
+  content: string,
+) => {
+  const normalizedContent = String(content || "").trim();
+  if (normalizedContent.length < 2) {
+    throw new Error("Reply content too short");
+  }
+
+  return prisma.$transaction(async (tx) => {
+    const thread = await tx.eventCommunityThread.findUnique({
+      where: { id: threadId },
+      select: { eventId: true },
+    });
+
+    if (!thread) {
+      const err: any = new Error("Data not found");
+      err.code = "P2025";
+      throw err;
+    }
+
+    const message = await tx.eventCommunityMessage.create({
+      data: {
+        threadId,
+        authorId,
+        content: normalizedContent,
+      },
+      include: {
+        author: {
+          select: {
+            id: true,
+            fullName: true,
+            profile: { select: { avatar: true } },
+          },
+        },
+      },
+    });
+
+    await tx.eventCommunityThread.update({
+      where: { id: threadId },
+      data: {
+        replyCount: { increment: 1 },
+      },
+    });
+
+    publishEventUpdate(thread.eventId, {
+      type: "event.community.reply.created",
+      threadId,
+      messageId: message.id,
+    });
+
+    return message;
+  });
+};
+
+export const toggleCommunityThreadLike = async (
+  threadId: string,
+  userId: string,
+) => {
+  const existing = await prisma.eventCommunityThreadLike.findUnique({
+    where: { userId_threadId: { userId, threadId } },
+  });
+
+  if (existing) {
+    await prisma.$transaction([
+      prisma.eventCommunityThreadLike.delete({ where: { id: existing.id } }),
+      prisma.eventCommunityThread.update({
+        where: { id: threadId },
+        data: { likeCount: { decrement: 1 } },
+      }),
+    ]);
+
+    const count = await prisma.eventCommunityThreadLike.count({
+      where: { threadId },
+    });
+    return { isLiked: false, likeCount: count };
+  }
+
+  await prisma.$transaction([
+    prisma.eventCommunityThreadLike.create({ data: { threadId, userId } }),
+    prisma.eventCommunityThread.update({
+      where: { id: threadId },
+      data: { likeCount: { increment: 1 } },
+    }),
+  ]);
+
+  const count = await prisma.eventCommunityThreadLike.count({
+    where: { threadId },
+  });
+  return { isLiked: true, likeCount: count };
+};
+
+export const toggleCommunityMessageLike = async (
+  messageId: string,
+  userId: string,
+) => {
+  const existing = await prisma.eventCommunityMessageLike.findUnique({
+    where: { userId_messageId: { userId, messageId } },
+  });
+
+  if (existing) {
+    await prisma.$transaction([
+      prisma.eventCommunityMessageLike.delete({ where: { id: existing.id } }),
+      prisma.eventCommunityMessage.update({
+        where: { id: messageId },
+        data: { likeCount: { decrement: 1 } },
+      }),
+    ]);
+
+    const count = await prisma.eventCommunityMessageLike.count({
+      where: { messageId },
+    });
+    return { isLiked: false, likeCount: count };
+  }
+
+  await prisma.$transaction([
+    prisma.eventCommunityMessageLike.create({ data: { messageId, userId } }),
+    prisma.eventCommunityMessage.update({
+      where: { id: messageId },
+      data: { likeCount: { increment: 1 } },
+    }),
+  ]);
+
+  const count = await prisma.eventCommunityMessageLike.count({
+    where: { messageId },
+  });
+  return { isLiked: true, likeCount: count };
 };

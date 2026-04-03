@@ -8,6 +8,9 @@ const avatarMemoryStorage = multer.memoryStorage();
 // Memory storage for event banner uploads (superadmin only)
 const bannerMemoryStorage = multer.memoryStorage();
 
+// Memory storage for event resource uploads (superadmin only)
+const resourceMemoryStorage = multer.memoryStorage();
+
 export const uploadAvatar = multer({
   storage: avatarMemoryStorage,
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB raw limit
@@ -33,6 +36,35 @@ export const uploadEventBannerMiddleware = multer({
     }
   },
 }).single("banner");
+
+export const uploadEventResourceFilesMiddleware = multer({
+  storage: resourceMemoryStorage,
+  limits: {
+    fileSize: 25 * 1024 * 1024,
+    files: 10,
+  },
+  fileFilter: (_req, file, cb) => {
+    const allowed = [
+      "application/pdf",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "application/zip",
+      "application/x-zip-compressed",
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "image/webp",
+    ];
+
+    if (allowed.includes(file.mimetype)) {
+      cb(null, true);
+      return;
+    }
+
+    cb(new Error("Unsupported resource file type"));
+  },
+}).array("files", 10);
 
 // Keep existing uploadSingle for submission files (diskStorage, unchanged)
 const submissionStorage = multer.diskStorage({

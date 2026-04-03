@@ -27,6 +27,7 @@ import LoadingSpinner from "../components/LoadingSpinner";
 import { formatDate } from "../lib/utils";
 import { eventsApi } from "../services/api/eventsApi";
 import { useAuthContext } from "../contexts/AuthContext";
+import { useEventRealtime } from "../hooks/useEventRealtime";
 
 type EventTimeline = {
   id: string;
@@ -71,6 +72,7 @@ type StudentEventDetail = {
   status: string;
   registrationEndDate?: string | null;
   isRegistrationOpen?: boolean;
+  isPreRegistrationOpen?: boolean;
   fee: string;
   prizePool?: string;
   organizer?: string;
@@ -196,14 +198,6 @@ const DashboardEventDetail: React.FC = () => {
     navigate(location.pathname, { replace: true, state: null });
   }, [location.pathname, location.state, navigate]);
 
-  useEffect(() => {
-    const intervalId = window.setInterval(() => {
-      void fetchEventDetail({ silent: true });
-    }, 15000);
-
-    return () => window.clearInterval(intervalId);
-  }, [fetchEventDetail]);
-
   const fetchQuestions = useCallback(async () => {
     if (!event?.id) return;
     try {
@@ -218,8 +212,27 @@ const DashboardEventDetail: React.FC = () => {
     void fetchQuestions();
   }, [fetchQuestions]);
 
+  const handleRealtimeUpdate = useCallback(
+    (payload: { type?: string }) => {
+      if (!payload?.type) return;
+      void fetchEventDetail({ silent: true });
+
+      if (payload.type.startsWith("event.community.")) {
+        void fetchQuestions();
+      }
+    },
+    [fetchEventDetail, fetchQuestions],
+  );
+
+  useEventRealtime(event?.id, handleRealtimeUpdate, Boolean(event?.id));
+
   const handleRegister = async () => {
-    if (!event || event.isRegistered || !event.isRegistrationOpen) return;
+    if (
+      !event ||
+      event.isRegistered ||
+      (!event.isRegistrationOpen && !event.isPreRegistrationOpen)
+    )
+      return;
 
     setRegistering(true);
     setError(null);
@@ -274,6 +287,7 @@ const DashboardEventDetail: React.FC = () => {
     event?.totalParticipants ?? event?._count?.registrations ?? 0;
   const totalSaves = event?.totalSaves ?? 0;
   const isRegistrationOpen = Boolean(event?.isRegistrationOpen);
+  const isPreRegistrationOpen = Boolean(event?.isPreRegistrationOpen);
   const eligibilityLabel = event?.eligibility?.length
     ? event.eligibility.join(", ")
     : "Open to all participants";
@@ -555,7 +569,7 @@ const DashboardEventDetail: React.FC = () => {
 
   const ctaButton = () => {
     if (!event.isRegistered) {
-      if (!isRegistrationOpen) {
+      if (!isRegistrationOpen && !isPreRegistrationOpen) {
         return (
           <Button size="lg" disabled>
             Registration Closed
@@ -565,7 +579,11 @@ const DashboardEventDetail: React.FC = () => {
 
       return (
         <Button size="lg" onClick={handleRegister} disabled={registering}>
-          {registering ? "Registering..." : "Register for Event"}
+          {registering
+            ? "Processing..."
+            : isPreRegistrationOpen
+              ? "Pre-register"
+              : "Register for Event"}
         </Button>
       );
     }

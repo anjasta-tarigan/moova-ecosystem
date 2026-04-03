@@ -3,7 +3,6 @@ import { useParams, useNavigate } from "react-router-dom";
 import {
   ChevronLeft,
   FileText,
-  Save,
   Lock,
   MessageSquare,
   ExternalLink,
@@ -30,6 +29,7 @@ const JudgeScoringView: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState<"doc" | "poster" | "video">("doc");
   const [error, setError] = useState<string | null>(null);
+  const normalizedRound = (roundId || "ABSTRACT").toUpperCase();
 
   useEffect(() => {
     const init = async () => {
@@ -39,9 +39,9 @@ const JudgeScoringView: React.FC = () => {
         const { submission, rubric, scoreRecord } = res.data.data;
 
         setSubmission(submission);
-        setRubric(rubric);
+        setRubric(Array.isArray(rubric) ? rubric : []);
 
-        const upperStage = roundId.toUpperCase();
+        const upperStage = normalizedRound;
         if (upperStage === "PAPER") setActiveTab("doc");
         if (upperStage === "FINAL") setActiveTab("video");
 
@@ -51,7 +51,9 @@ const JudgeScoringView: React.FC = () => {
           setStatus(scoreRecord.status);
         } else {
           const initial: Record<string, number> = {};
-          rubric.forEach((c: any) => (initial[c.id] = 0));
+          (Array.isArray(rubric) ? rubric : []).forEach(
+            (criterion: any) => (initial[criterion.id] = 0),
+          );
           setScores(initial);
         }
       } catch (err) {
@@ -62,7 +64,7 @@ const JudgeScoringView: React.FC = () => {
       }
     };
     init();
-  }, [submissionId, roundId]);
+  }, [submissionId, roundId, normalizedRound]);
 
   const totalScore = useMemo(() => {
     return rubric.reduce((sum: number, c: any) => {
@@ -85,7 +87,7 @@ const JudgeScoringView: React.FC = () => {
     try {
       await judgeApi.saveScore({
         submissionId,
-        stage: roundId,
+        stage: normalizedRound,
         criteriaScores: scores,
         comment,
         status: newStatus,
@@ -131,10 +133,10 @@ const JudgeScoringView: React.FC = () => {
   };
 
   // Determine which tabs to show based on available assets & stage
-  const showPoster =
-    roundId?.toUpperCase() === "PAPER" || roundId?.toUpperCase() === "FINAL";
-  const showVideo =
-    roundId?.toUpperCase() === "FINAL" || submission.presentationUrl;
+  const showPoster = normalizedRound === "PAPER" || normalizedRound === "FINAL";
+  const showVideo = normalizedRound === "FINAL" || submission.presentationUrl;
+  const teamLabel =
+    submission.teamName || submission.team?.name || submission.team || "-";
 
   return (
     <div className="flex flex-col h-[calc(100vh-64px)] overflow-hidden bg-slate-100">
@@ -153,9 +155,9 @@ const JudgeScoringView: React.FC = () => {
               {submission.title}
             </h2>
             <p className="text-xs text-slate-500">
-              {submission.team} •{" "}
+              {teamLabel} •{" "}
               <span className="uppercase">
-                {stageLabelMap[roundId?.toUpperCase() || ""] || roundId}
+                {stageLabelMap[normalizedRound] || normalizedRound}
               </span>
             </p>
           </div>
@@ -240,7 +242,7 @@ const JudgeScoringView: React.FC = () => {
                       {submission.title}
                     </h1>
                     <p className="text-sm text-slate-500">
-                      {roundId === "abstract"
+                      {normalizedRound === "ABSTRACT"
                         ? "Abstract View"
                         : "Full Paper View"}
                     </p>
@@ -270,7 +272,7 @@ const JudgeScoringView: React.FC = () => {
 
             {activeTab === "poster" && (
               <div className="w-full h-full flex flex-col items-center justify-center p-4">
-                <div className="bg-white p-2 shadow-xl border border-slate-200 max-h-full aspect-[3/4] flex items-center justify-center bg-slate-50 text-slate-400">
+                <div className="p-2 shadow-xl border border-slate-200 max-h-full aspect-3/4 flex items-center justify-center bg-slate-50 text-slate-400">
                   {/* Mock Poster */}
                   <div className="text-center">
                     <ImageIcon size={64} className="mx-auto mb-4 opacity-20" />
@@ -291,6 +293,7 @@ const JudgeScoringView: React.FC = () => {
                   <a
                     href={submission.presentationUrl}
                     target="_blank"
+                    rel="noreferrer"
                     className="text-brand-blue hover:underline text-sm block mt-2"
                   >
                     Open External Link
@@ -302,11 +305,11 @@ const JudgeScoringView: React.FC = () => {
         </div>
 
         {/* RIGHT: Scoring Instrument */}
-        <div className="w-[400px] xl:w-[450px] bg-white flex flex-col shadow-xl z-10 border-l border-slate-200">
+        <div className="w-100 xl:w-112.5 bg-white flex flex-col shadow-xl z-10 border-l border-slate-200">
           <div className="p-6 bg-slate-50 border-b border-slate-200">
             <h3 className="font-bold text-slate-900">Grading Rubric</h3>
             <p className="text-xs text-slate-500 mt-1 uppercase tracking-wide font-bold text-brand-blue">
-              Stage: {roundId}
+              Stage: {normalizedRound}
             </p>
           </div>
 
@@ -361,7 +364,7 @@ const JudgeScoringView: React.FC = () => {
             ))}
 
             <div className="pt-6 border-t border-slate-100">
-              <label className="font-bold text-sm text-slate-900 mb-2 block flex items-center gap-2">
+              <label className="font-bold text-sm text-slate-900 mb-2 flex items-center gap-2">
                 <MessageSquare size={16} /> Final Comments
               </label>
               <textarea

@@ -411,10 +411,6 @@ export type EventRegistrationUncheckedUpdateManyWithoutEventNestedInput = {
   deleteMany?: Prisma.EventRegistrationScalarWhereInput | Prisma.EventRegistrationScalarWhereInput[]
 }
 
-export type NullableStringFieldUpdateOperationsInput = {
-  set?: string | null
-}
-
 export type EventRegistrationCreateNestedManyWithoutTeamInput = {
   create?: Prisma.XOR<Prisma.EventRegistrationCreateWithoutTeamInput, Prisma.EventRegistrationUncheckedCreateWithoutTeamInput> | Prisma.EventRegistrationCreateWithoutTeamInput[] | Prisma.EventRegistrationUncheckedCreateWithoutTeamInput[]
   connectOrCreate?: Prisma.EventRegistrationCreateOrConnectWithoutTeamInput | Prisma.EventRegistrationCreateOrConnectWithoutTeamInput[]

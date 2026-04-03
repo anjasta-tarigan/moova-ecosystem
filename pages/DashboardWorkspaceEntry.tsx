@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   AlertCircle,
@@ -18,6 +18,7 @@ import Button from "../components/Button";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { eventsApi } from "../services/api/eventsApi";
 import { submissionsApi } from "../services/api/submissionsApi";
+import { useEventRealtime } from "../hooks/useEventRealtime";
 
 type EventTimeline = {
   id: string;
@@ -39,6 +40,19 @@ type StudentEventDetail = {
   submissionId?: string | null;
   categories?: { name: string }[];
   faqs?: { question: string; answer: string }[];
+  stages?: {
+    id: string;
+    stageType: string;
+    startAt: string;
+    deadlineAt: string;
+  }[];
+  resources?: {
+    id: string;
+    title?: string;
+    fileName?: string;
+    url: string;
+    type?: string;
+  }[];
 };
 
 type SubmissionData = {
@@ -140,18 +154,21 @@ const DashboardWorkspaceEntry: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const verifyWorkspaceAccess = async () => {
+  const loadWorkspace = useCallback(
+    async (options?: { silent?: boolean }) => {
       if (!slug) {
         navigate("/dashboard/events", { replace: true });
         return;
       }
 
       const fallbackPath = `/dashboard/events/${encodeURIComponent(slug)}`;
+      const isSilent = options?.silent === true;
 
       try {
-        setLoading(true);
-        setError(null);
+        if (!isSilent) {
+          setLoading(true);
+          setError(null);
+        }
 
         await eventsApi.getStudentWorkspaceAccess(slug);
         const detailResponse = await eventsApi.getStudentEventBySlug(slug);
@@ -167,6 +184,8 @@ const DashboardWorkspaceEntry: React.FC = () => {
           } catch {
             setSubmission(null);
           }
+        } else {
+          setSubmission(null);
         }
       } catch (err: any) {
         const message =
@@ -177,47 +196,70 @@ const DashboardWorkspaceEntry: React.FC = () => {
           state: { workspaceError: message },
         });
       } finally {
-        setLoading(false);
+        if (!isSilent) {
+          setLoading(false);
+        }
       }
-    };
+    },
+    [navigate, slug],
+  );
 
-    void verifyWorkspaceAccess();
-  }, [navigate, slug]);
+  useEffect(() => {
+    void loadWorkspace();
+  }, [loadWorkspace]);
+
+  const handleRealtimeUpdate = useCallback(
+    (_payload: { type?: string }) => {
+      void loadWorkspace({ silent: true });
+    },
+    [loadWorkspace],
+  );
+
+  useEventRealtime(
+    eventDetail?.id,
+    handleRealtimeUpdate,
+    Boolean(eventDetail?.id),
+  );
 
   const stageRows = useMemo(() => {
     const categories = eventDetail?.categories?.map((item) => item.name) ?? [];
 
+    const orderedStageTypes = ["ABSTRACT", "PAPER", "FINAL"];
+    const stageLabelByType: Record<string, string> = {
+      ABSTRACT: "1. Abstract Review",
+      PAPER: "2. Full Paper & Poster",
+      FINAL: "3. Final Presentation",
+    };
+
     const baseStages =
-      eventDetail?.timeline && eventDetail.timeline.length > 0
-        ? [...eventDetail.timeline]
-            .sort((a, b) => (a.order || 0) - (b.order || 0))
-            .map((timeline, index) => ({
-              id: timeline.id,
-              title: normalizeStageTitle(timeline.title, index),
-              deadline: timeline.date || "TBD",
-              requirements: buildStageRequirements(index, categories),
-            }))
-        : DEFAULT_STAGES;
-
-    const now = Date.now();
-    const dates = baseStages.map((stage) => parseStageDate(stage.deadline));
-    let activeIndex = dates.findIndex((timestamp) => {
-      if (Number.isNaN(timestamp)) return false;
-      return timestamp >= now;
-    });
-
-    if (activeIndex < 0) {
-      activeIndex = baseStages.length - 1;
-    }
-
-    if (
-      submission &&
-      submission.status !== "DRAFT" &&
-      baseStages.length > 1 &&
-      activeIndex === 0
-    ) {
-      activeIndex = 1;
-    }
+      eventDetail?.stages && eventDetail.stages.length > 0
+        ? orderedStageTypes
+            .map((stageType, index) => {
+              const found = eventDetail.stages?.find(
+                (item) => item.stageType === stageType,
+              );
+              return {
+                id: found?.id || stageType,
+                title:
+                  stageLabelByType[stageType] ||
+                  normalizeStageTitle(stageType, index),
+                deadline: found?.deadlineAt || "TBD",
+                startAt: found?.startAt || "",
+                requirements: buildStageRequirements(index, categories),
+              };
+            })
+            .filter((item) => item.deadline !== "TBD")
+        : eventDetail?.timeline && eventDetail.timeline.length > 0
+          ? [...eventDetail.timeline]
+              .sort((a, b) => (a.order || 0) - (b.order || 0))
+              .map((timeline, index) => ({
+                id: timeline.id,
+                title: normalizeStageTitle(timeline.title, index),
+                deadline: timeline.date || "TBD",
+                startAt: "",
+                requirements: buildStageRequirements(index, categories),
+              }))
+          : DEFAULT_STAGES.map((item) => ({ ...item, startAt: "" }));
 
     const latestScore =
       submission?.scores && submission.scores.length > 0
@@ -228,15 +270,21 @@ const DashboardWorkspaceEntry: React.FC = () => {
         : null;
 
     return baseStages.map((stage, index) => {
-      let status: StageViewModel["status"] = "locked";
-      if (index < activeIndex) status = "completed";
-      if (index === activeIndex) status = "active";
+      const now = Date.now();
+      const stageStart = parseStageDate(stage.startAt || stage.deadline);
+      const stageDeadline = parseStageDate(stage.deadline);
 
-      if (
-        submission &&
-        submission.status === "SCORED" &&
-        index <= activeIndex
-      ) {
+      let status: StageViewModel["status"] = "locked";
+
+      if (!Number.isNaN(stageStart) && now < stageStart) {
+        status = "locked";
+      } else if (!Number.isNaN(stageDeadline) && now > stageDeadline) {
+        status = "completed";
+      } else {
+        status = "active";
+      }
+
+      if (submission && submission.status === "SCORED" && status !== "locked") {
         status = "completed";
       }
 
@@ -311,16 +359,11 @@ const DashboardWorkspaceEntry: React.FC = () => {
             </Button>
             <Button
               size="sm"
-              onClick={() => {
-                if (hasSubmission) {
-                  navigate(`/dashboard/submission/${eventDetail.submissionId}`);
-                  return;
-                }
-
-                navigate("/dashboard/team/manage");
-              }}
+              onClick={() =>
+                navigate(`/dashboard/workspace/${eventDetail.slug}/community`)
+              }
             >
-              {hasSubmission ? "Open Submission" : "Start Submission"}
+              Event Community
             </Button>
           </div>
         </div>
@@ -516,8 +559,7 @@ const DashboardWorkspaceEntry: React.FC = () => {
 
                   {isLocked && (
                     <div className="text-center py-4 text-slate-400 text-sm italic">
-                      This stage will unlock once the previous stage is
-                      completed.
+                      This stage is locked until its configured start time.
                     </div>
                   )}
                 </div>
@@ -534,26 +576,31 @@ const DashboardWorkspaceEntry: React.FC = () => {
           <p className="text-slate-500 mb-6">
             Download templates, guidebooks, and rules.
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto text-left">
-            {[
-              "Participant Guide.pdf",
-              "Submission Template.docx",
-              "Official Rules.pdf",
-            ].map((resource) => (
-              <div
-                key={resource}
-                className="flex items-center justify-between p-4 border border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer"
-              >
-                <div className="flex items-center gap-3">
-                  <FileText size={20} className="text-slate-400" />
-                  <span className="text-sm font-medium text-slate-700">
-                    {resource}
-                  </span>
-                </div>
-                <Download size={16} className="text-slate-400" />
-              </div>
-            ))}
-          </div>
+          {eventDetail.resources && eventDetail.resources.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto text-left">
+              {eventDetail.resources.map((resource) => (
+                <a
+                  key={resource.id}
+                  href={resource.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center justify-between p-4 border border-slate-200 rounded-lg hover:bg-slate-50"
+                >
+                  <div className="flex items-center gap-3">
+                    <FileText size={20} className="text-slate-400" />
+                    <span className="text-sm font-medium text-slate-700">
+                      {resource.title || resource.fileName || "Resource"}
+                    </span>
+                  </div>
+                  <Download size={16} className="text-slate-400" />
+                </a>
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-5 text-sm text-slate-500 max-w-2xl mx-auto">
+              No resources available yet.
+            </div>
+          )}
 
           {eventDetail.faqs && eventDetail.faqs.length > 0 && (
             <div className="mt-8 text-left max-w-3xl mx-auto border-t border-slate-100 pt-6 space-y-4">
