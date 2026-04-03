@@ -69,6 +69,8 @@ type StudentEventDetail = {
   category: string;
   image?: string;
   status: string;
+  registrationEndDate?: string | null;
+  isRegistrationOpen?: boolean;
   fee: string;
   prizePool?: string;
   organizer?: string;
@@ -79,6 +81,9 @@ type StudentEventDetail = {
   faqs?: EventFaq[];
   categories?: EventCategory[];
   _count?: { registrations?: number };
+  totalParticipants?: number;
+  totalSaves?: number;
+  isSaved?: boolean;
   isRegistered: boolean;
   registrationId?: string | null;
   registration?: EventRegistration | null;
@@ -125,6 +130,7 @@ const DashboardEventDetail: React.FC = () => {
   const [registering, setRegistering] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSaved, setIsSaved] = useState(false);
+  const [isBookmarkPending, setIsBookmarkPending] = useState(false);
   const [copied, setCopied] = useState(false);
   const [activeRuleTab, setActiveRuleTab] = useState(0);
 
@@ -133,29 +139,49 @@ const DashboardEventDetail: React.FC = () => {
   const [isSubmittingQuestion, setIsSubmittingQuestion] = useState(false);
   const [isTogglingUpvote, setIsTogglingUpvote] = useState<string | null>(null);
 
-  const fetchEventDetail = async () => {
-    if (!slug) return;
+  const fetchEventDetail = useCallback(
+    async (options?: { silent?: boolean }) => {
+      if (!slug) return;
 
-    setLoading(true);
-    setError(null);
-
-    try {
-      const response = await eventsApi.getStudentEventBySlug(slug);
-      setEvent(response.data?.data ?? null);
-    } catch (err: any) {
-      if (err?.response?.status === 404) {
-        setError("Event not found");
-      } else {
-        setError("Failed to load event detail");
+      const isSilent = options?.silent === true;
+      if (!isSilent) {
+        setLoading(true);
+        setError(null);
       }
-    } finally {
-      setLoading(false);
-    }
-  };
+
+      try {
+        const response = await eventsApi.getStudentEventBySlug(slug);
+        const nextEvent = response.data?.data ?? null;
+        setEvent(nextEvent);
+        setIsSaved(Boolean(nextEvent?.isSaved));
+      } catch (err: any) {
+        if (!isSilent) {
+          if (err?.response?.status === 404) {
+            setError("Event not found");
+          } else {
+            setError("Failed to load event detail");
+          }
+        }
+      } finally {
+        if (!isSilent) {
+          setLoading(false);
+        }
+      }
+    },
+    [slug],
+  );
 
   useEffect(() => {
     void fetchEventDetail();
-  }, [slug]);
+  }, [fetchEventDetail]);
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      void fetchEventDetail({ silent: true });
+    }, 15000);
+
+    return () => window.clearInterval(intervalId);
+  }, [fetchEventDetail]);
 
   const fetchQuestions = useCallback(async () => {
     if (!event?.id) return;
@@ -172,7 +198,7 @@ const DashboardEventDetail: React.FC = () => {
   }, [fetchQuestions]);
 
   const handleRegister = async () => {
-    if (!event || event.isRegistered) return;
+    if (!event || event.isRegistered || !event.isRegistrationOpen) return;
 
     setRegistering(true);
     setError(null);
@@ -182,9 +208,15 @@ const DashboardEventDetail: React.FC = () => {
 
       setEvent((prev) => {
         if (!prev) return prev;
+        const currentParticipants =
+          typeof prev.totalParticipants === "number"
+            ? prev.totalParticipants
+            : (prev._count?.registrations ?? 0);
+
         return {
           ...prev,
           isRegistered: true,
+          totalParticipants: currentParticipants + 1,
           registrationId: registration?.id ?? prev.registrationId,
           registration: registration
             ? {
@@ -217,7 +249,10 @@ const DashboardEventDetail: React.FC = () => {
   const deadlineLabel = event?.deadline ? formatDate(event.deadline) : "TBD";
   const dateLabel = event?.date ? formatDate(event.date) : "TBD";
 
-  const registrations = event?._count?.registrations ?? 0;
+  const registrations =
+    event?.totalParticipants ?? event?._count?.registrations ?? 0;
+  const totalSaves = event?.totalSaves ?? 0;
+  const isRegistrationOpen = Boolean(event?.isRegistrationOpen);
   const eligibilityLabel = event?.eligibility?.length
     ? event.eligibility.join(", ")
     : "Open to all participants";
@@ -367,8 +402,70 @@ const DashboardEventDetail: React.FC = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleSaveEvent = () => {
-    setIsSaved((previous) => !previous);
+  const handleSaveEvent = async () => {
+    if (!event || isBookmarkPending) return;
+
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+
+    if (user.role !== "STUDENT") {
+      setError("Only students can save events.");
+      return;
+    }
+
+    const previousSaved = isSaved;
+    const nextSaved = !previousSaved;
+
+    setIsSaved(nextSaved);
+    setEvent((previous) => {
+      if (!previous) return previous;
+      const baseTotalSaves = previous.totalSaves ?? 0;
+      return {
+        ...previous,
+        totalSaves: Math.max(0, baseTotalSaves + (nextSaved ? 1 : -1)),
+      };
+    });
+
+    try {
+      setIsBookmarkPending(true);
+      const response = nextSaved
+        ? await eventsApi.bookmarkEvent(event.id)
+        : await eventsApi.unbookmarkEvent(event.id);
+
+      const payload = response.data?.data ?? {};
+      const resolvedSaved =
+        typeof payload.isSaved === "boolean" ? payload.isSaved : nextSaved;
+
+      setIsSaved(resolvedSaved);
+      setEvent((previous) => {
+        if (!previous) return previous;
+        const fallbackTotal = previous.totalSaves ?? 0;
+        return {
+          ...previous,
+          totalSaves:
+            typeof payload.totalSaves === "number"
+              ? payload.totalSaves
+              : fallbackTotal,
+        };
+      });
+    } catch (err: any) {
+      const message =
+        err?.response?.data?.message || "Failed to update saved event state";
+      setError(message);
+      setIsSaved(previousSaved);
+      setEvent((previous) => {
+        if (!previous) return previous;
+        const baseTotalSaves = previous.totalSaves ?? 0;
+        return {
+          ...previous,
+          totalSaves: Math.max(0, baseTotalSaves + (previousSaved ? 1 : -1)),
+        };
+      });
+    } finally {
+      setIsBookmarkPending(false);
+    }
   };
 
   const QuickInfoCard = ({
@@ -432,6 +529,14 @@ const DashboardEventDetail: React.FC = () => {
 
   const ctaButton = () => {
     if (!event.isRegistered) {
+      if (!isRegistrationOpen) {
+        return (
+          <Button size="lg" disabled>
+            Registration Closed
+          </Button>
+        );
+      }
+
       return (
         <Button size="lg" onClick={handleRegister} disabled={registering}>
           {registering ? "Registering..." : "Register for Event"}
@@ -539,13 +644,13 @@ const DashboardEventDetail: React.FC = () => {
               <QuickInfoCard
                 icon={<Users />}
                 label="Registered"
-                value={event.isRegistered ? registrations + 1 : registrations}
+                value={registrations}
                 subValue="Participants"
               />
               <QuickInfoCard
                 icon={<Bookmark />}
                 label="Interested"
-                value={isSaved ? registrations + 1 : registrations}
+                value={totalSaves}
                 subValue="Saves"
               />
               <QuickInfoCard
@@ -1002,13 +1107,13 @@ const DashboardEventDetail: React.FC = () => {
                   <div className="flex items-center gap-2 mb-4">
                     <div
                       className={`w-3 h-3 rounded-full ${
-                        event.status.toUpperCase() === "OPEN"
+                        isRegistrationOpen
                           ? "bg-emerald-500 animate-pulse"
                           : "bg-slate-300"
                       }`}
                     />
                     <span className="font-bold text-xl text-slate-900">
-                      {event.status.toUpperCase() === "OPEN"
+                      {isRegistrationOpen
                         ? "Registration Open"
                         : "Registration Closed"}
                     </span>
@@ -1027,7 +1132,8 @@ const DashboardEventDetail: React.FC = () => {
 
                 <div className="space-y-3">
                   <button
-                    onClick={handleSaveEvent}
+                    onClick={() => void handleSaveEvent()}
+                    disabled={isBookmarkPending}
                     className={`flex items-center justify-center gap-2 w-full py-2.5 border rounded-lg text-sm font-medium transition-colors ${
                       isSaved
                         ? "bg-secondary-50 border-secondary-200 text-secondary-600"
@@ -1038,7 +1144,11 @@ const DashboardEventDetail: React.FC = () => {
                       size={16}
                       fill={isSaved ? "currentColor" : "none"}
                     />
-                    {isSaved ? "Event Saved" : "Save for Later"}
+                    {isBookmarkPending
+                      ? "Saving..."
+                      : isSaved
+                        ? "Event Saved"
+                        : "Save for Later"}
                   </button>
                   <button
                     onClick={handleCopyLink}
@@ -1119,15 +1229,14 @@ const DashboardEventDetail: React.FC = () => {
                 navigate("/dashboard/team/manage");
               }}
               disabled={
-                registering ||
-                (event.status.toUpperCase() === "CLOSED" && !event.isRegistered)
+                registering || (!isRegistrationOpen && !event.isRegistered)
               }
             >
               {event.isRegistered
                 ? event.submissionId
                   ? "Go to Submission"
                   : "View Team"
-                : event.status.toUpperCase() === "CLOSED"
+                : !isRegistrationOpen
                   ? "Closed"
                   : registering
                     ? "Registering..."

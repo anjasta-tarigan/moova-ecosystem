@@ -22,6 +22,7 @@ const baseListSelect = {
   category: true,
   image: true,
   status: true,
+  registrationEndDate: true,
   fee: true,
   teamSizeMin: true,
   teamSizeMax: true,
@@ -67,7 +68,110 @@ const buildCatalogWhere = (
   return where;
 };
 
-export const listPublicEvents = async (query: any) => {
+const parseRegistrationEndDate = (
+  deadline: string,
+  registrationEndDate?: Date | null,
+) => {
+  if (registrationEndDate) return registrationEndDate;
+
+  const normalizedDeadline = (deadline || "").trim();
+  const dateOnlyMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(normalizedDeadline);
+
+  if (dateOnlyMatch) {
+    const year = Number(dateOnlyMatch[1]);
+    const month = Number(dateOnlyMatch[2]) - 1;
+    const day = Number(dateOnlyMatch[3]);
+    return new Date(Date.UTC(year, month, day, 23, 59, 59, 999));
+  }
+
+  const parsed = new Date(normalizedDeadline);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+};
+
+const hasRegistrationDeadlinePassed = (event: {
+  deadline: string;
+  registrationEndDate?: Date | null;
+}) => {
+  const endDate = parseRegistrationEndDate(
+    event.deadline,
+    event.registrationEndDate,
+  );
+  if (!endDate) return false;
+  return Date.now() > endDate.getTime();
+};
+
+const isRegistrationOpen = (event: {
+  status: string;
+  deadline: string;
+  registrationEndDate?: Date | null;
+}) => {
+  if (event.status !== "OPEN") return false;
+  return !hasRegistrationDeadlinePassed(event);
+};
+
+const mapEventWithLifecycle = <
+  T extends {
+    id: string;
+    status: string;
+    deadline: string;
+    registrationEndDate?: Date | null;
+    _count?: { registrations?: number };
+  },
+>(
+  event: T,
+  options?: { totalSaves?: number; isSaved?: boolean },
+) => {
+  const registrationEndDate = parseRegistrationEndDate(
+    event.deadline,
+    event.registrationEndDate,
+  );
+
+  return {
+    ...event,
+    totalParticipants: event._count?.registrations ?? 0,
+    totalSaves: options?.totalSaves ?? 0,
+    isSaved: options?.isSaved ?? false,
+    isRegistrationOpen: isRegistrationOpen(event),
+    registrationEndDate: registrationEndDate
+      ? registrationEndDate.toISOString()
+      : null,
+  };
+};
+
+const getSavedStats = async (eventIds: string[], userId?: string) => {
+  if (!eventIds.length) {
+    return {
+      saveCountByEventId: new Map<string, number>(),
+      savedEventIds: new Set<string>(),
+    };
+  }
+
+  const [saveCounts, savedByUser] = await Promise.all([
+    prisma.savedEvent.groupBy({
+      by: ["eventId"],
+      where: { eventId: { in: eventIds } },
+      _count: { _all: true },
+    }),
+    userId
+      ? prisma.savedEvent.findMany({
+          where: { userId, eventId: { in: eventIds } },
+          select: { eventId: true },
+        })
+      : Promise.resolve([]),
+  ]);
+
+  const saveCountByEventId = new Map<string, number>();
+  for (const item of saveCounts) {
+    saveCountByEventId.set(item.eventId, item._count._all);
+  }
+
+  const savedEventIds = new Set<string>(
+    savedByUser.map((item) => item.eventId),
+  );
+  return { saveCountByEventId, savedEventIds };
+};
+
+export const listPublicEvents = async (query: any, userId?: string) => {
   const { page, limit } = parsePagination(query.page, query.limit);
   const skip = (page - 1) * limit;
   const where = buildCatalogWhere(query, PUBLIC_EVENT_STATUSES);
@@ -83,7 +187,20 @@ export const listPublicEvents = async (query: any) => {
     }),
   ]);
 
-  return { data, total, page, limit };
+  const eventIds = data.map((event) => event.id);
+  const { saveCountByEventId, savedEventIds } = await getSavedStats(
+    eventIds,
+    userId,
+  );
+
+  const mapped = data.map((event) =>
+    mapEventWithLifecycle(event, {
+      totalSaves: saveCountByEventId.get(event.id) ?? 0,
+      isSaved: savedEventIds.has(event.id),
+    }),
+  );
+
+  return { data: mapped, total, page, limit };
 };
 
 export const listEvents = listPublicEvents;
@@ -119,9 +236,36 @@ export const listStudentEvents = async (userId: string, query: any) => {
     }),
   ]);
 
+  const lifecycleEventIds = [
+    ...new Set([
+      ...registrations.map((item) => item.event.id),
+      ...discover.map((item) => item.id),
+    ]),
+  ];
+
+  const { saveCountByEventId, savedEventIds } = await getSavedStats(
+    lifecycleEventIds,
+    userId,
+  );
+
+  const mappedRegistrations = registrations.map((registration) => ({
+    ...registration,
+    event: mapEventWithLifecycle(registration.event, {
+      totalSaves: saveCountByEventId.get(registration.event.id) ?? 0,
+      isSaved: savedEventIds.has(registration.event.id),
+    }),
+  }));
+
+  const mappedDiscover = discover.map((item) =>
+    mapEventWithLifecycle(item, {
+      totalSaves: saveCountByEventId.get(item.id) ?? 0,
+      isSaved: savedEventIds.has(item.id),
+    }),
+  );
+
   return {
-    registered: registrations,
-    discover,
+    registered: mappedRegistrations,
+    discover: mappedDiscover,
     page,
     limit,
     total: discoverTotal,
@@ -228,10 +372,30 @@ export const listAdminEvents = async (query: any) => {
   return { data, total, page, limit };
 };
 
-export const getEventById = async (id: string, role?: string) => {
+export const getEventById = async (
+  id: string,
+  role?: string,
+  userId?: string,
+) => {
   const event = await prisma.event.findUnique({
     where: { id },
-    include: eventDetailInclude,
+    include: {
+      ...eventDetailInclude,
+      ...(userId
+        ? {
+            registrations: {
+              where: { userId },
+              select: { id: true },
+              take: 1,
+            },
+            savedBy: {
+              where: { userId },
+              select: { id: true },
+              take: 1,
+            },
+          }
+        : {}),
+    },
   });
   if (!event) {
     const err: any = new Error("Data not found");
@@ -247,7 +411,24 @@ export const getEventById = async (id: string, role?: string) => {
   }
 
   const registrationCount = event._count?.registrations ?? 0;
-  return { ...event, registrationCount };
+  const totalSaves = await prisma.savedEvent.count({ where: { eventId: id } });
+
+  const registrations = (event as any).registrations as
+    | { id: string }[]
+    | undefined;
+  const savedBy = (event as any).savedBy as { id: string }[] | undefined;
+  const eventData: any = { ...(event as any) };
+  delete eventData.registrations;
+  delete eventData.savedBy;
+
+  return {
+    ...mapEventWithLifecycle(eventData, {
+      totalSaves,
+      isSaved: Boolean(savedBy?.length),
+    }),
+    registrationCount,
+    isRegistered: Boolean(registrations?.length),
+  };
 };
 
 export const getStudentEventBySlug = async (slug: string, userId: string) => {
@@ -264,6 +445,11 @@ export const getStudentEventBySlug = async (slug: string, userId: string) => {
         },
         take: 1,
       },
+      savedBy: {
+        where: { userId },
+        select: { id: true },
+        take: 1,
+      },
     },
   });
 
@@ -274,6 +460,7 @@ export const getStudentEventBySlug = async (slug: string, userId: string) => {
   }
 
   const registration = event.registrations[0] ?? null;
+  const isSaved = event.savedBy.length > 0;
   let submissionId: string | null = null;
 
   if (registration?.teamId) {
@@ -288,10 +475,17 @@ export const getStudentEventBySlug = async (slug: string, userId: string) => {
     submissionId = submission?.id ?? null;
   }
 
+  const totalSaves = await prisma.savedEvent.count({
+    where: { eventId: event.id },
+  });
+
   const { registrations, ...eventData } = event;
 
   return {
-    ...eventData,
+    ...mapEventWithLifecycle(eventData, {
+      totalSaves,
+      isSaved,
+    }),
     isRegistered: Boolean(registration),
     registrationId: registration?.id ?? null,
     registration: registration
@@ -310,7 +504,15 @@ export const registerEvent = async (
   userId: string,
   teamId?: string,
 ) => {
-  const event = await prisma.event.findUnique({ where: { id: eventId } });
+  const event = await prisma.event.findUnique({
+    where: { id: eventId },
+    select: {
+      id: true,
+      status: true,
+      deadline: true,
+      registrationEndDate: true,
+    },
+  });
   if (!event) {
     const err: any = new Error("Data not found");
     err.code = "P2025";
@@ -318,6 +520,11 @@ export const registerEvent = async (
   }
   if (event.status !== "OPEN") {
     throw new Error("Event not open");
+  }
+  if (hasRegistrationDeadlinePassed(event)) {
+    const err: any = new Error("Registration closed by deadline");
+    err.status = 403;
+    throw err;
   }
 
   const profile = await prisma.siswaProfile.findUnique({ where: { userId } });
@@ -346,6 +553,37 @@ export const registerEvent = async (
   return prisma.eventRegistration.create({
     data: { eventId, userId, teamId: selectedTeamId },
   });
+};
+
+export const bookmarkEvent = async (eventId: string, userId: string) => {
+  const event = await prisma.event.findUnique({
+    where: { id: eventId },
+    select: { id: true, status: true },
+  });
+
+  if (!event || event.status === "DRAFT") {
+    const err: any = new Error("Data not found");
+    err.code = "P2025";
+    throw err;
+  }
+
+  await prisma.savedEvent.upsert({
+    where: { userId_eventId: { userId, eventId } },
+    update: {},
+    create: { userId, eventId },
+  });
+
+  const totalSaves = await prisma.savedEvent.count({ where: { eventId } });
+  return { eventId, isSaved: true, totalSaves };
+};
+
+export const unbookmarkEvent = async (eventId: string, userId: string) => {
+  await prisma.savedEvent.deleteMany({
+    where: { eventId, userId },
+  });
+
+  const totalSaves = await prisma.savedEvent.count({ where: { eventId } });
+  return { eventId, isSaved: false, totalSaves };
 };
 
 export const listQuestions = async (

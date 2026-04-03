@@ -91,6 +91,15 @@ export const myEvents = async (req: Request, res: Response) => {
   }
 };
 
+export const mySavedEvents = async (req: Request, res: Response) => {
+  try {
+    const data = await siswaService.mySavedEvents(req.user!.id);
+    return success(res, data);
+  } catch (err) {
+    return mapError(err, res);
+  }
+};
+
 export const mySubmissions = async (req: Request, res: Response) => {
   try {
     const data = await siswaService.mySubmissions(req.user!.id);

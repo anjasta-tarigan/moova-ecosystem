@@ -60,6 +60,11 @@ export type SiswaProfile = Prisma.SiswaProfileModel
  */
 export type Event = Prisma.EventModel
 /**
+ * Model SavedEvent
+ * 
+ */
+export type SavedEvent = Prisma.SavedEventModel
+/**
  * Model EventTimeline
  * 
  */

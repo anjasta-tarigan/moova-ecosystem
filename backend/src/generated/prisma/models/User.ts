@@ -218,6 +218,7 @@ export type UserWhereInput = {
   qaQuestions?: Prisma.QaQuestionListRelationFilter
   qaReplies?: Prisma.QaReplyListRelationFilter
   qaUpvotes?: Prisma.QaUpvoteListRelationFilter
+  savedEvents?: Prisma.SavedEventListRelationFilter
   notifications?: Prisma.NotificationListRelationFilter
   mentorTeams?: Prisma.TeamMentorListRelationFilter
 }
@@ -243,6 +244,7 @@ export type UserOrderByWithRelationInput = {
   qaQuestions?: Prisma.QaQuestionOrderByRelationAggregateInput
   qaReplies?: Prisma.QaReplyOrderByRelationAggregateInput
   qaUpvotes?: Prisma.QaUpvoteOrderByRelationAggregateInput
+  savedEvents?: Prisma.SavedEventOrderByRelationAggregateInput
   notifications?: Prisma.NotificationOrderByRelationAggregateInput
   mentorTeams?: Prisma.TeamMentorOrderByRelationAggregateInput
 }
@@ -271,6 +273,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   qaQuestions?: Prisma.QaQuestionListRelationFilter
   qaReplies?: Prisma.QaReplyListRelationFilter
   qaUpvotes?: Prisma.QaUpvoteListRelationFilter
+  savedEvents?: Prisma.SavedEventListRelationFilter
   notifications?: Prisma.NotificationListRelationFilter
   mentorTeams?: Prisma.TeamMentorListRelationFilter
 }, "id" | "email">
@@ -324,6 +327,7 @@ export type UserCreateInput = {
   qaQuestions?: Prisma.QaQuestionCreateNestedManyWithoutUserInput
   qaReplies?: Prisma.QaReplyCreateNestedManyWithoutUserInput
   qaUpvotes?: Prisma.QaUpvoteCreateNestedManyWithoutUserInput
+  savedEvents?: Prisma.SavedEventCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   mentorTeams?: Prisma.TeamMentorCreateNestedManyWithoutUserInput
 }
@@ -349,6 +353,7 @@ export type UserUncheckedCreateInput = {
   qaQuestions?: Prisma.QaQuestionUncheckedCreateNestedManyWithoutUserInput
   qaReplies?: Prisma.QaReplyUncheckedCreateNestedManyWithoutUserInput
   qaUpvotes?: Prisma.QaUpvoteUncheckedCreateNestedManyWithoutUserInput
+  savedEvents?: Prisma.SavedEventUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   mentorTeams?: Prisma.TeamMentorUncheckedCreateNestedManyWithoutUserInput
 }
@@ -374,6 +379,7 @@ export type UserUpdateInput = {
   qaQuestions?: Prisma.QaQuestionUpdateManyWithoutUserNestedInput
   qaReplies?: Prisma.QaReplyUpdateManyWithoutUserNestedInput
   qaUpvotes?: Prisma.QaUpvoteUpdateManyWithoutUserNestedInput
+  savedEvents?: Prisma.SavedEventUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   mentorTeams?: Prisma.TeamMentorUpdateManyWithoutUserNestedInput
 }
@@ -399,6 +405,7 @@ export type UserUncheckedUpdateInput = {
   qaQuestions?: Prisma.QaQuestionUncheckedUpdateManyWithoutUserNestedInput
   qaReplies?: Prisma.QaReplyUncheckedUpdateManyWithoutUserNestedInput
   qaUpvotes?: Prisma.QaUpvoteUncheckedUpdateManyWithoutUserNestedInput
+  savedEvents?: Prisma.SavedEventUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   mentorTeams?: Prisma.TeamMentorUncheckedUpdateManyWithoutUserNestedInput
 }
@@ -516,6 +523,20 @@ export type UserUpdateOneRequiredWithoutProfileNestedInput = {
   upsert?: Prisma.UserUpsertWithoutProfileInput
   connect?: Prisma.UserWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutProfileInput, Prisma.UserUpdateWithoutProfileInput>, Prisma.UserUncheckedUpdateWithoutProfileInput>
+}
+
+export type UserCreateNestedOneWithoutSavedEventsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSavedEventsInput, Prisma.UserUncheckedCreateWithoutSavedEventsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSavedEventsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutSavedEventsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSavedEventsInput, Prisma.UserUncheckedCreateWithoutSavedEventsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSavedEventsInput
+  upsert?: Prisma.UserUpsertWithoutSavedEventsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutSavedEventsInput, Prisma.UserUpdateWithoutSavedEventsInput>, Prisma.UserUncheckedUpdateWithoutSavedEventsInput>
 }
 
 export type UserCreateNestedOneWithoutEventRegistrationsInput = {
@@ -706,6 +727,7 @@ export type UserCreateWithoutRefreshTokensInput = {
   qaQuestions?: Prisma.QaQuestionCreateNestedManyWithoutUserInput
   qaReplies?: Prisma.QaReplyCreateNestedManyWithoutUserInput
   qaUpvotes?: Prisma.QaUpvoteCreateNestedManyWithoutUserInput
+  savedEvents?: Prisma.SavedEventCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   mentorTeams?: Prisma.TeamMentorCreateNestedManyWithoutUserInput
 }
@@ -730,6 +752,7 @@ export type UserUncheckedCreateWithoutRefreshTokensInput = {
   qaQuestions?: Prisma.QaQuestionUncheckedCreateNestedManyWithoutUserInput
   qaReplies?: Prisma.QaReplyUncheckedCreateNestedManyWithoutUserInput
   qaUpvotes?: Prisma.QaUpvoteUncheckedCreateNestedManyWithoutUserInput
+  savedEvents?: Prisma.SavedEventUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   mentorTeams?: Prisma.TeamMentorUncheckedCreateNestedManyWithoutUserInput
 }
@@ -770,6 +793,7 @@ export type UserUpdateWithoutRefreshTokensInput = {
   qaQuestions?: Prisma.QaQuestionUpdateManyWithoutUserNestedInput
   qaReplies?: Prisma.QaReplyUpdateManyWithoutUserNestedInput
   qaUpvotes?: Prisma.QaUpvoteUpdateManyWithoutUserNestedInput
+  savedEvents?: Prisma.SavedEventUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   mentorTeams?: Prisma.TeamMentorUpdateManyWithoutUserNestedInput
 }
@@ -794,6 +818,7 @@ export type UserUncheckedUpdateWithoutRefreshTokensInput = {
   qaQuestions?: Prisma.QaQuestionUncheckedUpdateManyWithoutUserNestedInput
   qaReplies?: Prisma.QaReplyUncheckedUpdateManyWithoutUserNestedInput
   qaUpvotes?: Prisma.QaUpvoteUncheckedUpdateManyWithoutUserNestedInput
+  savedEvents?: Prisma.SavedEventUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   mentorTeams?: Prisma.TeamMentorUncheckedUpdateManyWithoutUserNestedInput
 }
@@ -818,6 +843,7 @@ export type UserCreateWithoutProfileInput = {
   qaQuestions?: Prisma.QaQuestionCreateNestedManyWithoutUserInput
   qaReplies?: Prisma.QaReplyCreateNestedManyWithoutUserInput
   qaUpvotes?: Prisma.QaUpvoteCreateNestedManyWithoutUserInput
+  savedEvents?: Prisma.SavedEventCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   mentorTeams?: Prisma.TeamMentorCreateNestedManyWithoutUserInput
 }
@@ -842,6 +868,7 @@ export type UserUncheckedCreateWithoutProfileInput = {
   qaQuestions?: Prisma.QaQuestionUncheckedCreateNestedManyWithoutUserInput
   qaReplies?: Prisma.QaReplyUncheckedCreateNestedManyWithoutUserInput
   qaUpvotes?: Prisma.QaUpvoteUncheckedCreateNestedManyWithoutUserInput
+  savedEvents?: Prisma.SavedEventUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   mentorTeams?: Prisma.TeamMentorUncheckedCreateNestedManyWithoutUserInput
 }
@@ -882,6 +909,7 @@ export type UserUpdateWithoutProfileInput = {
   qaQuestions?: Prisma.QaQuestionUpdateManyWithoutUserNestedInput
   qaReplies?: Prisma.QaReplyUpdateManyWithoutUserNestedInput
   qaUpvotes?: Prisma.QaUpvoteUpdateManyWithoutUserNestedInput
+  savedEvents?: Prisma.SavedEventUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   mentorTeams?: Prisma.TeamMentorUpdateManyWithoutUserNestedInput
 }
@@ -895,6 +923,123 @@ export type UserUncheckedUpdateWithoutProfileInput = {
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
+  certificates?: Prisma.CertificateUncheckedUpdateManyWithoutUserNestedInput
+  issuedCertificates?: Prisma.CertificateUncheckedUpdateManyWithoutIssuedByNestedInput
+  judgeAssignments?: Prisma.JudgeAssignmentUncheckedUpdateManyWithoutJudgeNestedInput
+  scores?: Prisma.ScoreUncheckedUpdateManyWithoutJudgeNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
+  qaQuestions?: Prisma.QaQuestionUncheckedUpdateManyWithoutUserNestedInput
+  qaReplies?: Prisma.QaReplyUncheckedUpdateManyWithoutUserNestedInput
+  qaUpvotes?: Prisma.QaUpvoteUncheckedUpdateManyWithoutUserNestedInput
+  savedEvents?: Prisma.SavedEventUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  mentorTeams?: Prisma.TeamMentorUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutSavedEventsInput = {
+  id?: string
+  fullName: string
+  email: string
+  password: string
+  role?: $Enums.UserRole
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  profile?: Prisma.SiswaProfileCreateNestedOneWithoutUserInput
+  teamMemberships?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
+  eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
+  submissions?: Prisma.SubmissionCreateNestedManyWithoutSubmittedByInput
+  certificates?: Prisma.CertificateCreateNestedManyWithoutUserInput
+  issuedCertificates?: Prisma.CertificateCreateNestedManyWithoutIssuedByInput
+  judgeAssignments?: Prisma.JudgeAssignmentCreateNestedManyWithoutJudgeInput
+  scores?: Prisma.ScoreCreateNestedManyWithoutJudgeInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
+  qaQuestions?: Prisma.QaQuestionCreateNestedManyWithoutUserInput
+  qaReplies?: Prisma.QaReplyCreateNestedManyWithoutUserInput
+  qaUpvotes?: Prisma.QaUpvoteCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  mentorTeams?: Prisma.TeamMentorCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutSavedEventsInput = {
+  id?: string
+  fullName: string
+  email: string
+  password: string
+  role?: $Enums.UserRole
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  profile?: Prisma.SiswaProfileUncheckedCreateNestedOneWithoutUserInput
+  teamMemberships?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
+  submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
+  certificates?: Prisma.CertificateUncheckedCreateNestedManyWithoutUserInput
+  issuedCertificates?: Prisma.CertificateUncheckedCreateNestedManyWithoutIssuedByInput
+  judgeAssignments?: Prisma.JudgeAssignmentUncheckedCreateNestedManyWithoutJudgeInput
+  scores?: Prisma.ScoreUncheckedCreateNestedManyWithoutJudgeInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
+  qaQuestions?: Prisma.QaQuestionUncheckedCreateNestedManyWithoutUserInput
+  qaReplies?: Prisma.QaReplyUncheckedCreateNestedManyWithoutUserInput
+  qaUpvotes?: Prisma.QaUpvoteUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  mentorTeams?: Prisma.TeamMentorUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutSavedEventsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutSavedEventsInput, Prisma.UserUncheckedCreateWithoutSavedEventsInput>
+}
+
+export type UserUpsertWithoutSavedEventsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutSavedEventsInput, Prisma.UserUncheckedUpdateWithoutSavedEventsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutSavedEventsInput, Prisma.UserUncheckedCreateWithoutSavedEventsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutSavedEventsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutSavedEventsInput, Prisma.UserUncheckedUpdateWithoutSavedEventsInput>
+}
+
+export type UserUpdateWithoutSavedEventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  profile?: Prisma.SiswaProfileUpdateOneWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
+  submissions?: Prisma.SubmissionUpdateManyWithoutSubmittedByNestedInput
+  certificates?: Prisma.CertificateUpdateManyWithoutUserNestedInput
+  issuedCertificates?: Prisma.CertificateUpdateManyWithoutIssuedByNestedInput
+  judgeAssignments?: Prisma.JudgeAssignmentUpdateManyWithoutJudgeNestedInput
+  scores?: Prisma.ScoreUpdateManyWithoutJudgeNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
+  qaQuestions?: Prisma.QaQuestionUpdateManyWithoutUserNestedInput
+  qaReplies?: Prisma.QaReplyUpdateManyWithoutUserNestedInput
+  qaUpvotes?: Prisma.QaUpvoteUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  mentorTeams?: Prisma.TeamMentorUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutSavedEventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  profile?: Prisma.SiswaProfileUncheckedUpdateOneWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
@@ -930,6 +1075,7 @@ export type UserCreateWithoutEventRegistrationsInput = {
   qaQuestions?: Prisma.QaQuestionCreateNestedManyWithoutUserInput
   qaReplies?: Prisma.QaReplyCreateNestedManyWithoutUserInput
   qaUpvotes?: Prisma.QaUpvoteCreateNestedManyWithoutUserInput
+  savedEvents?: Prisma.SavedEventCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   mentorTeams?: Prisma.TeamMentorCreateNestedManyWithoutUserInput
 }
@@ -954,6 +1100,7 @@ export type UserUncheckedCreateWithoutEventRegistrationsInput = {
   qaQuestions?: Prisma.QaQuestionUncheckedCreateNestedManyWithoutUserInput
   qaReplies?: Prisma.QaReplyUncheckedCreateNestedManyWithoutUserInput
   qaUpvotes?: Prisma.QaUpvoteUncheckedCreateNestedManyWithoutUserInput
+  savedEvents?: Prisma.SavedEventUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   mentorTeams?: Prisma.TeamMentorUncheckedCreateNestedManyWithoutUserInput
 }
@@ -994,6 +1141,7 @@ export type UserUpdateWithoutEventRegistrationsInput = {
   qaQuestions?: Prisma.QaQuestionUpdateManyWithoutUserNestedInput
   qaReplies?: Prisma.QaReplyUpdateManyWithoutUserNestedInput
   qaUpvotes?: Prisma.QaUpvoteUpdateManyWithoutUserNestedInput
+  savedEvents?: Prisma.SavedEventUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   mentorTeams?: Prisma.TeamMentorUpdateManyWithoutUserNestedInput
 }
@@ -1018,6 +1166,7 @@ export type UserUncheckedUpdateWithoutEventRegistrationsInput = {
   qaQuestions?: Prisma.QaQuestionUncheckedUpdateManyWithoutUserNestedInput
   qaReplies?: Prisma.QaReplyUncheckedUpdateManyWithoutUserNestedInput
   qaUpvotes?: Prisma.QaUpvoteUncheckedUpdateManyWithoutUserNestedInput
+  savedEvents?: Prisma.SavedEventUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   mentorTeams?: Prisma.TeamMentorUncheckedUpdateManyWithoutUserNestedInput
 }
@@ -1042,6 +1191,7 @@ export type UserCreateWithoutTeamMembershipsInput = {
   qaQuestions?: Prisma.QaQuestionCreateNestedManyWithoutUserInput
   qaReplies?: Prisma.QaReplyCreateNestedManyWithoutUserInput
   qaUpvotes?: Prisma.QaUpvoteCreateNestedManyWithoutUserInput
+  savedEvents?: Prisma.SavedEventCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   mentorTeams?: Prisma.TeamMentorCreateNestedManyWithoutUserInput
 }
@@ -1066,6 +1216,7 @@ export type UserUncheckedCreateWithoutTeamMembershipsInput = {
   qaQuestions?: Prisma.QaQuestionUncheckedCreateNestedManyWithoutUserInput
   qaReplies?: Prisma.QaReplyUncheckedCreateNestedManyWithoutUserInput
   qaUpvotes?: Prisma.QaUpvoteUncheckedCreateNestedManyWithoutUserInput
+  savedEvents?: Prisma.SavedEventUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   mentorTeams?: Prisma.TeamMentorUncheckedCreateNestedManyWithoutUserInput
 }
@@ -1106,6 +1257,7 @@ export type UserUpdateWithoutTeamMembershipsInput = {
   qaQuestions?: Prisma.QaQuestionUpdateManyWithoutUserNestedInput
   qaReplies?: Prisma.QaReplyUpdateManyWithoutUserNestedInput
   qaUpvotes?: Prisma.QaUpvoteUpdateManyWithoutUserNestedInput
+  savedEvents?: Prisma.SavedEventUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   mentorTeams?: Prisma.TeamMentorUpdateManyWithoutUserNestedInput
 }
@@ -1130,6 +1282,7 @@ export type UserUncheckedUpdateWithoutTeamMembershipsInput = {
   qaQuestions?: Prisma.QaQuestionUncheckedUpdateManyWithoutUserNestedInput
   qaReplies?: Prisma.QaReplyUncheckedUpdateManyWithoutUserNestedInput
   qaUpvotes?: Prisma.QaUpvoteUncheckedUpdateManyWithoutUserNestedInput
+  savedEvents?: Prisma.SavedEventUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   mentorTeams?: Prisma.TeamMentorUncheckedUpdateManyWithoutUserNestedInput
 }
@@ -1155,6 +1308,7 @@ export type UserCreateWithoutMentorTeamsInput = {
   qaQuestions?: Prisma.QaQuestionCreateNestedManyWithoutUserInput
   qaReplies?: Prisma.QaReplyCreateNestedManyWithoutUserInput
   qaUpvotes?: Prisma.QaUpvoteCreateNestedManyWithoutUserInput
+  savedEvents?: Prisma.SavedEventCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
 }
 
@@ -1179,6 +1333,7 @@ export type UserUncheckedCreateWithoutMentorTeamsInput = {
   qaQuestions?: Prisma.QaQuestionUncheckedCreateNestedManyWithoutUserInput
   qaReplies?: Prisma.QaReplyUncheckedCreateNestedManyWithoutUserInput
   qaUpvotes?: Prisma.QaUpvoteUncheckedCreateNestedManyWithoutUserInput
+  savedEvents?: Prisma.SavedEventUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -1219,6 +1374,7 @@ export type UserUpdateWithoutMentorTeamsInput = {
   qaQuestions?: Prisma.QaQuestionUpdateManyWithoutUserNestedInput
   qaReplies?: Prisma.QaReplyUpdateManyWithoutUserNestedInput
   qaUpvotes?: Prisma.QaUpvoteUpdateManyWithoutUserNestedInput
+  savedEvents?: Prisma.SavedEventUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
 }
 
@@ -1243,6 +1399,7 @@ export type UserUncheckedUpdateWithoutMentorTeamsInput = {
   qaQuestions?: Prisma.QaQuestionUncheckedUpdateManyWithoutUserNestedInput
   qaReplies?: Prisma.QaReplyUncheckedUpdateManyWithoutUserNestedInput
   qaUpvotes?: Prisma.QaUpvoteUncheckedUpdateManyWithoutUserNestedInput
+  savedEvents?: Prisma.SavedEventUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -1266,6 +1423,7 @@ export type UserCreateWithoutSubmissionsInput = {
   qaQuestions?: Prisma.QaQuestionCreateNestedManyWithoutUserInput
   qaReplies?: Prisma.QaReplyCreateNestedManyWithoutUserInput
   qaUpvotes?: Prisma.QaUpvoteCreateNestedManyWithoutUserInput
+  savedEvents?: Prisma.SavedEventCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   mentorTeams?: Prisma.TeamMentorCreateNestedManyWithoutUserInput
 }
@@ -1290,6 +1448,7 @@ export type UserUncheckedCreateWithoutSubmissionsInput = {
   qaQuestions?: Prisma.QaQuestionUncheckedCreateNestedManyWithoutUserInput
   qaReplies?: Prisma.QaReplyUncheckedCreateNestedManyWithoutUserInput
   qaUpvotes?: Prisma.QaUpvoteUncheckedCreateNestedManyWithoutUserInput
+  savedEvents?: Prisma.SavedEventUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   mentorTeams?: Prisma.TeamMentorUncheckedCreateNestedManyWithoutUserInput
 }
@@ -1330,6 +1489,7 @@ export type UserUpdateWithoutSubmissionsInput = {
   qaQuestions?: Prisma.QaQuestionUpdateManyWithoutUserNestedInput
   qaReplies?: Prisma.QaReplyUpdateManyWithoutUserNestedInput
   qaUpvotes?: Prisma.QaUpvoteUpdateManyWithoutUserNestedInput
+  savedEvents?: Prisma.SavedEventUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   mentorTeams?: Prisma.TeamMentorUpdateManyWithoutUserNestedInput
 }
@@ -1354,6 +1514,7 @@ export type UserUncheckedUpdateWithoutSubmissionsInput = {
   qaQuestions?: Prisma.QaQuestionUncheckedUpdateManyWithoutUserNestedInput
   qaReplies?: Prisma.QaReplyUncheckedUpdateManyWithoutUserNestedInput
   qaUpvotes?: Prisma.QaUpvoteUncheckedUpdateManyWithoutUserNestedInput
+  savedEvents?: Prisma.SavedEventUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   mentorTeams?: Prisma.TeamMentorUncheckedUpdateManyWithoutUserNestedInput
 }
@@ -1378,6 +1539,7 @@ export type UserCreateWithoutJudgeAssignmentsInput = {
   qaQuestions?: Prisma.QaQuestionCreateNestedManyWithoutUserInput
   qaReplies?: Prisma.QaReplyCreateNestedManyWithoutUserInput
   qaUpvotes?: Prisma.QaUpvoteCreateNestedManyWithoutUserInput
+  savedEvents?: Prisma.SavedEventCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   mentorTeams?: Prisma.TeamMentorCreateNestedManyWithoutUserInput
 }
@@ -1402,6 +1564,7 @@ export type UserUncheckedCreateWithoutJudgeAssignmentsInput = {
   qaQuestions?: Prisma.QaQuestionUncheckedCreateNestedManyWithoutUserInput
   qaReplies?: Prisma.QaReplyUncheckedCreateNestedManyWithoutUserInput
   qaUpvotes?: Prisma.QaUpvoteUncheckedCreateNestedManyWithoutUserInput
+  savedEvents?: Prisma.SavedEventUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   mentorTeams?: Prisma.TeamMentorUncheckedCreateNestedManyWithoutUserInput
 }
@@ -1442,6 +1605,7 @@ export type UserUpdateWithoutJudgeAssignmentsInput = {
   qaQuestions?: Prisma.QaQuestionUpdateManyWithoutUserNestedInput
   qaReplies?: Prisma.QaReplyUpdateManyWithoutUserNestedInput
   qaUpvotes?: Prisma.QaUpvoteUpdateManyWithoutUserNestedInput
+  savedEvents?: Prisma.SavedEventUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   mentorTeams?: Prisma.TeamMentorUpdateManyWithoutUserNestedInput
 }
@@ -1466,6 +1630,7 @@ export type UserUncheckedUpdateWithoutJudgeAssignmentsInput = {
   qaQuestions?: Prisma.QaQuestionUncheckedUpdateManyWithoutUserNestedInput
   qaReplies?: Prisma.QaReplyUncheckedUpdateManyWithoutUserNestedInput
   qaUpvotes?: Prisma.QaUpvoteUncheckedUpdateManyWithoutUserNestedInput
+  savedEvents?: Prisma.SavedEventUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   mentorTeams?: Prisma.TeamMentorUncheckedUpdateManyWithoutUserNestedInput
 }
@@ -1490,6 +1655,7 @@ export type UserCreateWithoutScoresInput = {
   qaQuestions?: Prisma.QaQuestionCreateNestedManyWithoutUserInput
   qaReplies?: Prisma.QaReplyCreateNestedManyWithoutUserInput
   qaUpvotes?: Prisma.QaUpvoteCreateNestedManyWithoutUserInput
+  savedEvents?: Prisma.SavedEventCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   mentorTeams?: Prisma.TeamMentorCreateNestedManyWithoutUserInput
 }
@@ -1514,6 +1680,7 @@ export type UserUncheckedCreateWithoutScoresInput = {
   qaQuestions?: Prisma.QaQuestionUncheckedCreateNestedManyWithoutUserInput
   qaReplies?: Prisma.QaReplyUncheckedCreateNestedManyWithoutUserInput
   qaUpvotes?: Prisma.QaUpvoteUncheckedCreateNestedManyWithoutUserInput
+  savedEvents?: Prisma.SavedEventUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   mentorTeams?: Prisma.TeamMentorUncheckedCreateNestedManyWithoutUserInput
 }
@@ -1554,6 +1721,7 @@ export type UserUpdateWithoutScoresInput = {
   qaQuestions?: Prisma.QaQuestionUpdateManyWithoutUserNestedInput
   qaReplies?: Prisma.QaReplyUpdateManyWithoutUserNestedInput
   qaUpvotes?: Prisma.QaUpvoteUpdateManyWithoutUserNestedInput
+  savedEvents?: Prisma.SavedEventUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   mentorTeams?: Prisma.TeamMentorUpdateManyWithoutUserNestedInput
 }
@@ -1578,6 +1746,7 @@ export type UserUncheckedUpdateWithoutScoresInput = {
   qaQuestions?: Prisma.QaQuestionUncheckedUpdateManyWithoutUserNestedInput
   qaReplies?: Prisma.QaReplyUncheckedUpdateManyWithoutUserNestedInput
   qaUpvotes?: Prisma.QaUpvoteUncheckedUpdateManyWithoutUserNestedInput
+  savedEvents?: Prisma.SavedEventUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   mentorTeams?: Prisma.TeamMentorUncheckedUpdateManyWithoutUserNestedInput
 }
@@ -1602,6 +1771,7 @@ export type UserCreateWithoutCertificatesInput = {
   qaQuestions?: Prisma.QaQuestionCreateNestedManyWithoutUserInput
   qaReplies?: Prisma.QaReplyCreateNestedManyWithoutUserInput
   qaUpvotes?: Prisma.QaUpvoteCreateNestedManyWithoutUserInput
+  savedEvents?: Prisma.SavedEventCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   mentorTeams?: Prisma.TeamMentorCreateNestedManyWithoutUserInput
 }
@@ -1626,6 +1796,7 @@ export type UserUncheckedCreateWithoutCertificatesInput = {
   qaQuestions?: Prisma.QaQuestionUncheckedCreateNestedManyWithoutUserInput
   qaReplies?: Prisma.QaReplyUncheckedCreateNestedManyWithoutUserInput
   qaUpvotes?: Prisma.QaUpvoteUncheckedCreateNestedManyWithoutUserInput
+  savedEvents?: Prisma.SavedEventUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   mentorTeams?: Prisma.TeamMentorUncheckedCreateNestedManyWithoutUserInput
 }
@@ -1655,6 +1826,7 @@ export type UserCreateWithoutIssuedCertificatesInput = {
   qaQuestions?: Prisma.QaQuestionCreateNestedManyWithoutUserInput
   qaReplies?: Prisma.QaReplyCreateNestedManyWithoutUserInput
   qaUpvotes?: Prisma.QaUpvoteCreateNestedManyWithoutUserInput
+  savedEvents?: Prisma.SavedEventCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   mentorTeams?: Prisma.TeamMentorCreateNestedManyWithoutUserInput
 }
@@ -1679,6 +1851,7 @@ export type UserUncheckedCreateWithoutIssuedCertificatesInput = {
   qaQuestions?: Prisma.QaQuestionUncheckedCreateNestedManyWithoutUserInput
   qaReplies?: Prisma.QaReplyUncheckedCreateNestedManyWithoutUserInput
   qaUpvotes?: Prisma.QaUpvoteUncheckedCreateNestedManyWithoutUserInput
+  savedEvents?: Prisma.SavedEventUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   mentorTeams?: Prisma.TeamMentorUncheckedCreateNestedManyWithoutUserInput
 }
@@ -1719,6 +1892,7 @@ export type UserUpdateWithoutCertificatesInput = {
   qaQuestions?: Prisma.QaQuestionUpdateManyWithoutUserNestedInput
   qaReplies?: Prisma.QaReplyUpdateManyWithoutUserNestedInput
   qaUpvotes?: Prisma.QaUpvoteUpdateManyWithoutUserNestedInput
+  savedEvents?: Prisma.SavedEventUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   mentorTeams?: Prisma.TeamMentorUpdateManyWithoutUserNestedInput
 }
@@ -1743,6 +1917,7 @@ export type UserUncheckedUpdateWithoutCertificatesInput = {
   qaQuestions?: Prisma.QaQuestionUncheckedUpdateManyWithoutUserNestedInput
   qaReplies?: Prisma.QaReplyUncheckedUpdateManyWithoutUserNestedInput
   qaUpvotes?: Prisma.QaUpvoteUncheckedUpdateManyWithoutUserNestedInput
+  savedEvents?: Prisma.SavedEventUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   mentorTeams?: Prisma.TeamMentorUncheckedUpdateManyWithoutUserNestedInput
 }
@@ -1778,6 +1953,7 @@ export type UserUpdateWithoutIssuedCertificatesInput = {
   qaQuestions?: Prisma.QaQuestionUpdateManyWithoutUserNestedInput
   qaReplies?: Prisma.QaReplyUpdateManyWithoutUserNestedInput
   qaUpvotes?: Prisma.QaUpvoteUpdateManyWithoutUserNestedInput
+  savedEvents?: Prisma.SavedEventUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   mentorTeams?: Prisma.TeamMentorUpdateManyWithoutUserNestedInput
 }
@@ -1802,6 +1978,7 @@ export type UserUncheckedUpdateWithoutIssuedCertificatesInput = {
   qaQuestions?: Prisma.QaQuestionUncheckedUpdateManyWithoutUserNestedInput
   qaReplies?: Prisma.QaReplyUncheckedUpdateManyWithoutUserNestedInput
   qaUpvotes?: Prisma.QaUpvoteUncheckedUpdateManyWithoutUserNestedInput
+  savedEvents?: Prisma.SavedEventUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   mentorTeams?: Prisma.TeamMentorUncheckedUpdateManyWithoutUserNestedInput
 }
@@ -1826,6 +2003,7 @@ export type UserCreateWithoutQaQuestionsInput = {
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   qaReplies?: Prisma.QaReplyCreateNestedManyWithoutUserInput
   qaUpvotes?: Prisma.QaUpvoteCreateNestedManyWithoutUserInput
+  savedEvents?: Prisma.SavedEventCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   mentorTeams?: Prisma.TeamMentorCreateNestedManyWithoutUserInput
 }
@@ -1850,6 +2028,7 @@ export type UserUncheckedCreateWithoutQaQuestionsInput = {
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   qaReplies?: Prisma.QaReplyUncheckedCreateNestedManyWithoutUserInput
   qaUpvotes?: Prisma.QaUpvoteUncheckedCreateNestedManyWithoutUserInput
+  savedEvents?: Prisma.SavedEventUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   mentorTeams?: Prisma.TeamMentorUncheckedCreateNestedManyWithoutUserInput
 }
@@ -1890,6 +2069,7 @@ export type UserUpdateWithoutQaQuestionsInput = {
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   qaReplies?: Prisma.QaReplyUpdateManyWithoutUserNestedInput
   qaUpvotes?: Prisma.QaUpvoteUpdateManyWithoutUserNestedInput
+  savedEvents?: Prisma.SavedEventUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   mentorTeams?: Prisma.TeamMentorUpdateManyWithoutUserNestedInput
 }
@@ -1914,6 +2094,7 @@ export type UserUncheckedUpdateWithoutQaQuestionsInput = {
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   qaReplies?: Prisma.QaReplyUncheckedUpdateManyWithoutUserNestedInput
   qaUpvotes?: Prisma.QaUpvoteUncheckedUpdateManyWithoutUserNestedInput
+  savedEvents?: Prisma.SavedEventUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   mentorTeams?: Prisma.TeamMentorUncheckedUpdateManyWithoutUserNestedInput
 }
@@ -1938,6 +2119,7 @@ export type UserCreateWithoutQaRepliesInput = {
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   qaQuestions?: Prisma.QaQuestionCreateNestedManyWithoutUserInput
   qaUpvotes?: Prisma.QaUpvoteCreateNestedManyWithoutUserInput
+  savedEvents?: Prisma.SavedEventCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   mentorTeams?: Prisma.TeamMentorCreateNestedManyWithoutUserInput
 }
@@ -1962,6 +2144,7 @@ export type UserUncheckedCreateWithoutQaRepliesInput = {
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   qaQuestions?: Prisma.QaQuestionUncheckedCreateNestedManyWithoutUserInput
   qaUpvotes?: Prisma.QaUpvoteUncheckedCreateNestedManyWithoutUserInput
+  savedEvents?: Prisma.SavedEventUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   mentorTeams?: Prisma.TeamMentorUncheckedCreateNestedManyWithoutUserInput
 }
@@ -2002,6 +2185,7 @@ export type UserUpdateWithoutQaRepliesInput = {
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   qaQuestions?: Prisma.QaQuestionUpdateManyWithoutUserNestedInput
   qaUpvotes?: Prisma.QaUpvoteUpdateManyWithoutUserNestedInput
+  savedEvents?: Prisma.SavedEventUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   mentorTeams?: Prisma.TeamMentorUpdateManyWithoutUserNestedInput
 }
@@ -2026,6 +2210,7 @@ export type UserUncheckedUpdateWithoutQaRepliesInput = {
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   qaQuestions?: Prisma.QaQuestionUncheckedUpdateManyWithoutUserNestedInput
   qaUpvotes?: Prisma.QaUpvoteUncheckedUpdateManyWithoutUserNestedInput
+  savedEvents?: Prisma.SavedEventUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   mentorTeams?: Prisma.TeamMentorUncheckedUpdateManyWithoutUserNestedInput
 }
@@ -2050,6 +2235,7 @@ export type UserCreateWithoutQaUpvotesInput = {
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   qaQuestions?: Prisma.QaQuestionCreateNestedManyWithoutUserInput
   qaReplies?: Prisma.QaReplyCreateNestedManyWithoutUserInput
+  savedEvents?: Prisma.SavedEventCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   mentorTeams?: Prisma.TeamMentorCreateNestedManyWithoutUserInput
 }
@@ -2074,6 +2260,7 @@ export type UserUncheckedCreateWithoutQaUpvotesInput = {
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   qaQuestions?: Prisma.QaQuestionUncheckedCreateNestedManyWithoutUserInput
   qaReplies?: Prisma.QaReplyUncheckedCreateNestedManyWithoutUserInput
+  savedEvents?: Prisma.SavedEventUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   mentorTeams?: Prisma.TeamMentorUncheckedCreateNestedManyWithoutUserInput
 }
@@ -2114,6 +2301,7 @@ export type UserUpdateWithoutQaUpvotesInput = {
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   qaQuestions?: Prisma.QaQuestionUpdateManyWithoutUserNestedInput
   qaReplies?: Prisma.QaReplyUpdateManyWithoutUserNestedInput
+  savedEvents?: Prisma.SavedEventUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   mentorTeams?: Prisma.TeamMentorUpdateManyWithoutUserNestedInput
 }
@@ -2138,6 +2326,7 @@ export type UserUncheckedUpdateWithoutQaUpvotesInput = {
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   qaQuestions?: Prisma.QaQuestionUncheckedUpdateManyWithoutUserNestedInput
   qaReplies?: Prisma.QaReplyUncheckedUpdateManyWithoutUserNestedInput
+  savedEvents?: Prisma.SavedEventUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   mentorTeams?: Prisma.TeamMentorUncheckedUpdateManyWithoutUserNestedInput
 }
@@ -2163,6 +2352,7 @@ export type UserCreateWithoutNotificationsInput = {
   qaQuestions?: Prisma.QaQuestionCreateNestedManyWithoutUserInput
   qaReplies?: Prisma.QaReplyCreateNestedManyWithoutUserInput
   qaUpvotes?: Prisma.QaUpvoteCreateNestedManyWithoutUserInput
+  savedEvents?: Prisma.SavedEventCreateNestedManyWithoutUserInput
   mentorTeams?: Prisma.TeamMentorCreateNestedManyWithoutUserInput
 }
 
@@ -2187,6 +2377,7 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   qaQuestions?: Prisma.QaQuestionUncheckedCreateNestedManyWithoutUserInput
   qaReplies?: Prisma.QaReplyUncheckedCreateNestedManyWithoutUserInput
   qaUpvotes?: Prisma.QaUpvoteUncheckedCreateNestedManyWithoutUserInput
+  savedEvents?: Prisma.SavedEventUncheckedCreateNestedManyWithoutUserInput
   mentorTeams?: Prisma.TeamMentorUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -2227,6 +2418,7 @@ export type UserUpdateWithoutNotificationsInput = {
   qaQuestions?: Prisma.QaQuestionUpdateManyWithoutUserNestedInput
   qaReplies?: Prisma.QaReplyUpdateManyWithoutUserNestedInput
   qaUpvotes?: Prisma.QaUpvoteUpdateManyWithoutUserNestedInput
+  savedEvents?: Prisma.SavedEventUpdateManyWithoutUserNestedInput
   mentorTeams?: Prisma.TeamMentorUpdateManyWithoutUserNestedInput
 }
 
@@ -2251,6 +2443,7 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   qaQuestions?: Prisma.QaQuestionUncheckedUpdateManyWithoutUserNestedInput
   qaReplies?: Prisma.QaReplyUncheckedUpdateManyWithoutUserNestedInput
   qaUpvotes?: Prisma.QaUpvoteUncheckedUpdateManyWithoutUserNestedInput
+  savedEvents?: Prisma.SavedEventUncheckedUpdateManyWithoutUserNestedInput
   mentorTeams?: Prisma.TeamMentorUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -2271,6 +2464,7 @@ export type UserCountOutputType = {
   qaQuestions: number
   qaReplies: number
   qaUpvotes: number
+  savedEvents: number
   notifications: number
   mentorTeams: number
 }
@@ -2287,6 +2481,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   qaQuestions?: boolean | UserCountOutputTypeCountQaQuestionsArgs
   qaReplies?: boolean | UserCountOutputTypeCountQaRepliesArgs
   qaUpvotes?: boolean | UserCountOutputTypeCountQaUpvotesArgs
+  savedEvents?: boolean | UserCountOutputTypeCountSavedEventsArgs
   notifications?: boolean | UserCountOutputTypeCountNotificationsArgs
   mentorTeams?: boolean | UserCountOutputTypeCountMentorTeamsArgs
 }
@@ -2381,6 +2576,13 @@ export type UserCountOutputTypeCountQaUpvotesArgs<ExtArgs extends runtime.Types.
 /**
  * UserCountOutputType without action
  */
+export type UserCountOutputTypeCountSavedEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SavedEventWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
 export type UserCountOutputTypeCountNotificationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.NotificationWhereInput
 }
@@ -2414,6 +2616,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   qaQuestions?: boolean | Prisma.User$qaQuestionsArgs<ExtArgs>
   qaReplies?: boolean | Prisma.User$qaRepliesArgs<ExtArgs>
   qaUpvotes?: boolean | Prisma.User$qaUpvotesArgs<ExtArgs>
+  savedEvents?: boolean | Prisma.User$savedEventsArgs<ExtArgs>
   notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
   mentorTeams?: boolean | Prisma.User$mentorTeamsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
@@ -2466,6 +2669,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   qaQuestions?: boolean | Prisma.User$qaQuestionsArgs<ExtArgs>
   qaReplies?: boolean | Prisma.User$qaRepliesArgs<ExtArgs>
   qaUpvotes?: boolean | Prisma.User$qaUpvotesArgs<ExtArgs>
+  savedEvents?: boolean | Prisma.User$savedEventsArgs<ExtArgs>
   notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
   mentorTeams?: boolean | Prisma.User$mentorTeamsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
@@ -2488,6 +2692,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     qaQuestions: Prisma.$QaQuestionPayload<ExtArgs>[]
     qaReplies: Prisma.$QaReplyPayload<ExtArgs>[]
     qaUpvotes: Prisma.$QaUpvotePayload<ExtArgs>[]
+    savedEvents: Prisma.$SavedEventPayload<ExtArgs>[]
     notifications: Prisma.$NotificationPayload<ExtArgs>[]
     mentorTeams: Prisma.$TeamMentorPayload<ExtArgs>[]
   }
@@ -2906,6 +3111,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   qaQuestions<T extends Prisma.User$qaQuestionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$qaQuestionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$QaQuestionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   qaReplies<T extends Prisma.User$qaRepliesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$qaRepliesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$QaReplyPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   qaUpvotes<T extends Prisma.User$qaUpvotesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$qaUpvotesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$QaUpvotePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  savedEvents<T extends Prisma.User$savedEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$savedEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SavedEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   notifications<T extends Prisma.User$notificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   mentorTeams<T extends Prisma.User$mentorTeamsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$mentorTeamsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TeamMentorPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
@@ -3618,6 +3824,30 @@ export type User$qaUpvotesArgs<ExtArgs extends runtime.Types.Extensions.Internal
   take?: number
   skip?: number
   distinct?: Prisma.QaUpvoteScalarFieldEnum | Prisma.QaUpvoteScalarFieldEnum[]
+}
+
+/**
+ * User.savedEvents
+ */
+export type User$savedEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SavedEvent
+   */
+  select?: Prisma.SavedEventSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SavedEvent
+   */
+  omit?: Prisma.SavedEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SavedEventInclude<ExtArgs> | null
+  where?: Prisma.SavedEventWhereInput
+  orderBy?: Prisma.SavedEventOrderByWithRelationInput | Prisma.SavedEventOrderByWithRelationInput[]
+  cursor?: Prisma.SavedEventWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SavedEventScalarFieldEnum | Prisma.SavedEventScalarFieldEnum[]
 }
 
 /**

@@ -14,6 +14,7 @@ import {
   X,
   Trophy,
   CalendarPlus,
+  Bookmark,
   Download,
   ExternalLink,
   Play,
@@ -24,6 +25,7 @@ import Button from "../components/Button";
 import { eventsApi } from "../services/api/eventsApi";
 import { formatDate } from "../lib/utils";
 import LoadingSpinner from "../components/LoadingSpinner";
+import { useAuthContext } from "../contexts/AuthContext";
 
 // --- Animation Helper (Inlined for standalone usage) ---
 const useOnScreen = (ref: React.RefObject<Element>, rootMargin = "0px") => {
@@ -75,6 +77,10 @@ type EventItem = {
   image: string;
   status: string;
   deadline?: string;
+  isSaved?: boolean;
+  totalSaves?: number;
+  totalParticipants?: number;
+  isRegistrationOpen?: boolean;
   teamSizeMin?: number;
   teamSizeMax?: number;
   _count?: { registrations?: number };
@@ -89,6 +95,7 @@ const statusOptions = [
 
 const EventsPage: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuthContext();
   const [searchTerm, setSearchTerm] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
   const [activeStatus, setActiveStatus] = useState<string>(
@@ -99,6 +106,7 @@ const EventsPage: React.FC = () => {
   const [categories, setCategories] = useState<string[]>(["All"]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [togglingEventId, setTogglingEventId] = useState<string | null>(null);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -142,6 +150,14 @@ const EventsPage: React.FC = () => {
 
   useEffect(() => {
     fetchEvents();
+  }, [fetchEvents]);
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      void fetchEvents();
+    }, 15000);
+
+    return () => window.clearInterval(intervalId);
   }, [fetchEvents]);
 
   useEffect(() => {
@@ -259,13 +275,94 @@ const EventsPage: React.FC = () => {
     setPage(1);
   };
 
+  const handleToggleSave = async (
+    clickEvent: React.MouseEvent,
+    event: EventItem,
+  ) => {
+    clickEvent.stopPropagation();
+
+    if (togglingEventId) return;
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+    if (user.role !== "STUDENT") {
+      setError("Only students can save events.");
+      return;
+    }
+
+    const previousSaved = Boolean(event.isSaved);
+    const nextSaved = !previousSaved;
+
+    setEvents((previous) =>
+      previous.map((item) =>
+        item.id === event.id
+          ? {
+              ...item,
+              isSaved: nextSaved,
+              totalSaves: Math.max(
+                0,
+                (item.totalSaves ?? 0) + (nextSaved ? 1 : -1),
+              ),
+            }
+          : item,
+      ),
+    );
+
+    try {
+      setTogglingEventId(event.id);
+      const response = nextSaved
+        ? await eventsApi.bookmarkEvent(event.id)
+        : await eventsApi.unbookmarkEvent(event.id);
+      const payload = response.data?.data ?? {};
+
+      setEvents((previous) =>
+        previous.map((item) =>
+          item.id === event.id
+            ? {
+                ...item,
+                isSaved:
+                  typeof payload.isSaved === "boolean"
+                    ? payload.isSaved
+                    : nextSaved,
+                totalSaves:
+                  typeof payload.totalSaves === "number"
+                    ? payload.totalSaves
+                    : item.totalSaves,
+              }
+            : item,
+        ),
+      );
+    } catch (err: any) {
+      const message =
+        err?.response?.data?.message || "Failed to update saved state";
+      setError(message);
+      setEvents((previous) =>
+        previous.map((item) =>
+          item.id === event.id
+            ? {
+                ...item,
+                isSaved: previousSaved,
+                totalSaves: Math.max(
+                  0,
+                  (item.totalSaves ?? 0) + (previousSaved ? 1 : -1),
+                ),
+              }
+            : item,
+        ),
+      );
+    } finally {
+      setTogglingEventId(null);
+    }
+  };
+
   return (
     <div className="bg-slate-50 min-h-screen">
       {/* 1. HERO SECTION */}
       <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden bg-slate-50">
         <div className="absolute inset-0 bg-grid-pattern opacity-50 pointer-events-none"></div>
         {/* Warm Orange Glow */}
-        <div className="absolute top-1/4 right-1/4 w-[600px] h-[600px] bg-gradient-to-r from-orange-200/30 to-red-200/20 rounded-full blur-[100px] pointer-events-none"></div>
+        <div className="absolute top-1/4 right-1/4 w-150 h-150 bg-linear-to-r from-orange-200/30 to-red-200/20 rounded-full blur-[100px] pointer-events-none"></div>
 
         <div className="container mx-auto px-6 md:px-12 lg:px-20 max-w-7xl relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
@@ -300,13 +397,13 @@ const EventsPage: React.FC = () => {
             </div>
 
             {/* Interactive Events UI */}
-            <div className="relative h-[550px] w-full hidden lg:flex items-center justify-center">
+            <div className="relative h-137.5 w-full hidden lg:flex items-center justify-center">
               {/* Event Ticket (Back) */}
-              <div className="absolute top-8 right-10 w-[300px] bg-white rounded-2xl shadow-xl border border-slate-200 p-0 overflow-hidden transform rotate-6 opacity-60">
+              <div className="absolute top-8 right-10 w-75 bg-white rounded-2xl shadow-xl border border-slate-200 p-0 overflow-hidden transform rotate-6 opacity-60">
                 <div className="h-32 bg-slate-800"></div>
                 <div className="p-4 border-b border-dashed border-slate-300 relative">
-                  <div className="absolute -left-2 bottom-[-10px] w-4 h-4 bg-slate-50 rounded-full"></div>
-                  <div className="absolute -right-2 bottom-[-10px] w-4 h-4 bg-slate-50 rounded-full"></div>
+                  <div className="absolute -left-2 -bottom-2.5 w-4 h-4 bg-slate-50 rounded-full"></div>
+                  <div className="absolute -right-2 -bottom-2.5 w-4 h-4 bg-slate-50 rounded-full"></div>
                   <div className="h-4 w-3/4 bg-slate-200 rounded mb-2"></div>
                   <div className="h-3 w-1/2 bg-slate-100 rounded"></div>
                 </div>
@@ -604,10 +701,30 @@ const EventsPage: React.FC = () => {
                           <Users size={16} />
                         </div>
                         <div className="flex items-center text-sm font-semibold text-slate-700 ml-2">
-                          {event._count?.registrations ?? 0} registered
+                          {event.totalParticipants ??
+                            event._count?.registrations ??
+                            0}{" "}
+                          registered
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
+                        <button
+                          onClick={(clickEvent) =>
+                            void handleToggleSave(clickEvent, event)
+                          }
+                          className={`flex items-center justify-center w-10 h-10 rounded-full border transition-colors ${
+                            event.isSaved
+                              ? "border-secondary-200 bg-secondary-50 text-secondary-600"
+                              : "border-slate-200 text-slate-400 hover:text-primary-600 hover:bg-slate-50"
+                          }`}
+                          title="Save for Later"
+                          disabled={togglingEventId === event.id}
+                        >
+                          <Bookmark
+                            size={18}
+                            fill={event.isSaved ? "currentColor" : "none"}
+                          />
+                        </button>
                         <button
                           onClick={(e) => openCalendarModal(e, event)}
                           className="flex items-center justify-center w-10 h-10 rounded-full border border-slate-200 text-slate-400 hover:text-primary-600 hover:bg-slate-50 transition-colors"

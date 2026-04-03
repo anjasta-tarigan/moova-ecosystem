@@ -57,6 +57,7 @@ export type EventMinAggregateOutputType = {
   teamSizeMax: number | null
   prizePool: string | null
   organizer: string | null
+  registrationEndDate: Date | null
   createdById: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -81,6 +82,7 @@ export type EventMaxAggregateOutputType = {
   teamSizeMax: number | null
   prizePool: string | null
   organizer: string | null
+  registrationEndDate: Date | null
   createdById: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -107,6 +109,7 @@ export type EventCountAggregateOutputType = {
   sdgs: number
   prizePool: number
   organizer: number
+  registrationEndDate: number
   createdById: number
   createdAt: number
   updatedAt: number
@@ -145,6 +148,7 @@ export type EventMinAggregateInputType = {
   teamSizeMax?: true
   prizePool?: true
   organizer?: true
+  registrationEndDate?: true
   createdById?: true
   createdAt?: true
   updatedAt?: true
@@ -169,6 +173,7 @@ export type EventMaxAggregateInputType = {
   teamSizeMax?: true
   prizePool?: true
   organizer?: true
+  registrationEndDate?: true
   createdById?: true
   createdAt?: true
   updatedAt?: true
@@ -195,6 +200,7 @@ export type EventCountAggregateInputType = {
   sdgs?: true
   prizePool?: true
   organizer?: true
+  registrationEndDate?: true
   createdById?: true
   createdAt?: true
   updatedAt?: true
@@ -308,6 +314,7 @@ export type EventGroupByOutputType = {
   sdgs: number[]
   prizePool: string
   organizer: string
+  registrationEndDate: Date | null
   createdById: string
   createdAt: Date
   updatedAt: Date
@@ -357,6 +364,7 @@ export type EventWhereInput = {
   sdgs?: Prisma.IntNullableListFilter<"Event">
   prizePool?: Prisma.StringFilter<"Event"> | string
   organizer?: Prisma.StringFilter<"Event"> | string
+  registrationEndDate?: Prisma.DateTimeNullableFilter<"Event"> | Date | string | null
   createdById?: Prisma.StringFilter<"Event"> | string
   createdAt?: Prisma.DateTimeFilter<"Event"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Event"> | Date | string
@@ -364,6 +372,7 @@ export type EventWhereInput = {
   faqs?: Prisma.EventFaqListRelationFilter
   categories?: Prisma.EventCategoryListRelationFilter
   registrations?: Prisma.EventRegistrationListRelationFilter
+  savedBy?: Prisma.SavedEventListRelationFilter
   submissions?: Prisma.SubmissionListRelationFilter
   judgeAssignments?: Prisma.JudgeAssignmentListRelationFilter
   qaQuestions?: Prisma.QaQuestionListRelationFilter
@@ -391,6 +400,7 @@ export type EventOrderByWithRelationInput = {
   sdgs?: Prisma.SortOrder
   prizePool?: Prisma.SortOrder
   organizer?: Prisma.SortOrder
+  registrationEndDate?: Prisma.SortOrderInput | Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -398,6 +408,7 @@ export type EventOrderByWithRelationInput = {
   faqs?: Prisma.EventFaqOrderByRelationAggregateInput
   categories?: Prisma.EventCategoryOrderByRelationAggregateInput
   registrations?: Prisma.EventRegistrationOrderByRelationAggregateInput
+  savedBy?: Prisma.SavedEventOrderByRelationAggregateInput
   submissions?: Prisma.SubmissionOrderByRelationAggregateInput
   judgeAssignments?: Prisma.JudgeAssignmentOrderByRelationAggregateInput
   qaQuestions?: Prisma.QaQuestionOrderByRelationAggregateInput
@@ -428,6 +439,7 @@ export type EventWhereUniqueInput = Prisma.AtLeast<{
   sdgs?: Prisma.IntNullableListFilter<"Event">
   prizePool?: Prisma.StringFilter<"Event"> | string
   organizer?: Prisma.StringFilter<"Event"> | string
+  registrationEndDate?: Prisma.DateTimeNullableFilter<"Event"> | Date | string | null
   createdById?: Prisma.StringFilter<"Event"> | string
   createdAt?: Prisma.DateTimeFilter<"Event"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Event"> | Date | string
@@ -435,6 +447,7 @@ export type EventWhereUniqueInput = Prisma.AtLeast<{
   faqs?: Prisma.EventFaqListRelationFilter
   categories?: Prisma.EventCategoryListRelationFilter
   registrations?: Prisma.EventRegistrationListRelationFilter
+  savedBy?: Prisma.SavedEventListRelationFilter
   submissions?: Prisma.SubmissionListRelationFilter
   judgeAssignments?: Prisma.JudgeAssignmentListRelationFilter
   qaQuestions?: Prisma.QaQuestionListRelationFilter
@@ -462,6 +475,7 @@ export type EventOrderByWithAggregationInput = {
   sdgs?: Prisma.SortOrder
   prizePool?: Prisma.SortOrder
   organizer?: Prisma.SortOrder
+  registrationEndDate?: Prisma.SortOrderInput | Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -496,6 +510,7 @@ export type EventScalarWhereWithAggregatesInput = {
   sdgs?: Prisma.IntNullableListFilter<"Event">
   prizePool?: Prisma.StringWithAggregatesFilter<"Event"> | string
   organizer?: Prisma.StringWithAggregatesFilter<"Event"> | string
+  registrationEndDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Event"> | Date | string | null
   createdById?: Prisma.StringWithAggregatesFilter<"Event"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Event"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Event"> | Date | string
@@ -522,6 +537,7 @@ export type EventCreateInput = {
   sdgs?: Prisma.EventCreatesdgsInput | number[]
   prizePool?: string
   organizer?: string
+  registrationEndDate?: Date | string | null
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -529,6 +545,7 @@ export type EventCreateInput = {
   faqs?: Prisma.EventFaqCreateNestedManyWithoutEventInput
   categories?: Prisma.EventCategoryCreateNestedManyWithoutEventInput
   registrations?: Prisma.EventRegistrationCreateNestedManyWithoutEventInput
+  savedBy?: Prisma.SavedEventCreateNestedManyWithoutEventInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutEventInput
   judgeAssignments?: Prisma.JudgeAssignmentCreateNestedManyWithoutEventInput
   qaQuestions?: Prisma.QaQuestionCreateNestedManyWithoutEventInput
@@ -556,6 +573,7 @@ export type EventUncheckedCreateInput = {
   sdgs?: Prisma.EventCreatesdgsInput | number[]
   prizePool?: string
   organizer?: string
+  registrationEndDate?: Date | string | null
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -563,6 +581,7 @@ export type EventUncheckedCreateInput = {
   faqs?: Prisma.EventFaqUncheckedCreateNestedManyWithoutEventInput
   categories?: Prisma.EventCategoryUncheckedCreateNestedManyWithoutEventInput
   registrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutEventInput
+  savedBy?: Prisma.SavedEventUncheckedCreateNestedManyWithoutEventInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutEventInput
   judgeAssignments?: Prisma.JudgeAssignmentUncheckedCreateNestedManyWithoutEventInput
   qaQuestions?: Prisma.QaQuestionUncheckedCreateNestedManyWithoutEventInput
@@ -590,6 +609,7 @@ export type EventUpdateInput = {
   sdgs?: Prisma.EventUpdatesdgsInput | number[]
   prizePool?: Prisma.StringFieldUpdateOperationsInput | string
   organizer?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -597,6 +617,7 @@ export type EventUpdateInput = {
   faqs?: Prisma.EventFaqUpdateManyWithoutEventNestedInput
   categories?: Prisma.EventCategoryUpdateManyWithoutEventNestedInput
   registrations?: Prisma.EventRegistrationUpdateManyWithoutEventNestedInput
+  savedBy?: Prisma.SavedEventUpdateManyWithoutEventNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutEventNestedInput
   judgeAssignments?: Prisma.JudgeAssignmentUpdateManyWithoutEventNestedInput
   qaQuestions?: Prisma.QaQuestionUpdateManyWithoutEventNestedInput
@@ -624,6 +645,7 @@ export type EventUncheckedUpdateInput = {
   sdgs?: Prisma.EventUpdatesdgsInput | number[]
   prizePool?: Prisma.StringFieldUpdateOperationsInput | string
   organizer?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -631,6 +653,7 @@ export type EventUncheckedUpdateInput = {
   faqs?: Prisma.EventFaqUncheckedUpdateManyWithoutEventNestedInput
   categories?: Prisma.EventCategoryUncheckedUpdateManyWithoutEventNestedInput
   registrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutEventNestedInput
+  savedBy?: Prisma.SavedEventUncheckedUpdateManyWithoutEventNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutEventNestedInput
   judgeAssignments?: Prisma.JudgeAssignmentUncheckedUpdateManyWithoutEventNestedInput
   qaQuestions?: Prisma.QaQuestionUncheckedUpdateManyWithoutEventNestedInput
@@ -658,6 +681,7 @@ export type EventCreateManyInput = {
   sdgs?: Prisma.EventCreatesdgsInput | number[]
   prizePool?: string
   organizer?: string
+  registrationEndDate?: Date | string | null
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -684,6 +708,7 @@ export type EventUpdateManyMutationInput = {
   sdgs?: Prisma.EventUpdatesdgsInput | number[]
   prizePool?: Prisma.StringFieldUpdateOperationsInput | string
   organizer?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -710,6 +735,7 @@ export type EventUncheckedUpdateManyInput = {
   sdgs?: Prisma.EventUpdatesdgsInput | number[]
   prizePool?: Prisma.StringFieldUpdateOperationsInput | string
   organizer?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -744,6 +770,7 @@ export type EventCountOrderByAggregateInput = {
   sdgs?: Prisma.SortOrder
   prizePool?: Prisma.SortOrder
   organizer?: Prisma.SortOrder
+  registrationEndDate?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -774,6 +801,7 @@ export type EventMaxOrderByAggregateInput = {
   teamSizeMax?: Prisma.SortOrder
   prizePool?: Prisma.SortOrder
   organizer?: Prisma.SortOrder
+  registrationEndDate?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -798,6 +826,7 @@ export type EventMinOrderByAggregateInput = {
   teamSizeMax?: Prisma.SortOrder
   prizePool?: Prisma.SortOrder
   organizer?: Prisma.SortOrder
+  registrationEndDate?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -843,6 +872,20 @@ export type EventUpdateeligibilityInput = {
 export type EventUpdatesdgsInput = {
   set?: number[]
   push?: number | number[]
+}
+
+export type EventCreateNestedOneWithoutSavedByInput = {
+  create?: Prisma.XOR<Prisma.EventCreateWithoutSavedByInput, Prisma.EventUncheckedCreateWithoutSavedByInput>
+  connectOrCreate?: Prisma.EventCreateOrConnectWithoutSavedByInput
+  connect?: Prisma.EventWhereUniqueInput
+}
+
+export type EventUpdateOneRequiredWithoutSavedByNestedInput = {
+  create?: Prisma.XOR<Prisma.EventCreateWithoutSavedByInput, Prisma.EventUncheckedCreateWithoutSavedByInput>
+  connectOrCreate?: Prisma.EventCreateOrConnectWithoutSavedByInput
+  upsert?: Prisma.EventUpsertWithoutSavedByInput
+  connect?: Prisma.EventWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.EventUpdateToOneWithWhereWithoutSavedByInput, Prisma.EventUpdateWithoutSavedByInput>, Prisma.EventUncheckedUpdateWithoutSavedByInput>
 }
 
 export type EventCreateNestedOneWithoutTimelineInput = {
@@ -959,6 +1002,162 @@ export type EventUpdateOneRequiredWithoutQaQuestionsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.EventUpdateToOneWithWhereWithoutQaQuestionsInput, Prisma.EventUpdateWithoutQaQuestionsInput>, Prisma.EventUncheckedUpdateWithoutQaQuestionsInput>
 }
 
+export type EventCreateWithoutSavedByInput = {
+  id?: string
+  title: string
+  slug: string
+  shortDescription: string
+  fullDescription: string
+  theme?: string
+  date: string
+  location: string
+  format: $Enums.EventFormat
+  category: string
+  image?: string
+  status?: $Enums.EventStatus
+  deadline: string
+  fee?: string
+  teamSizeMin?: number
+  teamSizeMax?: number
+  eligibility?: Prisma.EventCreateeligibilityInput | string[]
+  sdgs?: Prisma.EventCreatesdgsInput | number[]
+  prizePool?: string
+  organizer?: string
+  registrationEndDate?: Date | string | null
+  createdById: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  timeline?: Prisma.EventTimelineCreateNestedManyWithoutEventInput
+  faqs?: Prisma.EventFaqCreateNestedManyWithoutEventInput
+  categories?: Prisma.EventCategoryCreateNestedManyWithoutEventInput
+  registrations?: Prisma.EventRegistrationCreateNestedManyWithoutEventInput
+  submissions?: Prisma.SubmissionCreateNestedManyWithoutEventInput
+  judgeAssignments?: Prisma.JudgeAssignmentCreateNestedManyWithoutEventInput
+  qaQuestions?: Prisma.QaQuestionCreateNestedManyWithoutEventInput
+  certificates?: Prisma.CertificateCreateNestedManyWithoutEventInput
+}
+
+export type EventUncheckedCreateWithoutSavedByInput = {
+  id?: string
+  title: string
+  slug: string
+  shortDescription: string
+  fullDescription: string
+  theme?: string
+  date: string
+  location: string
+  format: $Enums.EventFormat
+  category: string
+  image?: string
+  status?: $Enums.EventStatus
+  deadline: string
+  fee?: string
+  teamSizeMin?: number
+  teamSizeMax?: number
+  eligibility?: Prisma.EventCreateeligibilityInput | string[]
+  sdgs?: Prisma.EventCreatesdgsInput | number[]
+  prizePool?: string
+  organizer?: string
+  registrationEndDate?: Date | string | null
+  createdById: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  timeline?: Prisma.EventTimelineUncheckedCreateNestedManyWithoutEventInput
+  faqs?: Prisma.EventFaqUncheckedCreateNestedManyWithoutEventInput
+  categories?: Prisma.EventCategoryUncheckedCreateNestedManyWithoutEventInput
+  registrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutEventInput
+  submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutEventInput
+  judgeAssignments?: Prisma.JudgeAssignmentUncheckedCreateNestedManyWithoutEventInput
+  qaQuestions?: Prisma.QaQuestionUncheckedCreateNestedManyWithoutEventInput
+  certificates?: Prisma.CertificateUncheckedCreateNestedManyWithoutEventInput
+}
+
+export type EventCreateOrConnectWithoutSavedByInput = {
+  where: Prisma.EventWhereUniqueInput
+  create: Prisma.XOR<Prisma.EventCreateWithoutSavedByInput, Prisma.EventUncheckedCreateWithoutSavedByInput>
+}
+
+export type EventUpsertWithoutSavedByInput = {
+  update: Prisma.XOR<Prisma.EventUpdateWithoutSavedByInput, Prisma.EventUncheckedUpdateWithoutSavedByInput>
+  create: Prisma.XOR<Prisma.EventCreateWithoutSavedByInput, Prisma.EventUncheckedCreateWithoutSavedByInput>
+  where?: Prisma.EventWhereInput
+}
+
+export type EventUpdateToOneWithWhereWithoutSavedByInput = {
+  where?: Prisma.EventWhereInput
+  data: Prisma.XOR<Prisma.EventUpdateWithoutSavedByInput, Prisma.EventUncheckedUpdateWithoutSavedByInput>
+}
+
+export type EventUpdateWithoutSavedByInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  shortDescription?: Prisma.StringFieldUpdateOperationsInput | string
+  fullDescription?: Prisma.StringFieldUpdateOperationsInput | string
+  theme?: Prisma.StringFieldUpdateOperationsInput | string
+  date?: Prisma.StringFieldUpdateOperationsInput | string
+  location?: Prisma.StringFieldUpdateOperationsInput | string
+  format?: Prisma.EnumEventFormatFieldUpdateOperationsInput | $Enums.EventFormat
+  category?: Prisma.StringFieldUpdateOperationsInput | string
+  image?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumEventStatusFieldUpdateOperationsInput | $Enums.EventStatus
+  deadline?: Prisma.StringFieldUpdateOperationsInput | string
+  fee?: Prisma.StringFieldUpdateOperationsInput | string
+  teamSizeMin?: Prisma.IntFieldUpdateOperationsInput | number
+  teamSizeMax?: Prisma.IntFieldUpdateOperationsInput | number
+  eligibility?: Prisma.EventUpdateeligibilityInput | string[]
+  sdgs?: Prisma.EventUpdatesdgsInput | number[]
+  prizePool?: Prisma.StringFieldUpdateOperationsInput | string
+  organizer?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  timeline?: Prisma.EventTimelineUpdateManyWithoutEventNestedInput
+  faqs?: Prisma.EventFaqUpdateManyWithoutEventNestedInput
+  categories?: Prisma.EventCategoryUpdateManyWithoutEventNestedInput
+  registrations?: Prisma.EventRegistrationUpdateManyWithoutEventNestedInput
+  submissions?: Prisma.SubmissionUpdateManyWithoutEventNestedInput
+  judgeAssignments?: Prisma.JudgeAssignmentUpdateManyWithoutEventNestedInput
+  qaQuestions?: Prisma.QaQuestionUpdateManyWithoutEventNestedInput
+  certificates?: Prisma.CertificateUpdateManyWithoutEventNestedInput
+}
+
+export type EventUncheckedUpdateWithoutSavedByInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  shortDescription?: Prisma.StringFieldUpdateOperationsInput | string
+  fullDescription?: Prisma.StringFieldUpdateOperationsInput | string
+  theme?: Prisma.StringFieldUpdateOperationsInput | string
+  date?: Prisma.StringFieldUpdateOperationsInput | string
+  location?: Prisma.StringFieldUpdateOperationsInput | string
+  format?: Prisma.EnumEventFormatFieldUpdateOperationsInput | $Enums.EventFormat
+  category?: Prisma.StringFieldUpdateOperationsInput | string
+  image?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumEventStatusFieldUpdateOperationsInput | $Enums.EventStatus
+  deadline?: Prisma.StringFieldUpdateOperationsInput | string
+  fee?: Prisma.StringFieldUpdateOperationsInput | string
+  teamSizeMin?: Prisma.IntFieldUpdateOperationsInput | number
+  teamSizeMax?: Prisma.IntFieldUpdateOperationsInput | number
+  eligibility?: Prisma.EventUpdateeligibilityInput | string[]
+  sdgs?: Prisma.EventUpdatesdgsInput | number[]
+  prizePool?: Prisma.StringFieldUpdateOperationsInput | string
+  organizer?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  timeline?: Prisma.EventTimelineUncheckedUpdateManyWithoutEventNestedInput
+  faqs?: Prisma.EventFaqUncheckedUpdateManyWithoutEventNestedInput
+  categories?: Prisma.EventCategoryUncheckedUpdateManyWithoutEventNestedInput
+  registrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutEventNestedInput
+  submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutEventNestedInput
+  judgeAssignments?: Prisma.JudgeAssignmentUncheckedUpdateManyWithoutEventNestedInput
+  qaQuestions?: Prisma.QaQuestionUncheckedUpdateManyWithoutEventNestedInput
+  certificates?: Prisma.CertificateUncheckedUpdateManyWithoutEventNestedInput
+}
+
 export type EventCreateWithoutTimelineInput = {
   id?: string
   title: string
@@ -980,12 +1179,14 @@ export type EventCreateWithoutTimelineInput = {
   sdgs?: Prisma.EventCreatesdgsInput | number[]
   prizePool?: string
   organizer?: string
+  registrationEndDate?: Date | string | null
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
   faqs?: Prisma.EventFaqCreateNestedManyWithoutEventInput
   categories?: Prisma.EventCategoryCreateNestedManyWithoutEventInput
   registrations?: Prisma.EventRegistrationCreateNestedManyWithoutEventInput
+  savedBy?: Prisma.SavedEventCreateNestedManyWithoutEventInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutEventInput
   judgeAssignments?: Prisma.JudgeAssignmentCreateNestedManyWithoutEventInput
   qaQuestions?: Prisma.QaQuestionCreateNestedManyWithoutEventInput
@@ -1013,12 +1214,14 @@ export type EventUncheckedCreateWithoutTimelineInput = {
   sdgs?: Prisma.EventCreatesdgsInput | number[]
   prizePool?: string
   organizer?: string
+  registrationEndDate?: Date | string | null
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
   faqs?: Prisma.EventFaqUncheckedCreateNestedManyWithoutEventInput
   categories?: Prisma.EventCategoryUncheckedCreateNestedManyWithoutEventInput
   registrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutEventInput
+  savedBy?: Prisma.SavedEventUncheckedCreateNestedManyWithoutEventInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutEventInput
   judgeAssignments?: Prisma.JudgeAssignmentUncheckedCreateNestedManyWithoutEventInput
   qaQuestions?: Prisma.QaQuestionUncheckedCreateNestedManyWithoutEventInput
@@ -1062,12 +1265,14 @@ export type EventUpdateWithoutTimelineInput = {
   sdgs?: Prisma.EventUpdatesdgsInput | number[]
   prizePool?: Prisma.StringFieldUpdateOperationsInput | string
   organizer?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   faqs?: Prisma.EventFaqUpdateManyWithoutEventNestedInput
   categories?: Prisma.EventCategoryUpdateManyWithoutEventNestedInput
   registrations?: Prisma.EventRegistrationUpdateManyWithoutEventNestedInput
+  savedBy?: Prisma.SavedEventUpdateManyWithoutEventNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutEventNestedInput
   judgeAssignments?: Prisma.JudgeAssignmentUpdateManyWithoutEventNestedInput
   qaQuestions?: Prisma.QaQuestionUpdateManyWithoutEventNestedInput
@@ -1095,12 +1300,14 @@ export type EventUncheckedUpdateWithoutTimelineInput = {
   sdgs?: Prisma.EventUpdatesdgsInput | number[]
   prizePool?: Prisma.StringFieldUpdateOperationsInput | string
   organizer?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   faqs?: Prisma.EventFaqUncheckedUpdateManyWithoutEventNestedInput
   categories?: Prisma.EventCategoryUncheckedUpdateManyWithoutEventNestedInput
   registrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutEventNestedInput
+  savedBy?: Prisma.SavedEventUncheckedUpdateManyWithoutEventNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutEventNestedInput
   judgeAssignments?: Prisma.JudgeAssignmentUncheckedUpdateManyWithoutEventNestedInput
   qaQuestions?: Prisma.QaQuestionUncheckedUpdateManyWithoutEventNestedInput
@@ -1128,12 +1335,14 @@ export type EventCreateWithoutFaqsInput = {
   sdgs?: Prisma.EventCreatesdgsInput | number[]
   prizePool?: string
   organizer?: string
+  registrationEndDate?: Date | string | null
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
   timeline?: Prisma.EventTimelineCreateNestedManyWithoutEventInput
   categories?: Prisma.EventCategoryCreateNestedManyWithoutEventInput
   registrations?: Prisma.EventRegistrationCreateNestedManyWithoutEventInput
+  savedBy?: Prisma.SavedEventCreateNestedManyWithoutEventInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutEventInput
   judgeAssignments?: Prisma.JudgeAssignmentCreateNestedManyWithoutEventInput
   qaQuestions?: Prisma.QaQuestionCreateNestedManyWithoutEventInput
@@ -1161,12 +1370,14 @@ export type EventUncheckedCreateWithoutFaqsInput = {
   sdgs?: Prisma.EventCreatesdgsInput | number[]
   prizePool?: string
   organizer?: string
+  registrationEndDate?: Date | string | null
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
   timeline?: Prisma.EventTimelineUncheckedCreateNestedManyWithoutEventInput
   categories?: Prisma.EventCategoryUncheckedCreateNestedManyWithoutEventInput
   registrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutEventInput
+  savedBy?: Prisma.SavedEventUncheckedCreateNestedManyWithoutEventInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutEventInput
   judgeAssignments?: Prisma.JudgeAssignmentUncheckedCreateNestedManyWithoutEventInput
   qaQuestions?: Prisma.QaQuestionUncheckedCreateNestedManyWithoutEventInput
@@ -1210,12 +1421,14 @@ export type EventUpdateWithoutFaqsInput = {
   sdgs?: Prisma.EventUpdatesdgsInput | number[]
   prizePool?: Prisma.StringFieldUpdateOperationsInput | string
   organizer?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   timeline?: Prisma.EventTimelineUpdateManyWithoutEventNestedInput
   categories?: Prisma.EventCategoryUpdateManyWithoutEventNestedInput
   registrations?: Prisma.EventRegistrationUpdateManyWithoutEventNestedInput
+  savedBy?: Prisma.SavedEventUpdateManyWithoutEventNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutEventNestedInput
   judgeAssignments?: Prisma.JudgeAssignmentUpdateManyWithoutEventNestedInput
   qaQuestions?: Prisma.QaQuestionUpdateManyWithoutEventNestedInput
@@ -1243,12 +1456,14 @@ export type EventUncheckedUpdateWithoutFaqsInput = {
   sdgs?: Prisma.EventUpdatesdgsInput | number[]
   prizePool?: Prisma.StringFieldUpdateOperationsInput | string
   organizer?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   timeline?: Prisma.EventTimelineUncheckedUpdateManyWithoutEventNestedInput
   categories?: Prisma.EventCategoryUncheckedUpdateManyWithoutEventNestedInput
   registrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutEventNestedInput
+  savedBy?: Prisma.SavedEventUncheckedUpdateManyWithoutEventNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutEventNestedInput
   judgeAssignments?: Prisma.JudgeAssignmentUncheckedUpdateManyWithoutEventNestedInput
   qaQuestions?: Prisma.QaQuestionUncheckedUpdateManyWithoutEventNestedInput
@@ -1276,12 +1491,14 @@ export type EventCreateWithoutCategoriesInput = {
   sdgs?: Prisma.EventCreatesdgsInput | number[]
   prizePool?: string
   organizer?: string
+  registrationEndDate?: Date | string | null
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
   timeline?: Prisma.EventTimelineCreateNestedManyWithoutEventInput
   faqs?: Prisma.EventFaqCreateNestedManyWithoutEventInput
   registrations?: Prisma.EventRegistrationCreateNestedManyWithoutEventInput
+  savedBy?: Prisma.SavedEventCreateNestedManyWithoutEventInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutEventInput
   judgeAssignments?: Prisma.JudgeAssignmentCreateNestedManyWithoutEventInput
   qaQuestions?: Prisma.QaQuestionCreateNestedManyWithoutEventInput
@@ -1309,12 +1526,14 @@ export type EventUncheckedCreateWithoutCategoriesInput = {
   sdgs?: Prisma.EventCreatesdgsInput | number[]
   prizePool?: string
   organizer?: string
+  registrationEndDate?: Date | string | null
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
   timeline?: Prisma.EventTimelineUncheckedCreateNestedManyWithoutEventInput
   faqs?: Prisma.EventFaqUncheckedCreateNestedManyWithoutEventInput
   registrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutEventInput
+  savedBy?: Prisma.SavedEventUncheckedCreateNestedManyWithoutEventInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutEventInput
   judgeAssignments?: Prisma.JudgeAssignmentUncheckedCreateNestedManyWithoutEventInput
   qaQuestions?: Prisma.QaQuestionUncheckedCreateNestedManyWithoutEventInput
@@ -1358,12 +1577,14 @@ export type EventUpdateWithoutCategoriesInput = {
   sdgs?: Prisma.EventUpdatesdgsInput | number[]
   prizePool?: Prisma.StringFieldUpdateOperationsInput | string
   organizer?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   timeline?: Prisma.EventTimelineUpdateManyWithoutEventNestedInput
   faqs?: Prisma.EventFaqUpdateManyWithoutEventNestedInput
   registrations?: Prisma.EventRegistrationUpdateManyWithoutEventNestedInput
+  savedBy?: Prisma.SavedEventUpdateManyWithoutEventNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutEventNestedInput
   judgeAssignments?: Prisma.JudgeAssignmentUpdateManyWithoutEventNestedInput
   qaQuestions?: Prisma.QaQuestionUpdateManyWithoutEventNestedInput
@@ -1391,12 +1612,14 @@ export type EventUncheckedUpdateWithoutCategoriesInput = {
   sdgs?: Prisma.EventUpdatesdgsInput | number[]
   prizePool?: Prisma.StringFieldUpdateOperationsInput | string
   organizer?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   timeline?: Prisma.EventTimelineUncheckedUpdateManyWithoutEventNestedInput
   faqs?: Prisma.EventFaqUncheckedUpdateManyWithoutEventNestedInput
   registrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutEventNestedInput
+  savedBy?: Prisma.SavedEventUncheckedUpdateManyWithoutEventNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutEventNestedInput
   judgeAssignments?: Prisma.JudgeAssignmentUncheckedUpdateManyWithoutEventNestedInput
   qaQuestions?: Prisma.QaQuestionUncheckedUpdateManyWithoutEventNestedInput
@@ -1424,12 +1647,14 @@ export type EventCreateWithoutRegistrationsInput = {
   sdgs?: Prisma.EventCreatesdgsInput | number[]
   prizePool?: string
   organizer?: string
+  registrationEndDate?: Date | string | null
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
   timeline?: Prisma.EventTimelineCreateNestedManyWithoutEventInput
   faqs?: Prisma.EventFaqCreateNestedManyWithoutEventInput
   categories?: Prisma.EventCategoryCreateNestedManyWithoutEventInput
+  savedBy?: Prisma.SavedEventCreateNestedManyWithoutEventInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutEventInput
   judgeAssignments?: Prisma.JudgeAssignmentCreateNestedManyWithoutEventInput
   qaQuestions?: Prisma.QaQuestionCreateNestedManyWithoutEventInput
@@ -1457,12 +1682,14 @@ export type EventUncheckedCreateWithoutRegistrationsInput = {
   sdgs?: Prisma.EventCreatesdgsInput | number[]
   prizePool?: string
   organizer?: string
+  registrationEndDate?: Date | string | null
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
   timeline?: Prisma.EventTimelineUncheckedCreateNestedManyWithoutEventInput
   faqs?: Prisma.EventFaqUncheckedCreateNestedManyWithoutEventInput
   categories?: Prisma.EventCategoryUncheckedCreateNestedManyWithoutEventInput
+  savedBy?: Prisma.SavedEventUncheckedCreateNestedManyWithoutEventInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutEventInput
   judgeAssignments?: Prisma.JudgeAssignmentUncheckedCreateNestedManyWithoutEventInput
   qaQuestions?: Prisma.QaQuestionUncheckedCreateNestedManyWithoutEventInput
@@ -1506,12 +1733,14 @@ export type EventUpdateWithoutRegistrationsInput = {
   sdgs?: Prisma.EventUpdatesdgsInput | number[]
   prizePool?: Prisma.StringFieldUpdateOperationsInput | string
   organizer?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   timeline?: Prisma.EventTimelineUpdateManyWithoutEventNestedInput
   faqs?: Prisma.EventFaqUpdateManyWithoutEventNestedInput
   categories?: Prisma.EventCategoryUpdateManyWithoutEventNestedInput
+  savedBy?: Prisma.SavedEventUpdateManyWithoutEventNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutEventNestedInput
   judgeAssignments?: Prisma.JudgeAssignmentUpdateManyWithoutEventNestedInput
   qaQuestions?: Prisma.QaQuestionUpdateManyWithoutEventNestedInput
@@ -1539,12 +1768,14 @@ export type EventUncheckedUpdateWithoutRegistrationsInput = {
   sdgs?: Prisma.EventUpdatesdgsInput | number[]
   prizePool?: Prisma.StringFieldUpdateOperationsInput | string
   organizer?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   timeline?: Prisma.EventTimelineUncheckedUpdateManyWithoutEventNestedInput
   faqs?: Prisma.EventFaqUncheckedUpdateManyWithoutEventNestedInput
   categories?: Prisma.EventCategoryUncheckedUpdateManyWithoutEventNestedInput
+  savedBy?: Prisma.SavedEventUncheckedUpdateManyWithoutEventNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutEventNestedInput
   judgeAssignments?: Prisma.JudgeAssignmentUncheckedUpdateManyWithoutEventNestedInput
   qaQuestions?: Prisma.QaQuestionUncheckedUpdateManyWithoutEventNestedInput
@@ -1572,6 +1803,7 @@ export type EventCreateWithoutSubmissionsInput = {
   sdgs?: Prisma.EventCreatesdgsInput | number[]
   prizePool?: string
   organizer?: string
+  registrationEndDate?: Date | string | null
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1579,6 +1811,7 @@ export type EventCreateWithoutSubmissionsInput = {
   faqs?: Prisma.EventFaqCreateNestedManyWithoutEventInput
   categories?: Prisma.EventCategoryCreateNestedManyWithoutEventInput
   registrations?: Prisma.EventRegistrationCreateNestedManyWithoutEventInput
+  savedBy?: Prisma.SavedEventCreateNestedManyWithoutEventInput
   judgeAssignments?: Prisma.JudgeAssignmentCreateNestedManyWithoutEventInput
   qaQuestions?: Prisma.QaQuestionCreateNestedManyWithoutEventInput
   certificates?: Prisma.CertificateCreateNestedManyWithoutEventInput
@@ -1605,6 +1838,7 @@ export type EventUncheckedCreateWithoutSubmissionsInput = {
   sdgs?: Prisma.EventCreatesdgsInput | number[]
   prizePool?: string
   organizer?: string
+  registrationEndDate?: Date | string | null
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1612,6 +1846,7 @@ export type EventUncheckedCreateWithoutSubmissionsInput = {
   faqs?: Prisma.EventFaqUncheckedCreateNestedManyWithoutEventInput
   categories?: Prisma.EventCategoryUncheckedCreateNestedManyWithoutEventInput
   registrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutEventInput
+  savedBy?: Prisma.SavedEventUncheckedCreateNestedManyWithoutEventInput
   judgeAssignments?: Prisma.JudgeAssignmentUncheckedCreateNestedManyWithoutEventInput
   qaQuestions?: Prisma.QaQuestionUncheckedCreateNestedManyWithoutEventInput
   certificates?: Prisma.CertificateUncheckedCreateNestedManyWithoutEventInput
@@ -1654,6 +1889,7 @@ export type EventUpdateWithoutSubmissionsInput = {
   sdgs?: Prisma.EventUpdatesdgsInput | number[]
   prizePool?: Prisma.StringFieldUpdateOperationsInput | string
   organizer?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1661,6 +1897,7 @@ export type EventUpdateWithoutSubmissionsInput = {
   faqs?: Prisma.EventFaqUpdateManyWithoutEventNestedInput
   categories?: Prisma.EventCategoryUpdateManyWithoutEventNestedInput
   registrations?: Prisma.EventRegistrationUpdateManyWithoutEventNestedInput
+  savedBy?: Prisma.SavedEventUpdateManyWithoutEventNestedInput
   judgeAssignments?: Prisma.JudgeAssignmentUpdateManyWithoutEventNestedInput
   qaQuestions?: Prisma.QaQuestionUpdateManyWithoutEventNestedInput
   certificates?: Prisma.CertificateUpdateManyWithoutEventNestedInput
@@ -1687,6 +1924,7 @@ export type EventUncheckedUpdateWithoutSubmissionsInput = {
   sdgs?: Prisma.EventUpdatesdgsInput | number[]
   prizePool?: Prisma.StringFieldUpdateOperationsInput | string
   organizer?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1694,6 +1932,7 @@ export type EventUncheckedUpdateWithoutSubmissionsInput = {
   faqs?: Prisma.EventFaqUncheckedUpdateManyWithoutEventNestedInput
   categories?: Prisma.EventCategoryUncheckedUpdateManyWithoutEventNestedInput
   registrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutEventNestedInput
+  savedBy?: Prisma.SavedEventUncheckedUpdateManyWithoutEventNestedInput
   judgeAssignments?: Prisma.JudgeAssignmentUncheckedUpdateManyWithoutEventNestedInput
   qaQuestions?: Prisma.QaQuestionUncheckedUpdateManyWithoutEventNestedInput
   certificates?: Prisma.CertificateUncheckedUpdateManyWithoutEventNestedInput
@@ -1720,6 +1959,7 @@ export type EventCreateWithoutJudgeAssignmentsInput = {
   sdgs?: Prisma.EventCreatesdgsInput | number[]
   prizePool?: string
   organizer?: string
+  registrationEndDate?: Date | string | null
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1727,6 +1967,7 @@ export type EventCreateWithoutJudgeAssignmentsInput = {
   faqs?: Prisma.EventFaqCreateNestedManyWithoutEventInput
   categories?: Prisma.EventCategoryCreateNestedManyWithoutEventInput
   registrations?: Prisma.EventRegistrationCreateNestedManyWithoutEventInput
+  savedBy?: Prisma.SavedEventCreateNestedManyWithoutEventInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutEventInput
   qaQuestions?: Prisma.QaQuestionCreateNestedManyWithoutEventInput
   certificates?: Prisma.CertificateCreateNestedManyWithoutEventInput
@@ -1753,6 +1994,7 @@ export type EventUncheckedCreateWithoutJudgeAssignmentsInput = {
   sdgs?: Prisma.EventCreatesdgsInput | number[]
   prizePool?: string
   organizer?: string
+  registrationEndDate?: Date | string | null
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1760,6 +2002,7 @@ export type EventUncheckedCreateWithoutJudgeAssignmentsInput = {
   faqs?: Prisma.EventFaqUncheckedCreateNestedManyWithoutEventInput
   categories?: Prisma.EventCategoryUncheckedCreateNestedManyWithoutEventInput
   registrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutEventInput
+  savedBy?: Prisma.SavedEventUncheckedCreateNestedManyWithoutEventInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutEventInput
   qaQuestions?: Prisma.QaQuestionUncheckedCreateNestedManyWithoutEventInput
   certificates?: Prisma.CertificateUncheckedCreateNestedManyWithoutEventInput
@@ -1802,6 +2045,7 @@ export type EventUpdateWithoutJudgeAssignmentsInput = {
   sdgs?: Prisma.EventUpdatesdgsInput | number[]
   prizePool?: Prisma.StringFieldUpdateOperationsInput | string
   organizer?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1809,6 +2053,7 @@ export type EventUpdateWithoutJudgeAssignmentsInput = {
   faqs?: Prisma.EventFaqUpdateManyWithoutEventNestedInput
   categories?: Prisma.EventCategoryUpdateManyWithoutEventNestedInput
   registrations?: Prisma.EventRegistrationUpdateManyWithoutEventNestedInput
+  savedBy?: Prisma.SavedEventUpdateManyWithoutEventNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutEventNestedInput
   qaQuestions?: Prisma.QaQuestionUpdateManyWithoutEventNestedInput
   certificates?: Prisma.CertificateUpdateManyWithoutEventNestedInput
@@ -1835,6 +2080,7 @@ export type EventUncheckedUpdateWithoutJudgeAssignmentsInput = {
   sdgs?: Prisma.EventUpdatesdgsInput | number[]
   prizePool?: Prisma.StringFieldUpdateOperationsInput | string
   organizer?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1842,6 +2088,7 @@ export type EventUncheckedUpdateWithoutJudgeAssignmentsInput = {
   faqs?: Prisma.EventFaqUncheckedUpdateManyWithoutEventNestedInput
   categories?: Prisma.EventCategoryUncheckedUpdateManyWithoutEventNestedInput
   registrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutEventNestedInput
+  savedBy?: Prisma.SavedEventUncheckedUpdateManyWithoutEventNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutEventNestedInput
   qaQuestions?: Prisma.QaQuestionUncheckedUpdateManyWithoutEventNestedInput
   certificates?: Prisma.CertificateUncheckedUpdateManyWithoutEventNestedInput
@@ -1868,6 +2115,7 @@ export type EventCreateWithoutCertificatesInput = {
   sdgs?: Prisma.EventCreatesdgsInput | number[]
   prizePool?: string
   organizer?: string
+  registrationEndDate?: Date | string | null
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1875,6 +2123,7 @@ export type EventCreateWithoutCertificatesInput = {
   faqs?: Prisma.EventFaqCreateNestedManyWithoutEventInput
   categories?: Prisma.EventCategoryCreateNestedManyWithoutEventInput
   registrations?: Prisma.EventRegistrationCreateNestedManyWithoutEventInput
+  savedBy?: Prisma.SavedEventCreateNestedManyWithoutEventInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutEventInput
   judgeAssignments?: Prisma.JudgeAssignmentCreateNestedManyWithoutEventInput
   qaQuestions?: Prisma.QaQuestionCreateNestedManyWithoutEventInput
@@ -1901,6 +2150,7 @@ export type EventUncheckedCreateWithoutCertificatesInput = {
   sdgs?: Prisma.EventCreatesdgsInput | number[]
   prizePool?: string
   organizer?: string
+  registrationEndDate?: Date | string | null
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1908,6 +2158,7 @@ export type EventUncheckedCreateWithoutCertificatesInput = {
   faqs?: Prisma.EventFaqUncheckedCreateNestedManyWithoutEventInput
   categories?: Prisma.EventCategoryUncheckedCreateNestedManyWithoutEventInput
   registrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutEventInput
+  savedBy?: Prisma.SavedEventUncheckedCreateNestedManyWithoutEventInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutEventInput
   judgeAssignments?: Prisma.JudgeAssignmentUncheckedCreateNestedManyWithoutEventInput
   qaQuestions?: Prisma.QaQuestionUncheckedCreateNestedManyWithoutEventInput
@@ -1950,6 +2201,7 @@ export type EventUpdateWithoutCertificatesInput = {
   sdgs?: Prisma.EventUpdatesdgsInput | number[]
   prizePool?: Prisma.StringFieldUpdateOperationsInput | string
   organizer?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1957,6 +2209,7 @@ export type EventUpdateWithoutCertificatesInput = {
   faqs?: Prisma.EventFaqUpdateManyWithoutEventNestedInput
   categories?: Prisma.EventCategoryUpdateManyWithoutEventNestedInput
   registrations?: Prisma.EventRegistrationUpdateManyWithoutEventNestedInput
+  savedBy?: Prisma.SavedEventUpdateManyWithoutEventNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutEventNestedInput
   judgeAssignments?: Prisma.JudgeAssignmentUpdateManyWithoutEventNestedInput
   qaQuestions?: Prisma.QaQuestionUpdateManyWithoutEventNestedInput
@@ -1983,6 +2236,7 @@ export type EventUncheckedUpdateWithoutCertificatesInput = {
   sdgs?: Prisma.EventUpdatesdgsInput | number[]
   prizePool?: Prisma.StringFieldUpdateOperationsInput | string
   organizer?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1990,6 +2244,7 @@ export type EventUncheckedUpdateWithoutCertificatesInput = {
   faqs?: Prisma.EventFaqUncheckedUpdateManyWithoutEventNestedInput
   categories?: Prisma.EventCategoryUncheckedUpdateManyWithoutEventNestedInput
   registrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutEventNestedInput
+  savedBy?: Prisma.SavedEventUncheckedUpdateManyWithoutEventNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutEventNestedInput
   judgeAssignments?: Prisma.JudgeAssignmentUncheckedUpdateManyWithoutEventNestedInput
   qaQuestions?: Prisma.QaQuestionUncheckedUpdateManyWithoutEventNestedInput
@@ -2016,6 +2271,7 @@ export type EventCreateWithoutQaQuestionsInput = {
   sdgs?: Prisma.EventCreatesdgsInput | number[]
   prizePool?: string
   organizer?: string
+  registrationEndDate?: Date | string | null
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2023,6 +2279,7 @@ export type EventCreateWithoutQaQuestionsInput = {
   faqs?: Prisma.EventFaqCreateNestedManyWithoutEventInput
   categories?: Prisma.EventCategoryCreateNestedManyWithoutEventInput
   registrations?: Prisma.EventRegistrationCreateNestedManyWithoutEventInput
+  savedBy?: Prisma.SavedEventCreateNestedManyWithoutEventInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutEventInput
   judgeAssignments?: Prisma.JudgeAssignmentCreateNestedManyWithoutEventInput
   certificates?: Prisma.CertificateCreateNestedManyWithoutEventInput
@@ -2049,6 +2306,7 @@ export type EventUncheckedCreateWithoutQaQuestionsInput = {
   sdgs?: Prisma.EventCreatesdgsInput | number[]
   prizePool?: string
   organizer?: string
+  registrationEndDate?: Date | string | null
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2056,6 +2314,7 @@ export type EventUncheckedCreateWithoutQaQuestionsInput = {
   faqs?: Prisma.EventFaqUncheckedCreateNestedManyWithoutEventInput
   categories?: Prisma.EventCategoryUncheckedCreateNestedManyWithoutEventInput
   registrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutEventInput
+  savedBy?: Prisma.SavedEventUncheckedCreateNestedManyWithoutEventInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutEventInput
   judgeAssignments?: Prisma.JudgeAssignmentUncheckedCreateNestedManyWithoutEventInput
   certificates?: Prisma.CertificateUncheckedCreateNestedManyWithoutEventInput
@@ -2098,6 +2357,7 @@ export type EventUpdateWithoutQaQuestionsInput = {
   sdgs?: Prisma.EventUpdatesdgsInput | number[]
   prizePool?: Prisma.StringFieldUpdateOperationsInput | string
   organizer?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2105,6 +2365,7 @@ export type EventUpdateWithoutQaQuestionsInput = {
   faqs?: Prisma.EventFaqUpdateManyWithoutEventNestedInput
   categories?: Prisma.EventCategoryUpdateManyWithoutEventNestedInput
   registrations?: Prisma.EventRegistrationUpdateManyWithoutEventNestedInput
+  savedBy?: Prisma.SavedEventUpdateManyWithoutEventNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutEventNestedInput
   judgeAssignments?: Prisma.JudgeAssignmentUpdateManyWithoutEventNestedInput
   certificates?: Prisma.CertificateUpdateManyWithoutEventNestedInput
@@ -2131,6 +2392,7 @@ export type EventUncheckedUpdateWithoutQaQuestionsInput = {
   sdgs?: Prisma.EventUpdatesdgsInput | number[]
   prizePool?: Prisma.StringFieldUpdateOperationsInput | string
   organizer?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2138,6 +2400,7 @@ export type EventUncheckedUpdateWithoutQaQuestionsInput = {
   faqs?: Prisma.EventFaqUncheckedUpdateManyWithoutEventNestedInput
   categories?: Prisma.EventCategoryUncheckedUpdateManyWithoutEventNestedInput
   registrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutEventNestedInput
+  savedBy?: Prisma.SavedEventUncheckedUpdateManyWithoutEventNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutEventNestedInput
   judgeAssignments?: Prisma.JudgeAssignmentUncheckedUpdateManyWithoutEventNestedInput
   certificates?: Prisma.CertificateUncheckedUpdateManyWithoutEventNestedInput
@@ -2153,6 +2416,7 @@ export type EventCountOutputType = {
   faqs: number
   categories: number
   registrations: number
+  savedBy: number
   submissions: number
   judgeAssignments: number
   qaQuestions: number
@@ -2164,6 +2428,7 @@ export type EventCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.
   faqs?: boolean | EventCountOutputTypeCountFaqsArgs
   categories?: boolean | EventCountOutputTypeCountCategoriesArgs
   registrations?: boolean | EventCountOutputTypeCountRegistrationsArgs
+  savedBy?: boolean | EventCountOutputTypeCountSavedByArgs
   submissions?: boolean | EventCountOutputTypeCountSubmissionsArgs
   judgeAssignments?: boolean | EventCountOutputTypeCountJudgeAssignmentsArgs
   qaQuestions?: boolean | EventCountOutputTypeCountQaQuestionsArgs
@@ -2206,6 +2471,13 @@ export type EventCountOutputTypeCountCategoriesArgs<ExtArgs extends runtime.Type
  */
 export type EventCountOutputTypeCountRegistrationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.EventRegistrationWhereInput
+}
+
+/**
+ * EventCountOutputType without action
+ */
+export type EventCountOutputTypeCountSavedByArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SavedEventWhereInput
 }
 
 /**
@@ -2258,6 +2530,7 @@ export type EventSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   sdgs?: boolean
   prizePool?: boolean
   organizer?: boolean
+  registrationEndDate?: boolean
   createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -2265,6 +2538,7 @@ export type EventSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   faqs?: boolean | Prisma.Event$faqsArgs<ExtArgs>
   categories?: boolean | Prisma.Event$categoriesArgs<ExtArgs>
   registrations?: boolean | Prisma.Event$registrationsArgs<ExtArgs>
+  savedBy?: boolean | Prisma.Event$savedByArgs<ExtArgs>
   submissions?: boolean | Prisma.Event$submissionsArgs<ExtArgs>
   judgeAssignments?: boolean | Prisma.Event$judgeAssignmentsArgs<ExtArgs>
   qaQuestions?: boolean | Prisma.Event$qaQuestionsArgs<ExtArgs>
@@ -2293,6 +2567,7 @@ export type EventSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   sdgs?: boolean
   prizePool?: boolean
   organizer?: boolean
+  registrationEndDate?: boolean
   createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -2319,6 +2594,7 @@ export type EventSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   sdgs?: boolean
   prizePool?: boolean
   organizer?: boolean
+  registrationEndDate?: boolean
   createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -2345,17 +2621,19 @@ export type EventSelectScalar = {
   sdgs?: boolean
   prizePool?: boolean
   organizer?: boolean
+  registrationEndDate?: boolean
   createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type EventOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "slug" | "shortDescription" | "fullDescription" | "theme" | "date" | "location" | "format" | "category" | "image" | "status" | "deadline" | "fee" | "teamSizeMin" | "teamSizeMax" | "eligibility" | "sdgs" | "prizePool" | "organizer" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["event"]>
+export type EventOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "slug" | "shortDescription" | "fullDescription" | "theme" | "date" | "location" | "format" | "category" | "image" | "status" | "deadline" | "fee" | "teamSizeMin" | "teamSizeMax" | "eligibility" | "sdgs" | "prizePool" | "organizer" | "registrationEndDate" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["event"]>
 export type EventInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   timeline?: boolean | Prisma.Event$timelineArgs<ExtArgs>
   faqs?: boolean | Prisma.Event$faqsArgs<ExtArgs>
   categories?: boolean | Prisma.Event$categoriesArgs<ExtArgs>
   registrations?: boolean | Prisma.Event$registrationsArgs<ExtArgs>
+  savedBy?: boolean | Prisma.Event$savedByArgs<ExtArgs>
   submissions?: boolean | Prisma.Event$submissionsArgs<ExtArgs>
   judgeAssignments?: boolean | Prisma.Event$judgeAssignmentsArgs<ExtArgs>
   qaQuestions?: boolean | Prisma.Event$qaQuestionsArgs<ExtArgs>
@@ -2372,6 +2650,7 @@ export type $EventPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     faqs: Prisma.$EventFaqPayload<ExtArgs>[]
     categories: Prisma.$EventCategoryPayload<ExtArgs>[]
     registrations: Prisma.$EventRegistrationPayload<ExtArgs>[]
+    savedBy: Prisma.$SavedEventPayload<ExtArgs>[]
     submissions: Prisma.$SubmissionPayload<ExtArgs>[]
     judgeAssignments: Prisma.$JudgeAssignmentPayload<ExtArgs>[]
     qaQuestions: Prisma.$QaQuestionPayload<ExtArgs>[]
@@ -2398,6 +2677,7 @@ export type $EventPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     sdgs: number[]
     prizePool: string
     organizer: string
+    registrationEndDate: Date | null
     createdById: string
     createdAt: Date
     updatedAt: Date
@@ -2799,6 +3079,7 @@ export interface Prisma__EventClient<T, Null = never, ExtArgs extends runtime.Ty
   faqs<T extends Prisma.Event$faqsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Event$faqsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EventFaqPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   categories<T extends Prisma.Event$categoriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Event$categoriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EventCategoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   registrations<T extends Prisma.Event$registrationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Event$registrationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EventRegistrationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  savedBy<T extends Prisma.Event$savedByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Event$savedByArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SavedEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   submissions<T extends Prisma.Event$submissionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Event$submissionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   judgeAssignments<T extends Prisma.Event$judgeAssignmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Event$judgeAssignmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$JudgeAssignmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   qaQuestions<T extends Prisma.Event$qaQuestionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Event$qaQuestionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$QaQuestionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -2852,6 +3133,7 @@ export interface EventFieldRefs {
   readonly sdgs: Prisma.FieldRef<"Event", 'Int[]'>
   readonly prizePool: Prisma.FieldRef<"Event", 'String'>
   readonly organizer: Prisma.FieldRef<"Event", 'String'>
+  readonly registrationEndDate: Prisma.FieldRef<"Event", 'DateTime'>
   readonly createdById: Prisma.FieldRef<"Event", 'String'>
   readonly createdAt: Prisma.FieldRef<"Event", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Event", 'DateTime'>
@@ -3341,6 +3623,30 @@ export type Event$registrationsArgs<ExtArgs extends runtime.Types.Extensions.Int
   take?: number
   skip?: number
   distinct?: Prisma.EventRegistrationScalarFieldEnum | Prisma.EventRegistrationScalarFieldEnum[]
+}
+
+/**
+ * Event.savedBy
+ */
+export type Event$savedByArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SavedEvent
+   */
+  select?: Prisma.SavedEventSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SavedEvent
+   */
+  omit?: Prisma.SavedEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SavedEventInclude<ExtArgs> | null
+  where?: Prisma.SavedEventWhereInput
+  orderBy?: Prisma.SavedEventOrderByWithRelationInput | Prisma.SavedEventOrderByWithRelationInput[]
+  cursor?: Prisma.SavedEventWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SavedEventScalarFieldEnum | Prisma.SavedEventScalarFieldEnum[]
 }
 
 /**

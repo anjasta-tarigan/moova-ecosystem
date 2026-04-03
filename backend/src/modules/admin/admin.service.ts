@@ -43,6 +43,25 @@ const ensureValidDates = (date: string, deadline: string) => {
   }
 };
 
+const toRegistrationEndDate = (deadline: string) => {
+  const trimmedDeadline = deadline.trim();
+  const dateOnlyMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(trimmedDeadline);
+
+  if (dateOnlyMatch) {
+    const year = Number(dateOnlyMatch[1]);
+    const month = Number(dateOnlyMatch[2]) - 1;
+    const day = Number(dateOnlyMatch[3]);
+    return new Date(Date.UTC(year, month, day, 23, 59, 59, 999));
+  }
+
+  const parsed = new Date(trimmedDeadline);
+  if (Number.isNaN(parsed.getTime())) {
+    throw validationError("Invalid date or deadline format");
+  }
+
+  return parsed;
+};
+
 const ensureLocationValid = (format: string, location: string) => {
   const trimmed = location.trim();
   if (!trimmed) throw validationError("Location is required");
@@ -99,6 +118,9 @@ const normalizeEventPayload = async (data: any, eventId?: string) => {
   ensureLocationValid(format, location);
 
   ensureValidDates(String(data.date || ""), String(data.deadline || ""));
+  const registrationEndDate = toRegistrationEndDate(
+    String(data.deadline || ""),
+  );
 
   const teamSizeMin = Number(data.teamSizeMin ?? 1);
   const teamSizeMax = Number(data.teamSizeMax ?? 1);
@@ -136,6 +158,7 @@ const normalizeEventPayload = async (data: any, eventId?: string) => {
     location,
     date: String(data.date || ""),
     deadline: String(data.deadline || ""),
+    registrationEndDate,
     fee: (data.fee || "Gratis").trim() || "Gratis",
     organizer: (data.organizer || "GIVA").trim() || "GIVA",
     theme: data.theme || "",

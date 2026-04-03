@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.3.8] – 2026-04-03 14:04:19 (UTC+08:00)
+
+- Implemented Event Lifecycle management with persistent bookmarks via new `SavedEvent` relation and student bookmark endpoints (`POST/DELETE /api/events/:id/bookmark`) plus profile access endpoint (`GET /api/siswa/my-saved-events`).
+- Added server-computed lifecycle fields on event payloads (`totalParticipants`, `totalSaves`, `isSaved`, `registrationEndDate`, `isRegistrationOpen`) and enforced deadline-based registration rejection with 403 when registration time has passed.
+- Updated public and dashboard event UIs (cards + detail pages) with optimistic save/unsave interactions, rollback on failure, periodic smart polling for participant/saved counters, and registration buttons that auto-switch to closed state based on server lifecycle status.
+
 ## [0.3.7] – 2026-04-03 13:27:09 (UTC+8)
 
 - Expanded student dashboard event detail page to match the legacy public detail completeness (quick info counters, core theme/tracks, judging criteria, requirements, rules tabs, resources, public Q&A, sticky sidebar, and mobile action bar).

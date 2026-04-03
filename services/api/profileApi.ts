@@ -21,6 +21,7 @@ export const profileApi = {
   },
 
   getMyEvents: () => api.get("/api/siswa/my-events"),
+  getMySavedEvents: () => api.get("/api/siswa/my-saved-events"),
   getMySubmissions: () => api.get("/api/siswa/my-submissions"),
   getMyCertificates: () => api.get("/api/siswa/my-certificates"),
 };

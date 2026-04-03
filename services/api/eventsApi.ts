@@ -23,6 +23,10 @@ export const eventsApi = {
   registerToEvent: (id: string, data: { teamId?: string }) =>
     api.post(`/api/events/${id}/register`, data),
 
+  bookmarkEvent: (id: string) => api.post(`/api/events/${id}/bookmark`),
+
+  unbookmarkEvent: (id: string) => api.delete(`/api/events/${id}/bookmark`),
+
   getQa: (eventId: string, params?: Record<string, any>) =>
     api.get(`/api/events/${eventId}/qa`, { params }),
 

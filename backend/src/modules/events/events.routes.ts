@@ -3,6 +3,7 @@ import { authenticate } from "../../middlewares/auth.middleware";
 import { requireRole } from "../../middlewares/role.middleware";
 import { validate } from "../../middlewares/validate.middleware";
 import {
+  bookmarkEvent,
   createQuestion,
   createReply,
   getAdminEvents,
@@ -15,6 +16,7 @@ import {
   getQuestions,
   registerEvent,
   toggleUpvote,
+  unbookmarkEvent,
 } from "./events.controller";
 import {
   questionSchema,
@@ -47,6 +49,18 @@ router.post(
   requireRole("STUDENT"),
   validate(registerEventSchema),
   registerEvent,
+);
+router.post(
+  "/:id/bookmark",
+  authenticate,
+  requireRole("STUDENT"),
+  bookmarkEvent,
+);
+router.delete(
+  "/:id/bookmark",
+  authenticate,
+  requireRole("STUDENT"),
+  unbookmarkEvent,
 );
 router.get("/:id/qa", getQuestions);
 router.post(

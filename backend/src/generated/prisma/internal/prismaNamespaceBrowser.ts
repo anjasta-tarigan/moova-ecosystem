@@ -55,6 +55,7 @@ export const ModelName = {
   RefreshToken: 'RefreshToken',
   SiswaProfile: 'SiswaProfile',
   Event: 'Event',
+  SavedEvent: 'SavedEvent',
   EventTimeline: 'EventTimeline',
   EventFaq: 'EventFaq',
   EventCategory: 'EventCategory',
@@ -169,12 +170,23 @@ export const EventScalarFieldEnum = {
   sdgs: 'sdgs',
   prizePool: 'prizePool',
   organizer: 'organizer',
+  registrationEndDate: 'registrationEndDate',
   createdById: 'createdById',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type EventScalarFieldEnum = (typeof EventScalarFieldEnum)[keyof typeof EventScalarFieldEnum]
+
+
+export const SavedEventScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  eventId: 'eventId',
+  savedAt: 'savedAt'
+} as const
+
+export type SavedEventScalarFieldEnum = (typeof SavedEventScalarFieldEnum)[keyof typeof SavedEventScalarFieldEnum]
 
 
 export const EventTimelineScalarFieldEnum = {

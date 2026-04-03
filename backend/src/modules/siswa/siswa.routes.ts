@@ -7,6 +7,7 @@ import {
   getProfile,
   myCertificates,
   myEvents,
+  mySavedEvents,
   mySubmissions,
   updateProfile,
   uploadAvatar,
@@ -40,6 +41,12 @@ router.get(
   authenticate,
   requireRole("STUDENT", "JUDGE"),
   myEvents,
+);
+router.get(
+  "/my-saved-events",
+  authenticate,
+  requireRole("STUDENT"),
+  mySavedEvents,
 );
 router.get(
   "/my-submissions",

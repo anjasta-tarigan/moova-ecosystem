@@ -56,6 +56,8 @@ type ApiEvent = {
   image: string;
   status: string;
   deadline: string;
+  registrationEndDate?: string | null;
+  isRegistrationOpen?: boolean;
   fee: string;
   teamSizeMin: number;
   teamSizeMax: number;
@@ -67,6 +69,10 @@ type ApiEvent = {
   timeline?: ApiTimeline[];
   faqs?: ApiFaq[];
   _count?: { registrations?: number };
+  totalParticipants?: number;
+  totalSaves?: number;
+  isSaved?: boolean;
+  isRegistered?: boolean;
 };
 
 type Judge = {
@@ -105,6 +111,8 @@ const EventDetailPage: React.FC = () => {
 
   const [isRegistered, setIsRegistered] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [isBookmarkPending, setIsBookmarkPending] = useState(false);
   const [copied, setCopied] = useState(false);
   const [activeRuleTab, setActiveRuleTab] = useState(0);
 
@@ -142,30 +150,57 @@ const EventDetailPage: React.FC = () => {
     }
   }, [id]);
 
-  useEffect(() => {
-    if (!id) return;
-    const fetchEvent = async () => {
-      setIsLoading(true);
-      setError(null);
+  const fetchEvent = useCallback(
+    async (options?: { silent?: boolean }) => {
+      if (!id) return;
+
+      const isSilent = options?.silent === true;
+      if (!isSilent) {
+        setIsLoading(true);
+        setError(null);
+      }
+
       try {
         const res = await eventsApi.getEvent(id);
-        setEvent(res.data?.data);
+        const nextEvent = res.data?.data ?? null;
+        setEvent(nextEvent);
+        setIsSaved(Boolean(nextEvent?.isSaved));
+        setIsRegistered(Boolean(nextEvent?.isRegistered));
       } catch (err: any) {
-        if (err?.response?.status === 404) {
-          setError("Event not found");
-        } else {
-          setError("Failed to load event");
+        if (!isSilent) {
+          if (err?.response?.status === 404) {
+            setError("Event not found");
+          } else {
+            setError("Failed to load event");
+          }
         }
       } finally {
-        setIsLoading(false);
+        if (!isSilent) {
+          setIsLoading(false);
+        }
       }
-    };
+    },
+    [id],
+  );
 
-    fetchEvent();
+  useEffect(() => {
+    if (!id) return;
+    void fetchEvent();
     fetchQuestions();
-  }, [id, fetchQuestions]);
+  }, [id, fetchEvent, fetchQuestions]);
 
-  const registrations = event?._count?.registrations ?? 0;
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      void fetchEvent({ silent: true });
+    }, 15000);
+
+    return () => window.clearInterval(intervalId);
+  }, [fetchEvent]);
+
+  const registrations =
+    event?.totalParticipants ?? event?._count?.registrations ?? 0;
+  const totalSaves = event?.totalSaves ?? 0;
+  const isRegistrationOpen = Boolean(event?.isRegistrationOpen);
   const deadlineLabel = event?.deadline ? formatDate(event.deadline) : "TBD";
   const dateLabel = event?.date ? formatDate(event.date) : "-";
   const eligibilityLabel = event?.eligibility?.length
@@ -277,11 +312,30 @@ const EventDetailPage: React.FC = () => {
       setError("Please log in as a Student to register.");
       return;
     }
+    if (!isRegistrationOpen) {
+      setError("Registration is closed for this event.");
+      return;
+    }
+
     try {
+      setIsRegistering(true);
       await eventsApi.registerToEvent(id, {});
       setIsRegistered(true);
+      setEvent((previous) => {
+        if (!previous) return previous;
+        const currentParticipants =
+          previous.totalParticipants ?? previous._count?.registrations ?? 0;
+        return {
+          ...previous,
+          totalParticipants: currentParticipants + 1,
+        };
+      });
     } catch (err) {
-      setError("Failed to register for event");
+      const message =
+        (err as any)?.response?.data?.message || "Failed to register for event";
+      setError(message);
+    } finally {
+      setIsRegistering(false);
     }
   };
 
@@ -330,9 +384,70 @@ const EventDetailPage: React.FC = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleSaveEvent = () => {
-    setIsSaved(!isSaved);
-    // In real app, API call here
+  const handleSaveEvent = async () => {
+    if (!event || isBookmarkPending) return;
+
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+
+    if (user.role !== "STUDENT") {
+      setError("Only students can save events.");
+      return;
+    }
+
+    const previousSaved = isSaved;
+    const nextSaved = !previousSaved;
+
+    setIsSaved(nextSaved);
+    setEvent((previous) => {
+      if (!previous) return previous;
+      const baseTotal = previous.totalSaves ?? 0;
+      return {
+        ...previous,
+        totalSaves: Math.max(0, baseTotal + (nextSaved ? 1 : -1)),
+      };
+    });
+
+    try {
+      setIsBookmarkPending(true);
+      const response = nextSaved
+        ? await eventsApi.bookmarkEvent(event.id)
+        : await eventsApi.unbookmarkEvent(event.id);
+
+      const payload = response.data?.data ?? {};
+      const resolvedSaved =
+        typeof payload.isSaved === "boolean" ? payload.isSaved : nextSaved;
+
+      setIsSaved(resolvedSaved);
+      setEvent((previous) => {
+        if (!previous) return previous;
+        const fallbackTotal = previous.totalSaves ?? 0;
+        return {
+          ...previous,
+          totalSaves:
+            typeof payload.totalSaves === "number"
+              ? payload.totalSaves
+              : fallbackTotal,
+        };
+      });
+    } catch (err: any) {
+      const message =
+        err?.response?.data?.message || "Failed to update saved event state";
+      setError(message);
+      setIsSaved(previousSaved);
+      setEvent((previous) => {
+        if (!previous) return previous;
+        const baseTotal = previous.totalSaves ?? 0;
+        return {
+          ...previous,
+          totalSaves: Math.max(0, baseTotal + (previousSaved ? 1 : -1)),
+        };
+      });
+    } finally {
+      setIsBookmarkPending(false);
+    }
   };
 
   const QuickInfoCard = ({
@@ -420,7 +535,7 @@ const EventDetailPage: React.FC = () => {
           alt={event.title}
           className="absolute inset-0 w-full h-full object-cover opacity-20 mix-blend-overlay"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-primary-900/90 via-primary-900/80 to-slate-50"></div>
+        <div className="absolute inset-0 bg-linear-to-b from-primary-900/90 via-primary-900/80 to-slate-50"></div>
         <div className="absolute inset-0 bg-grid-pattern-dark opacity-10 pointer-events-none"></div>
 
         <div className="container mx-auto px-6 md:px-12 lg:px-20 max-w-7xl relative z-10">
@@ -506,14 +621,14 @@ const EventDetailPage: React.FC = () => {
               <QuickInfoCard
                 icon={<Users />}
                 label="Registered"
-                value={isRegistered ? registrations + 1 : registrations}
+                value={registrations}
                 subValue="Participants"
               />
               {/* Counter 2 */}
               <QuickInfoCard
                 icon={<Bookmark />}
                 label="Interested"
-                value={isSaved ? registrations + 1 : registrations}
+                value={totalSaves}
                 subValue="Saves"
               />
               {/* Eligibility */}
@@ -656,7 +771,7 @@ const EventDetailPage: React.FC = () => {
                   {timelineItems.map((item, idx) => (
                     <div key={item.id || idx} className="relative pl-8">
                       <div
-                        className={`absolute -left-[9px] top-1.5 w-4 h-4 rounded-full border-2 border-white shadow-sm ${
+                        className={`absolute -left-2.25 top-1.5 w-4 h-4 rounded-full border-2 border-white shadow-sm ${
                           idx === 0 ? "bg-primary-600" : "bg-slate-300"
                         }`}
                       ></div>
@@ -677,7 +792,7 @@ const EventDetailPage: React.FC = () => {
 
             {/* 6. AWARDS (Conditional) */}
             {event.prizePool && (
-              <section className="bg-gradient-to-br from-slate-900 to-primary-900 rounded-3xl p-8 md:p-12 text-white relative overflow-hidden">
+              <section className="bg-linear-to-br from-slate-900 to-primary-900 rounded-3xl p-8 md:p-12 text-white relative overflow-hidden">
                 <div className="absolute inset-0 bg-grid-pattern-dark opacity-10 pointer-events-none"></div>
                 <div className="relative z-10 text-center">
                   <Trophy size={48} className="mx-auto mb-6 text-yellow-400" />
@@ -763,7 +878,7 @@ const EventDetailPage: React.FC = () => {
                     <Download size={16} /> Download Full Rulebook
                   </button>
                 </div>
-                <div className="flex-1 bg-white p-8 rounded-2xl border border-slate-200 min-h-[200px]">
+                <div className="flex-1 bg-white p-8 rounded-2xl border border-slate-200 min-h-50">
                   <h4 className="text-xl font-bold text-slate-900 mb-4">
                     {rules[activeRuleTab].title}
                   </h4>
@@ -958,8 +1073,16 @@ const EventDetailPage: React.FC = () => {
                 closes on {deadlineLabel}.
               </p>
               <div className="flex justify-center gap-4">
-                <Button size="lg" onClick={handleRegister}>
-                  Register Now
+                <Button
+                  size="lg"
+                  onClick={handleRegister}
+                  disabled={!isRegistrationOpen || isRegistering}
+                >
+                  {!isRegistrationOpen
+                    ? "Registration Closed"
+                    : isRegistering
+                      ? "Registering..."
+                      : "Register Now"}
                 </Button>
                 <Button
                   variant="white"
@@ -973,10 +1096,7 @@ const EventDetailPage: React.FC = () => {
           </div>
 
           {/* DESKTOP STICKY SIDEBAR */}
-          <div
-            className="hidden lg:block w-[360px] shrink-0"
-            id="register-section"
-          >
+          <div className="hidden lg:block w-90 shrink-0" id="register-section">
             <div className="sticky top-24 space-y-6">
               {/* Registration Card */}
               <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-100 p-6">
@@ -993,10 +1113,10 @@ const EventDetailPage: React.FC = () => {
                   </div>
                   <div className="flex items-center gap-2 mb-4">
                     <div
-                      className={`w-3 h-3 rounded-full ${event.status?.toUpperCase() === "OPEN" ? "bg-emerald-500 animate-pulse" : "bg-slate-300"}`}
+                      className={`w-3 h-3 rounded-full ${isRegistrationOpen ? "bg-emerald-500 animate-pulse" : "bg-slate-300"}`}
                     ></div>
                     <span className="font-bold text-xl text-slate-900">
-                      {event.status?.toUpperCase() === "OPEN"
+                      {isRegistrationOpen
                         ? "Registration Open"
                         : "Registration Closed"}
                     </span>
@@ -1029,12 +1149,14 @@ const EventDetailPage: React.FC = () => {
                     <Button
                       fullWidth
                       size="lg"
-                      disabled={event.status?.toUpperCase() === "CLOSED"}
+                      disabled={!isRegistrationOpen || isRegistering}
                       onClick={handleRegister}
                     >
-                      {event.status?.toUpperCase() === "CLOSED"
+                      {!isRegistrationOpen
                         ? "Closed"
-                        : "Register for Event"}
+                        : isRegistering
+                          ? "Registering..."
+                          : "Register for Event"}
                     </Button>
                     <div className="text-center text-xs text-slate-400 mt-2">
                       {feeLabel} • Instant Confirmation
@@ -1046,7 +1168,8 @@ const EventDetailPage: React.FC = () => {
 
                 <div className="space-y-3">
                   <button
-                    onClick={handleSaveEvent}
+                    onClick={() => void handleSaveEvent()}
+                    disabled={isBookmarkPending}
                     className={`flex items-center justify-center gap-2 w-full py-2.5 border rounded-lg text-sm font-medium transition-colors ${
                       isSaved
                         ? "bg-secondary-50 border-secondary-200 text-secondary-600"
@@ -1057,7 +1180,11 @@ const EventDetailPage: React.FC = () => {
                       size={16}
                       fill={isSaved ? "currentColor" : "none"}
                     />
-                    {isSaved ? "Event Saved" : "Save for Later"}
+                    {isBookmarkPending
+                      ? "Saving..."
+                      : isSaved
+                        ? "Event Saved"
+                        : "Save for Later"}
                   </button>
                   <button
                     onClick={handleCopyLink}
@@ -1074,13 +1201,13 @@ const EventDetailPage: React.FC = () => {
               </div>
 
               {/* Poster Space */}
-              <div className="bg-slate-900 rounded-2xl overflow-hidden shadow-lg relative group aspect-[3/4]">
+              <div className="bg-slate-900 rounded-2xl overflow-hidden shadow-lg relative group aspect-3/4">
                 <img
                   src={posterImage}
                   alt="Event Poster"
                   className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-500"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-6">
+                <div className="absolute inset-0 bg-linear-to-t from-black/80 to-transparent flex flex-col justify-end p-6">
                   <span className="text-xs font-bold text-white/60 uppercase mb-1">
                     Official Poster
                   </span>
@@ -1143,15 +1270,15 @@ const EventDetailPage: React.FC = () => {
             <Button
               fullWidth
               onClick={handleRegister}
-              disabled={
-                isRegistered || event.status?.toUpperCase() === "CLOSED"
-              }
+              disabled={isRegistered || !isRegistrationOpen || isRegistering}
             >
               {isRegistered
                 ? "Manage"
-                : event.status?.toUpperCase() === "CLOSED"
+                : !isRegistrationOpen
                   ? "Closed"
-                  : "Register Now"}
+                  : isRegistering
+                    ? "Registering..."
+                    : "Register Now"}
             </Button>
           </div>
           <button

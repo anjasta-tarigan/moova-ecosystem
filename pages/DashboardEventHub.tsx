@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronRight, Clock, MapPin, Users } from "lucide-react";
+import { Bookmark, ChevronRight, Clock, MapPin, Users } from "lucide-react";
 import { eventsApi } from "../services/api/eventsApi";
+import { useAuthContext } from "../contexts/AuthContext";
 
 interface EventRegistration {
   id: string;
@@ -29,6 +30,9 @@ type EventSummary = {
   status?: string;
   fee?: string;
   organizer?: string;
+  isSaved?: boolean;
+  totalSaves?: number;
+  totalParticipants?: number;
   _count?: { registrations?: number };
 };
 
@@ -49,6 +53,8 @@ const EventListView = ({
   error,
   onRetry,
   onPageChange,
+  onToggleSave,
+  togglingEventId,
 }: {
   registeredEvents: EventRegistration[];
   discoverEvents: EventSummary[];
@@ -59,6 +65,8 @@ const EventListView = ({
   error: string | null;
   onRetry: () => void;
   onPageChange: (nextPage: number) => void;
+  onToggleSave: (event: EventSummary) => void;
+  togglingEventId: string | null;
 }) => {
   const navigate = useNavigate();
 
@@ -181,9 +189,39 @@ const EventListView = ({
                     <Clock size={14} />
                     <span>Deadline: {event.deadline || "TBD"}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-slate-500">
-                    <Users size={14} />
-                    <span>{event._count?.registrations ?? 0} teams</span>
+                  <div className="flex items-center gap-3 text-slate-500">
+                    <div className="flex items-center gap-2">
+                      <Users size={14} />
+                      <span>
+                        {event.totalParticipants ??
+                          event._count?.registrations ??
+                          0}{" "}
+                        teams
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={(clickEvent) => {
+                        clickEvent.stopPropagation();
+                        onToggleSave(event);
+                      }}
+                      disabled={togglingEventId === event.id}
+                      className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-semibold transition-colors ${
+                        event.isSaved
+                          ? "border-secondary-200 bg-secondary-50 text-secondary-700"
+                          : "border-slate-200 text-slate-600 hover:bg-slate-50"
+                      }`}
+                    >
+                      <Bookmark
+                        size={12}
+                        fill={event.isSaved ? "currentColor" : "none"}
+                      />
+                      {event.isSaved
+                        ? "Saved"
+                        : togglingEventId === event.id
+                          ? "Saving..."
+                          : "Save"}
+                    </button>
                   </div>
                 </div>
               </div>
@@ -273,6 +311,7 @@ const EventListView = ({
 };
 
 const DashboardEventHub: React.FC = () => {
+  const { user } = useAuthContext();
   const [registeredEvents, setRegisteredEvents] = useState<EventRegistration[]>(
     [],
   );
@@ -282,6 +321,7 @@ const DashboardEventHub: React.FC = () => {
   );
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [togglingEventId, setTogglingEventId] = useState<string | null>(null);
   const [discoverPage, setDiscoverPage] = useState(1);
   const [pagination, setPagination] = useState<StudentEventsPagination>({
     page: 1,
@@ -319,6 +359,86 @@ const DashboardEventHub: React.FC = () => {
     fetchStudentEvents(discoverPage);
   }, [fetchStudentEvents, discoverPage]);
 
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      void fetchStudentEvents(discoverPage);
+    }, 15000);
+
+    return () => window.clearInterval(intervalId);
+  }, [discoverPage, fetchStudentEvents]);
+
+  const handleToggleSave = async (event: EventSummary) => {
+    if (togglingEventId) return;
+    if (!user || user.role !== "STUDENT") {
+      setError("Please log in as a student to save events.");
+      return;
+    }
+
+    const previousSaved = Boolean(event.isSaved);
+    const nextSaved = !previousSaved;
+
+    setDiscoverEvents((previous) =>
+      previous.map((item) =>
+        item.id === event.id
+          ? {
+              ...item,
+              isSaved: nextSaved,
+              totalSaves: Math.max(
+                0,
+                (item.totalSaves ?? 0) + (nextSaved ? 1 : -1),
+              ),
+            }
+          : item,
+      ),
+    );
+
+    try {
+      setTogglingEventId(event.id);
+      const response = nextSaved
+        ? await eventsApi.bookmarkEvent(event.id)
+        : await eventsApi.unbookmarkEvent(event.id);
+      const payload = response.data?.data ?? {};
+
+      setDiscoverEvents((previous) =>
+        previous.map((item) =>
+          item.id === event.id
+            ? {
+                ...item,
+                isSaved:
+                  typeof payload.isSaved === "boolean"
+                    ? payload.isSaved
+                    : nextSaved,
+                totalSaves:
+                  typeof payload.totalSaves === "number"
+                    ? payload.totalSaves
+                    : item.totalSaves,
+              }
+            : item,
+        ),
+      );
+    } catch (err: any) {
+      const message =
+        err?.response?.data?.message || "Failed to update saved state";
+      setError(message);
+      setDiscoverEvents((previous) =>
+        previous.map((item) =>
+          item.id === event.id
+            ? {
+                ...item,
+                isSaved: previousSaved,
+                totalSaves: Math.max(
+                  0,
+                  (item.totalSaves ?? 0) + (previousSaved ? 1 : -1),
+                ),
+              }
+            : item,
+        ),
+      );
+    } finally {
+      setTogglingEventId(null);
+    }
+  };
+
   return (
     <EventListView
       registeredEvents={registeredEvents}
@@ -329,6 +449,8 @@ const DashboardEventHub: React.FC = () => {
       isLoading={isLoading}
       error={error}
       onRetry={() => fetchStudentEvents(discoverPage)}
+      onToggleSave={handleToggleSave}
+      togglingEventId={togglingEventId}
       onPageChange={(nextPage) =>
         setDiscoverPage(
           Math.max(1, Math.min(nextPage, pagination.totalPages || 1)),

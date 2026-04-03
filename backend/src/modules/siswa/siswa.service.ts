@@ -128,6 +128,21 @@ export const myEvents = async (userId: string) => {
   });
 };
 
+export const mySavedEvents = async (userId: string) => {
+  return prisma.savedEvent.findMany({
+    where: { userId },
+    include: {
+      event: {
+        include: {
+          categories: true,
+          _count: { select: { registrations: true } },
+        },
+      },
+    },
+    orderBy: { savedAt: "desc" },
+  });
+};
+
 export const mySubmissions = async (userId: string) => {
   const memberships = await prisma.teamMember.findMany({ where: { userId } });
   const teamIds = memberships.map((m) => m.teamId);

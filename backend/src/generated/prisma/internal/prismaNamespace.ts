@@ -388,6 +388,7 @@ export const ModelName = {
   RefreshToken: 'RefreshToken',
   SiswaProfile: 'SiswaProfile',
   Event: 'Event',
+  SavedEvent: 'SavedEvent',
   EventTimeline: 'EventTimeline',
   EventFaq: 'EventFaq',
   EventCategory: 'EventCategory',
@@ -419,7 +420,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "refreshToken" | "siswaProfile" | "event" | "eventTimeline" | "eventFaq" | "eventCategory" | "eventRegistration" | "team" | "teamMember" | "teamMentor" | "submission" | "submissionFile" | "judgeAssignment" | "score" | "certificate" | "qaQuestion" | "qaReply" | "qaUpvote" | "notification"
+    modelProps: "user" | "refreshToken" | "siswaProfile" | "event" | "savedEvent" | "eventTimeline" | "eventFaq" | "eventCategory" | "eventRegistration" | "team" | "teamMember" | "teamMentor" | "submission" | "submissionFile" | "judgeAssignment" | "score" | "certificate" | "qaQuestion" | "qaReply" | "qaUpvote" | "notification"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -716,6 +717,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.EventCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.EventCountAggregateOutputType> | number
+        }
+      }
+    }
+    SavedEvent: {
+      payload: Prisma.$SavedEventPayload<ExtArgs>
+      fields: Prisma.SavedEventFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SavedEventFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedEventPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SavedEventFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedEventPayload>
+        }
+        findFirst: {
+          args: Prisma.SavedEventFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedEventPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SavedEventFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedEventPayload>
+        }
+        findMany: {
+          args: Prisma.SavedEventFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedEventPayload>[]
+        }
+        create: {
+          args: Prisma.SavedEventCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedEventPayload>
+        }
+        createMany: {
+          args: Prisma.SavedEventCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SavedEventCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedEventPayload>[]
+        }
+        delete: {
+          args: Prisma.SavedEventDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedEventPayload>
+        }
+        update: {
+          args: Prisma.SavedEventUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedEventPayload>
+        }
+        deleteMany: {
+          args: Prisma.SavedEventDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SavedEventUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SavedEventUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedEventPayload>[]
+        }
+        upsert: {
+          args: Prisma.SavedEventUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedEventPayload>
+        }
+        aggregate: {
+          args: Prisma.SavedEventAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSavedEvent>
+        }
+        groupBy: {
+          args: Prisma.SavedEventGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SavedEventGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SavedEventCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SavedEventCountAggregateOutputType> | number
         }
       }
     }
@@ -2022,12 +2097,23 @@ export const EventScalarFieldEnum = {
   sdgs: 'sdgs',
   prizePool: 'prizePool',
   organizer: 'organizer',
+  registrationEndDate: 'registrationEndDate',
   createdById: 'createdById',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type EventScalarFieldEnum = (typeof EventScalarFieldEnum)[keyof typeof EventScalarFieldEnum]
+
+
+export const SavedEventScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  eventId: 'eventId',
+  savedAt: 'savedAt'
+} as const
+
+export type SavedEventScalarFieldEnum = (typeof SavedEventScalarFieldEnum)[keyof typeof SavedEventScalarFieldEnum]
 
 
 export const EventTimelineScalarFieldEnum = {
@@ -2618,6 +2704,7 @@ export type GlobalOmitConfig = {
   refreshToken?: Prisma.RefreshTokenOmit
   siswaProfile?: Prisma.SiswaProfileOmit
   event?: Prisma.EventOmit
+  savedEvent?: Prisma.SavedEventOmit
   eventTimeline?: Prisma.EventTimelineOmit
   eventFaq?: Prisma.EventFaqOmit
   eventCategory?: Prisma.EventCategoryOmit

@@ -7,7 +7,13 @@ const ACCESS_TOKEN_SECRET =
   process.env.ACCESS_TOKEN_SECRET || "dev_access_secret";
 
 const mapError = (err: any, res: Response) => {
-  if (err?.status === 403) return error(res, err?.message || "Forbidden", 403);
+  if (err?.status === 403) {
+    const message =
+      err?.message === "Registration closed by deadline"
+        ? "Registration is closed for this event"
+        : err?.message || "Forbidden";
+    return error(res, message, 403);
+  }
   if (err?.code === "P2025") return error(res, "Data not found", 404);
   if (err?.code === "P2002") return error(res, "Data already exists", 409);
   if (err?.message === "Profile incomplete")
@@ -21,23 +27,34 @@ const mapError = (err: any, res: Response) => {
   return error(res, "Internal server error", 500);
 };
 
-const resolveRole = (req: Request) => {
+const resolveAuthContext = (req: Request) => {
+  if (req.user) {
+    return { role: req.user.role, userId: req.user.id };
+  }
+
   const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith("Bearer ")) return undefined;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return { role: undefined, userId: undefined };
+  }
+
   try {
     const token = authHeader.split(" ")[1];
     const payload = jwt.verify(token, ACCESS_TOKEN_SECRET) as {
+      id?: string;
       role?: string;
     };
-    return payload.role;
+    return { role: payload.role, userId: payload.id };
   } catch {
-    return undefined;
+    return { role: undefined, userId: undefined };
   }
 };
 
 export const getPublicEvents = async (req: Request, res: Response) => {
   try {
-    const result = await eventsService.listPublicEvents(req.query);
+    const authContext = resolveAuthContext(req);
+    const studentId =
+      authContext.role === "STUDENT" ? authContext.userId : undefined;
+    const result = await eventsService.listPublicEvents(req.query, studentId);
     return paginated(res, result.data, result.total, result.page, result.limit);
   } catch (err) {
     return mapError(err, res);
@@ -87,8 +104,12 @@ export const getEvents = getPublicEvents;
 
 export const getEventDetail = async (req: Request, res: Response) => {
   try {
-    const role = req.user?.role ?? resolveRole(req);
-    const event = await eventsService.getEventById(req.params.id, role);
+    const authContext = resolveAuthContext(req);
+    const event = await eventsService.getEventById(
+      req.params.id,
+      authContext.role,
+      authContext.role === "STUDENT" ? authContext.userId : undefined,
+    );
     return success(res, event);
   } catch (err) {
     return mapError(err, res);
@@ -166,6 +187,30 @@ export const toggleUpvote = async (req: Request, res: Response) => {
   try {
     const result = await eventsService.toggleUpvote(
       req.params.questionId,
+      req.user!.id,
+    );
+    return success(res, result);
+  } catch (err) {
+    return mapError(err, res);
+  }
+};
+
+export const bookmarkEvent = async (req: Request, res: Response) => {
+  try {
+    const result = await eventsService.bookmarkEvent(
+      req.params.id,
+      req.user!.id,
+    );
+    return success(res, result);
+  } catch (err) {
+    return mapError(err, res);
+  }
+};
+
+export const unbookmarkEvent = async (req: Request, res: Response) => {
+  try {
+    const result = await eventsService.unbookmarkEvent(
+      req.params.id,
       req.user!.id,
     );
     return success(res, result);
