@@ -87,7 +87,9 @@ const EventListView = ({
           return (
             <div
               key={item.id}
-              onClick={() => navigate(`/dashboard/events/${destinationSlug}`)}
+              onClick={() =>
+                navigate(`/dashboard/workspace/${destinationSlug}`)
+              }
               className="group bg-white rounded-xl border border-slate-200 p-6 shadow-sm hover:shadow-md hover:border-primary-300 transition-all cursor-pointer flex flex-col md:flex-row items-start md:items-center gap-6"
             >
               <div className="w-16 h-16 bg-primary-50 rounded-xl flex items-center justify-center shrink-0 text-primary-600 font-bold text-xl">

@@ -128,6 +128,21 @@ export const getStudentEventDetail = async (req: Request, res: Response) => {
   }
 };
 
+export const getStudentWorkspaceAccess = async (
+  req: Request,
+  res: Response,
+) => {
+  try {
+    const result = await eventsService.getStudentWorkspaceAccessBySlug(
+      req.params.slug,
+      req.user!.id,
+    );
+    return success(res, result);
+  } catch (err) {
+    return mapError(err, res);
+  }
+};
+
 export const registerEvent = async (req: Request, res: Response) => {
   try {
     const created = await eventsService.registerEvent(

@@ -13,6 +13,9 @@ export const eventsApi = {
   getStudentEventBySlug: (slug: string) =>
     api.get(`/api/student/events/${slug}`),
 
+  getStudentWorkspaceAccess: (slug: string) =>
+    api.get(`/api/student/events/${slug}/workspace-access`),
+
   getJudgeEvents: () => api.get("/api/events/judge"),
 
   getAdminEvents: (params?: Record<string, any>) =>

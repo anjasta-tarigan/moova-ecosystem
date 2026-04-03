@@ -211,7 +211,7 @@ const OverviewView = () => {
                       )
                     }
                   >
-                    Open Workspace
+                    Open Event Detail
                   </Button>
                 </div>
               </div>

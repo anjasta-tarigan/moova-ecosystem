@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.3.10] – 2026-04-03 15:43:47 (UTC+08:00)
+
+- Changed My Registered Events cards to navigate directly to workspace route (`/dashboard/workspace/:slug`) instead of event detail.
+- Rebuilt student workspace page by adapting the legacy backup layout structure (header, tabs, stage workflow cards, and resources section) while replacing mock data with live API data.
+- Kept workspace security checks in place: unauthorized direct access still redirects users gracefully back to event detail with a permission message.
+
+## [0.3.9] – 2026-04-03 16:12:00 (UTC+08:00)
+
+- Implemented Enrolled Event navigation flow by adding secure workspace-entry gate route `/dashboard/workspace/:slug` and redirecting enrolled users through event detail before workspace access.
+- Added backend authorization endpoint `GET /api/student/events/:slug/workspace-access` with server-side checks for student registration and event timeline status before granting workspace navigation.
+- Enriched student event detail payload with contextual workspace metadata (`canEnterWorkspace`, `workspacePath`, `workspaceAccessMessage`, `registrationStatus`, `eventTimelineStatus`) and updated dashboard detail CTA to render `Enter Workspace` only when access is approved.
+
 ## [0.3.8] – 2026-04-03 14:04:19 (UTC+08:00)
 
 - Implemented Event Lifecycle management with persistent bookmarks via new `SavedEvent` relation and student bookmark endpoints (`POST/DELETE /api/events/:id/bookmark`) plus profile access endpoint (`GET /api/siswa/my-saved-events`).

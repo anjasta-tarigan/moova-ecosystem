@@ -3,6 +3,7 @@ import prisma from "../../config/database";
 const EVENT_STATUSES = ["DRAFT", "OPEN", "UPCOMING", "CLOSED"] as const;
 const PUBLIC_EVENT_STATUSES = ["OPEN", "UPCOMING", "CLOSED"] as const;
 const EVENT_FORMATS = ["ONLINE", "IN_PERSON", "HYBRID"] as const;
+const WORKSPACE_ENABLED_STATUSES = ["OPEN"] as const;
 
 const parsePagination = (page?: number, limit?: number) => {
   const p = Number(page) || 1;
@@ -107,6 +108,48 @@ const isRegistrationOpen = (event: {
 }) => {
   if (event.status !== "OPEN") return false;
   return !hasRegistrationDeadlinePassed(event);
+};
+
+const isWorkspaceTimelineActive = (status: string) =>
+  WORKSPACE_ENABLED_STATUSES.includes(
+    status as (typeof WORKSPACE_ENABLED_STATUSES)[number],
+  );
+
+const getWorkspaceAccessDeniedMessage = (status: string) => {
+  const normalized = status.toUpperCase();
+  if (normalized === "UPCOMING") {
+    return "Workspace will open when the event timeline starts.";
+  }
+  if (normalized === "CLOSED") {
+    return "Workspace access is closed because the event timeline has ended.";
+  }
+  return "Workspace is unavailable for the current event status.";
+};
+
+const buildWorkspaceFallbackPath = (eventSlug: string) =>
+  `/dashboard/events/${encodeURIComponent(eventSlug)}`;
+
+const resolveWorkspacePath = async (
+  eventId: string,
+  eventSlug: string,
+  teamId?: string | null,
+) => {
+  if (teamId) {
+    const submission = await prisma.submission.findFirst({
+      where: {
+        eventId,
+        teamId,
+      },
+      select: { id: true },
+      orderBy: { createdAt: "desc" },
+    });
+
+    if (submission?.id) {
+      return `/dashboard/submission/${submission.id}`;
+    }
+  }
+
+  return `/dashboard/team/manage?event=${encodeURIComponent(eventSlug)}`;
 };
 
 const mapEventWithLifecycle = <
@@ -475,6 +518,20 @@ export const getStudentEventBySlug = async (slug: string, userId: string) => {
     submissionId = submission?.id ?? null;
   }
 
+  const timelineActive = isWorkspaceTimelineActive(event.status);
+  const canEnterWorkspace = Boolean(registration) && timelineActive;
+  const workspacePath = canEnterWorkspace
+    ? submissionId
+      ? `/dashboard/submission/${submissionId}`
+      : `/dashboard/team/manage?event=${encodeURIComponent(event.slug)}`
+    : null;
+  const workspaceFallbackPath = buildWorkspaceFallbackPath(event.slug);
+  const workspaceAccessMessage = !registration
+    ? "Register for this event to unlock workspace access."
+    : timelineActive
+      ? null
+      : getWorkspaceAccessDeniedMessage(event.status);
+
   const totalSaves = await prisma.savedEvent.count({
     where: { eventId: event.id },
   });
@@ -496,6 +553,64 @@ export const getStudentEventBySlug = async (slug: string, userId: string) => {
         }
       : null,
     submissionId,
+    registrationStatus: registration ? "APPROVED" : "NOT_REGISTERED",
+    eventTimelineStatus: event.status,
+    canEnterWorkspace,
+    workspacePath,
+    workspaceFallbackPath,
+    workspaceAccessMessage,
+  };
+};
+
+export const getStudentWorkspaceAccessBySlug = async (
+  slug: string,
+  userId: string,
+) => {
+  const event = await prisma.event.findUnique({
+    where: { slug },
+    select: {
+      id: true,
+      slug: true,
+      status: true,
+      registrations: {
+        where: { userId },
+        select: { id: true, teamId: true },
+        take: 1,
+      },
+    },
+  });
+
+  if (!event || event.status === "DRAFT") {
+    const err: any = new Error("Data not found");
+    err.code = "P2025";
+    throw err;
+  }
+
+  const registration = event.registrations[0] ?? null;
+  if (!registration) {
+    const err: any = new Error("You are not registered for this event");
+    err.status = 403;
+    throw err;
+  }
+
+  if (!isWorkspaceTimelineActive(event.status)) {
+    const err: any = new Error(getWorkspaceAccessDeniedMessage(event.status));
+    err.status = 403;
+    throw err;
+  }
+
+  const workspacePath = await resolveWorkspacePath(
+    event.id,
+    event.slug,
+    registration.teamId,
+  );
+
+  return {
+    canEnterWorkspace: true,
+    registrationStatus: "APPROVED",
+    eventTimelineStatus: event.status,
+    workspacePath,
+    workspaceFallbackPath: buildWorkspaceFallbackPath(event.slug),
   };
 };
 

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   Bookmark,
   Calendar,
@@ -87,6 +87,12 @@ type StudentEventDetail = {
   isRegistered: boolean;
   registrationId?: string | null;
   registration?: EventRegistration | null;
+  registrationStatus?: "APPROVED" | "NOT_REGISTERED";
+  eventTimelineStatus?: string;
+  canEnterWorkspace?: boolean;
+  workspacePath?: string | null;
+  workspaceFallbackPath?: string;
+  workspaceAccessMessage?: string | null;
   submissionId?: string | null;
 };
 
@@ -123,6 +129,7 @@ const formatFormatLabel = (format: string) => {
 
 const DashboardEventDetail: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
+  const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuthContext();
   const [event, setEvent] = useState<StudentEventDetail | null>(null);
@@ -131,6 +138,7 @@ const DashboardEventDetail: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isSaved, setIsSaved] = useState(false);
   const [isBookmarkPending, setIsBookmarkPending] = useState(false);
+  const [workspaceNotice, setWorkspaceNotice] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [activeRuleTab, setActiveRuleTab] = useState(0);
 
@@ -174,6 +182,19 @@ const DashboardEventDetail: React.FC = () => {
   useEffect(() => {
     void fetchEventDetail();
   }, [fetchEventDetail]);
+
+  useEffect(() => {
+    const navigationState = location.state as {
+      workspaceError?: string;
+    } | null;
+
+    if (!navigationState?.workspaceError) {
+      return;
+    }
+
+    setWorkspaceNotice(navigationState.workspaceError);
+    navigate(location.pathname, { replace: true, state: null });
+  }, [location.pathname, location.state, navigate]);
 
   useEffect(() => {
     const intervalId = window.setInterval(() => {
@@ -525,7 +546,12 @@ const DashboardEventDetail: React.FC = () => {
     );
   }
 
-  const isPendingTeamInvite = event.isRegistered && !event.registration?.teamId;
+  const canEnterWorkspace = Boolean(event.canEnterWorkspace);
+
+  const handleEnterWorkspace = () => {
+    if (!event?.slug) return;
+    navigate(`/dashboard/workspace/${event.slug}`);
+  };
 
   const ctaButton = () => {
     if (!event.isRegistered) {
@@ -544,30 +570,17 @@ const DashboardEventDetail: React.FC = () => {
       );
     }
 
-    if (isPendingTeamInvite) {
+    if (canEnterWorkspace) {
       return (
-        <Button size="lg" disabled>
-          Pending Team Invite
-        </Button>
-      );
-    }
-
-    if (event.submissionId) {
-      return (
-        <Button
-          size="lg"
-          onClick={() =>
-            navigate(`/dashboard/submission/${event.submissionId}`)
-          }
-        >
-          Go to Submission
+        <Button size="lg" onClick={handleEnterWorkspace}>
+          Enter Workspace
         </Button>
       );
     }
 
     return (
-      <Button size="lg" onClick={() => navigate("/dashboard/team/manage")}>
-        View Registration / Team
+      <Button size="lg" disabled>
+        {event.workspaceAccessMessage || "Workspace Locked"}
       </Button>
     );
   };
@@ -592,6 +605,12 @@ const DashboardEventDetail: React.FC = () => {
           >
             <ChevronLeft size={16} /> Back to Event Hub
           </button>
+
+          {workspaceNotice && (
+            <div className="mb-6 rounded-xl border border-amber-300 bg-amber-50/95 px-4 py-3 text-sm font-medium text-amber-900">
+              {workspaceNotice}
+            </div>
+          )}
 
           <div className="flex flex-col lg:flex-row gap-8 lg:items-end">
             <div className="flex-1">
@@ -1222,20 +1241,21 @@ const DashboardEventDetail: React.FC = () => {
                   void handleRegister();
                   return;
                 }
-                if (event.submissionId) {
-                  navigate(`/dashboard/submission/${event.submissionId}`);
-                  return;
+
+                if (canEnterWorkspace) {
+                  handleEnterWorkspace();
                 }
-                navigate("/dashboard/team/manage");
               }}
               disabled={
-                registering || (!isRegistrationOpen && !event.isRegistered)
+                registering ||
+                (!event.isRegistered && !isRegistrationOpen) ||
+                (event.isRegistered && !canEnterWorkspace)
               }
             >
               {event.isRegistered
-                ? event.submissionId
-                  ? "Go to Submission"
-                  : "View Team"
+                ? canEnterWorkspace
+                  ? "Enter Workspace"
+                  : "Workspace Locked"
                 : !isRegistrationOpen
                   ? "Closed"
                   : registering

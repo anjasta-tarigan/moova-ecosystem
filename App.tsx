@@ -26,6 +26,9 @@ const DashboardLayout = lazy(() => import("./layouts/DashboardLayout"));
 const DashboardPage = lazy(() => import("./pages/DashboardPage"));
 const DashboardEventHub = lazy(() => import("./pages/DashboardEventHub"));
 const DashboardEventDetail = lazy(() => import("./pages/DashboardEventDetail"));
+const DashboardWorkspaceEntry = lazy(
+  () => import("./pages/DashboardWorkspaceEntry"),
+);
 const DashboardTeam = lazy(() => import("./pages/DashboardTeam"));
 const DashboardSubmission = lazy(() => import("./pages/DashboardSubmission"));
 const DashboardCertificates = lazy(
@@ -225,6 +228,14 @@ const App: React.FC = () => {
                 element={
                   <RoleGuard allowedRoles={["STUDENT"]}>
                     <DashboardEventDetail />
+                  </RoleGuard>
+                }
+              />
+              <Route
+                path="workspace/:slug"
+                element={
+                  <RoleGuard allowedRoles={["STUDENT"]}>
+                    <DashboardWorkspaceEntry />
                   </RoleGuard>
                 }
               />

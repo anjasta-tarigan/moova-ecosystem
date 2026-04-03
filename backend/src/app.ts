@@ -12,7 +12,10 @@ import adminRoutes from "./modules/admin/admin.routes";
 import superadminRoutes from "./modules/superadmin/superadmin.routes";
 import { authenticate } from "./middlewares/auth.middleware";
 import { requireRole } from "./middlewares/role.middleware";
-import { getStudentEventDetail } from "./modules/events/events.controller";
+import {
+  getStudentEventDetail,
+  getStudentWorkspaceAccess,
+} from "./modules/events/events.controller";
 
 const app = express();
 
@@ -34,6 +37,12 @@ app.get(
   authenticate,
   requireRole("STUDENT"),
   getStudentEventDetail,
+);
+app.get(
+  "/api/student/events/:slug/workspace-access",
+  authenticate,
+  requireRole("STUDENT"),
+  getStudentWorkspaceAccess,
 );
 app.use("/api/events", eventsRoutes);
 app.use("/api/teams", authenticate, requireRole("STUDENT"), teamsRoutes);
