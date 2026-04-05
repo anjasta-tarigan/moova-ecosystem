@@ -18,10 +18,8 @@ pnpm-debug.log
 *.swo
 *~
 
-# Documentation & Config
-README.md
+# Documentation & Config (non-critical)
 CHANGELOG.md
-DEPLOYMENT.md
 BACKEND_PROMPT_AGENT.md
 FRONTEND_ADMIN_PROMPT.md
 GIVA_CONTEXT.md
@@ -34,11 +32,6 @@ coverage
 .jest
 test
 
-# Build outputs (not needed, will be built)
-dist
-build
-*.tsbuildinfo
-
 # Logs
 *.log
 logs
@@ -47,10 +40,19 @@ logs
 Thumbs.db
 thumbs.db
 
-# Backend-specific (for frontend build)
-backend/dist
-backend/node_modules
+# Backend-specific (IGNORE SOURCE, NOT DIST!)
+backend/src
+backend/*.ts
+!backend/dist/
 
-# Frontend-specific (for backend build)
-public
-assets
+# Frontend-specific (IGNORE SOURCE, NOT DIST!)
+src/
+*.ts
+*.tsx
+!dist/
+!public/
+
+# DO NOT IGNORE THESE (CRITICAL FOR DEPLOYMENT):
+# !dist/
+# !backend/dist/
+# !public/
