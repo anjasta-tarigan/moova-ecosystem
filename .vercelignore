@@ -3,22 +3,36 @@
 .gitignore
 .gitattributes
 
-# Development
+# Local dependencies and caches
 node_modules
-.DS_Store
-.env.local
-.env.*.local
-.pnpm-debug.log
-pnpm-debug.log
+backend/node_modules
 
-# IDE
+# Environment files and secrets
+.env
+.env.*
+!.env.example
+
+# IDE and OS files
 .vscode
 .idea
+.DS_Store
+Thumbs.db
+thumbs.db
 *.swp
 *.swo
 *~
 
-# Documentation & Config (non-critical)
+# Logs and debug output
+*.log
+logs
+.pnpm-debug.log
+pnpm-debug.log
+
+# Test and coverage artifacts
+coverage
+.jest
+
+# Repository notes and prompts that are not needed for deployment
 CHANGELOG.md
 BACKEND_PROMPT_AGENT.md
 FRONTEND_ADMIN_PROMPT.md
@@ -27,32 +41,5 @@ GIVA_CONTEXT.md
 *.agent.md
 *.prompt.md
 
-# Testing
-coverage
-.jest
-test
-
-# Logs
-*.log
-logs
-
-# OS
-Thumbs.db
-thumbs.db
-
-# Backend-specific (IGNORE SOURCE, NOT DIST!)
-backend/src
-backend/*.ts
-!backend/dist/
-
-# Frontend-specific (IGNORE SOURCE, NOT DIST!)
-src/
-*.ts
-*.tsx
-!dist/
-!public/
-
-# DO NOT IGNORE THESE (CRITICAL FOR DEPLOYMENT):
-# !dist/
-# !backend/dist/
-# !public/
+# Optional local-only uploads
+uploads
