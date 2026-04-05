@@ -6,6 +6,8 @@ declare global {
         email: string;
         role: "SUPERADMIN" | "ADMIN" | "JUDGE" | "STUDENT";
       };
+      file?: any;
+      files?: any;
     }
   }
 }
