@@ -4,6 +4,11 @@ import path from "path";
 import sharp from "sharp";
 import { error, paginated, success } from "../../utils/response";
 import * as adminService from "./admin.service";
+import { createClient } from "@supabase/supabase-js";
+
+const supabaseUrl = process.env.SUPABASE_URL || "";
+const supabaseKey = process.env.SUPABASE_KEY || "";
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 const resolveResourceType = (mimeType: string) => {
   const normalized = String(mimeType || "").toLowerCase();
@@ -309,20 +314,36 @@ export const uploadEventBanner = async (req: Request, res: Response) => {
   try {
     if (!req.file) return error(res, "No file uploaded", 400);
 
-    const bannerDir = path.join(__dirname, "../../../uploads/events");
-    fs.mkdirSync(bannerDir, { recursive: true });
+    const filename = `events/banner-${Date.now()}-${Math.random().toString(36).slice(2, 6)}.webp`;
 
-    const filename = `event-${Date.now()}-${Math.random().toString(36).slice(2, 6)}.webp`;
-    const filePath = path.join(bannerDir, filename);
-
-    await sharp(req.file.buffer)
+    // 1. Optimasi gambar pakai Sharp, TAPI JANGAN toFile(), gunakan toBuffer()
+    const optimizedBuffer = await sharp(req.file.buffer)
       .resize(1600, 900, { fit: "inside", withoutEnlargement: true })
       .webp({ quality: 85 })
-      .toFile(filePath);
+      .toBuffer(); // <--- Ini kunci rahasianya!
 
-    const publicUrl = `/uploads/events/${filename}`;
-    return success(res, { url: publicUrl }, "Banner uploaded");
+    // 2. Upload Buffer langsung ke Supabase Storage
+    const { data, error: uploadError } = await supabase.storage
+      .from("giva-events") // <--- Ganti dengan nama bucket yang Anda buat di Langkah 1
+      .upload(filename, optimizedBuffer, {
+        contentType: "image/webp",
+        upsert: false, // Jangan timpa file dengan nama sama
+      });
+
+    if (uploadError) {
+      console.error("Supabase Error:", uploadError);
+      throw new Error("Gagal mengunggah ke Cloud Storage");
+    }
+
+    // 3. Dapatkan URL Publik dari gambar yang baru diupload
+    const { data: publicUrlData } = supabase.storage
+      .from("giva-storage")
+      .getPublicUrl(filename);
+
+    // 4. Kembalikan URL tersebut ke Frontend
+    return success(res, { url: publicUrlData.publicUrl }, "Banner uploaded");
   } catch (err: any) {
+    console.error("🔥 UPLOAD BANNER ERROR:", err); // Agar log tidak bisu di Vercel
     if (err?.message?.includes("File too large"))
       return error(res, "Banner exceeds 2MB limit", 413);
     return mapError(err, res);
