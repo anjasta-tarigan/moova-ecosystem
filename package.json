@@ -15,7 +15,9 @@
     "db:seed": "pnpm -F giva-backend run seed",
     "db:push": "pnpm -F giva-backend run db:push",
     "prisma:generate": "pnpm -F giva-backend exec prisma generate",
-    "prisma:studio": "pnpm -F giva-backend exec prisma studio"
+    "prisma:studio": "pnpm -F giva-backend exec prisma studio",
+    "vercel-build": "pnpm prisma:generate && pnpm run build && pnpm db:migrate || true",
+    "vercel-migrate": "pnpm db:migrate"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
