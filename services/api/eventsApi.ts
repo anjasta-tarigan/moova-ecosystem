@@ -4,6 +4,19 @@ export const eventsApi = {
   getEvents: (params?: Record<string, any>) =>
     api.get("/api/events/public", { params }),
 
+  getCalendarRange: (params: {
+    start: string;
+    end: string;
+    role?: "PUBLIC" | "STUDENT" | "JUDGE";
+  }) =>
+    api.get("/api/events/calendar/range", {
+      params: {
+        start: params.start,
+        end: params.end,
+        role: params.role || "PUBLIC",
+      },
+    }),
+
   getPublicEvents: (params?: Record<string, any>) =>
     api.get("/api/events/public", { params }),
 

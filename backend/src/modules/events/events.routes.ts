@@ -11,8 +11,10 @@ import {
   getAdminEvents,
   getCommunityMessages,
   getCommunityThreads,
+  getCalendarEventsRange,
   getEventDetailBySlug,
   getEventDetail,
+  getGlobalEventsStream,
   getEventRealtimeStream,
   getEvents,
   getJudgeEvents,
@@ -51,6 +53,8 @@ router.get(
   requireRole("ADMIN", "SUPERADMIN"),
   getAdminEvents,
 );
+router.get("/calendar/range", getCalendarEventsRange);
+router.get("/stream", getGlobalEventsStream);
 router.get("/", getEvents);
 router.get("/slug/:slug", getEventDetailBySlug);
 router.get("/:id/stream", getEventRealtimeStream);

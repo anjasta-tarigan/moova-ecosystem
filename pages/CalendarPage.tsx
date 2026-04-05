@@ -1,4 +1,10 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, {
+  useState,
+  useRef,
+  useEffect,
+  useMemo,
+  useCallback,
+} from "react";
 import Section from "../components/Section";
 import Button from "../components/Button";
 import {
@@ -17,11 +23,16 @@ import {
   Flag,
   MoreHorizontal,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { eventsApi } from "../services/api/eventsApi";
 import LoadingSpinner from "../components/LoadingSpinner";
+import { useCalendarStream } from "../hooks/useCalendarStream";
 
 // --- Animation Helper (Inlined) ---
-const useOnScreen = (ref: React.RefObject<Element>, rootMargin = "0px") => {
+const useOnScreen = (
+  ref: React.RefObject<Element | null>,
+  rootMargin = "0px",
+) => {
   const [isIntersecting, setIntersecting] = useState(false);
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -64,6 +75,7 @@ type EventType = "deadline" | "event" | "workshop" | "milestone";
 
 interface CalendarEvent {
   id: string;
+  slug?: string;
   title: string;
   date: Date;
   type: EventType;
@@ -72,6 +84,22 @@ interface CalendarEvent {
   status: "open" | "registered" | "closed";
   sdg?: number;
 }
+
+type ApiCalendarEvent = {
+  id?: string;
+  slug?: string;
+  title?: string;
+  date?: string | Date;
+  deadline?: string | Date;
+  category?: string;
+  shortDescription?: string;
+  description?: string;
+  location?: string;
+  status?: string;
+  sdgs?: number[];
+  sdg?: number;
+  isRegistered?: boolean;
+};
 
 const mapCategoryToType = (category?: string): EventType => {
   if (category === "Competition") return "deadline";
@@ -85,6 +113,69 @@ const mapStatus = (status?: string): "open" | "registered" | "closed" => {
   if (normalized === "CLOSED") return "closed";
   return "open";
 };
+
+const toCalendarEvent = (evt: ApiCalendarEvent): CalendarEvent | null => {
+  if (!evt?.id || !evt?.title) {
+    return null;
+  }
+
+  const rawDate = evt.date || evt.deadline;
+  const parsedDate = rawDate ? new Date(rawDate) : null;
+  if (!parsedDate || Number.isNaN(parsedDate.getTime())) {
+    return null;
+  }
+
+  return {
+    id: evt.id,
+    slug: evt.slug,
+    title: evt.title,
+    date: parsedDate,
+    type: mapCategoryToType(evt.category),
+    description:
+      evt.shortDescription || evt.description || "No description yet.",
+    location: evt.location,
+    status: evt.isRegistered ? "registered" : mapStatus(evt.status),
+    sdg: Array.isArray(evt.sdgs)
+      ? evt.sdgs[0]
+      : typeof evt.sdg === "number"
+        ? evt.sdg
+        : undefined,
+  };
+};
+
+const monthCacheKey = (date: Date) =>
+  `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
+
+const getMonthRange = (date: Date) => {
+  const start = new Date(
+    Date.UTC(date.getFullYear(), date.getMonth(), 1, 0, 0, 0, 0),
+  );
+  const end = new Date(
+    Date.UTC(date.getFullYear(), date.getMonth() + 1, 0, 23, 59, 59, 999),
+  );
+
+  return {
+    start,
+    end,
+    key: monthCacheKey(start),
+  };
+};
+
+const isWithinRange = (date: Date, start: Date, end: Date) =>
+  date.getTime() >= start.getTime() && date.getTime() <= end.getTime();
+
+const toIcsDate = (value: Date) =>
+  value
+    .toISOString()
+    .replace(/[-:]/g, "")
+    .replace(/\.\d{3}/, "");
+
+const escapeIcsText = (value: string) =>
+  value
+    .replace(/\\/g, "\\\\")
+    .replace(/\n/g, "\\n")
+    .replace(/,/g, "\\,")
+    .replace(/;/g, "\\;");
 
 // --- Components ---
 
@@ -124,6 +215,7 @@ const EventBadge: React.FC<{ type: EventType; mini?: boolean }> = ({
 };
 
 const CalendarPage: React.FC = () => {
+  const navigate = useNavigate();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<"month" | "agenda">("month");
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(
@@ -133,35 +225,142 @@ const CalendarPage: React.FC = () => {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [actionMessage, setActionMessage] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [reloadTick, setReloadTick] = useState(0);
+  const cachedMonthsRef = useRef<Map<string, CalendarEvent[]>>(new Map());
+
+  useEffect(() => {
+    setActionMessage(null);
+    setActionError(null);
+  }, [selectedEvent?.id]);
+
+  const activeRange = useMemo(() => getMonthRange(currentDate), [currentDate]);
+
+  const applyStreamUpdate = useCallback(
+    (payload: Record<string, unknown>) => {
+      const action = String(payload.action || payload.type || "").toLowerCase();
+      const candidate = (payload.event ||
+        payload.data ||
+        payload) as ApiCalendarEvent;
+      const mapped = toCalendarEvent(candidate);
+      const targetId =
+        (candidate?.id && String(candidate.id)) ||
+        (typeof payload.eventId === "string" ? payload.eventId : undefined);
+
+      if (!mapped && !targetId) {
+        return;
+      }
+
+      const shouldRemove = /(delete|remove|cancel)/.test(action);
+
+      setEvents((previous) => {
+        let next = previous;
+
+        if (shouldRemove) {
+          next = previous.filter(
+            (item) => item.id !== (mapped?.id || targetId),
+          );
+          cachedMonthsRef.current.set(activeRange.key, next);
+          return next;
+        }
+
+        if (!mapped) {
+          if (targetId) {
+            cachedMonthsRef.current.delete(activeRange.key);
+            setReloadTick((value) => value + 1);
+          }
+          return previous;
+        }
+
+        if (!isWithinRange(mapped.date, activeRange.start, activeRange.end)) {
+          next = previous.filter((item) => item.id !== mapped.id);
+          cachedMonthsRef.current.set(activeRange.key, next);
+          return next;
+        }
+
+        const index = previous.findIndex((item) => item.id === mapped.id);
+        if (index === -1) {
+          next = [...previous, mapped];
+          cachedMonthsRef.current.set(activeRange.key, next);
+          return next;
+        }
+
+        next = [...previous];
+        next[index] = mapped;
+        cachedMonthsRef.current.set(activeRange.key, next);
+        return next;
+      });
+
+      setSelectedEvent((previous) => {
+        if (!previous) {
+          return previous;
+        }
+
+        if (shouldRemove && previous.id === (mapped?.id || targetId)) {
+          return null;
+        }
+
+        if (mapped && previous.id === mapped.id) {
+          return mapped;
+        }
+
+        return previous;
+      });
+    },
+    [activeRange.key, setEvents, setSelectedEvent],
+  );
+
+  useCalendarStream(applyStreamUpdate, true);
 
   useEffect(() => {
     const fetchEvents = async () => {
+      const cached = cachedMonthsRef.current.get(activeRange.key);
+      if (cached) {
+        setEvents(cached);
+        setError(null);
+        setIsLoading(false);
+        return;
+      }
+
       setIsLoading(true);
       setError(null);
+
       try {
-        const res = await eventsApi.getEvents({ limit: 50 });
-        const data = res.data?.data || [];
-        const mapped: CalendarEvent[] = data.map((evt: any) => ({
-          id: evt.id,
-          title: evt.title,
-          date: new Date(evt.deadline),
-          type: mapCategoryToType(evt.category),
-          description: evt.shortDescription,
-          location: evt.location,
-          status: mapStatus(evt.status),
-          sdg: Array.isArray(evt.sdgs) ? evt.sdgs[0] : undefined,
-        }));
+        const res = await eventsApi.getCalendarRange({
+          start: activeRange.start.toISOString(),
+          end: activeRange.end.toISOString(),
+          role: "PUBLIC",
+        });
+
+        const payload = res.data?.data;
+        const source = Array.isArray(payload)
+          ? payload
+          : Array.isArray(payload?.events)
+            ? payload.events
+            : Array.isArray(payload?.items)
+              ? payload.items
+              : [];
+
+        const mapped = source
+          .map((evt: ApiCalendarEvent) => toCalendarEvent(evt))
+          .filter((evt: CalendarEvent | null): evt is CalendarEvent =>
+            Boolean(evt),
+          );
+
+        cachedMonthsRef.current.set(activeRange.key, mapped);
         setEvents(mapped);
       } catch (err) {
         setError("Failed to load calendar events.");
-        console.error(err);
+        setEvents([]);
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchEvents();
-  }, []);
+  }, [activeRange, reloadTick]);
 
   // Navigation Logic
   const nextMonth = () => {
@@ -202,6 +401,26 @@ const CalendarPage: React.FC = () => {
     return true;
   });
 
+  const cycleFilter = () => {
+    const order: Array<EventType | "all"> = [
+      "all",
+      "workshop",
+      "deadline",
+      "milestone",
+      "event",
+    ];
+    const currentIndex = order.indexOf(filterType);
+    const nextIndex = (currentIndex + 1) % order.length;
+    setFilterType(order[nextIndex]);
+  };
+
+  const filterLabel =
+    filterType === "all"
+      ? "All"
+      : filterType === "event"
+        ? "Live Event"
+        : `${filterType.charAt(0).toUpperCase()}${filterType.slice(1)}`;
+
   const getEventsForDay = (date: Date) => {
     return filteredEvents.filter(
       (e) =>
@@ -225,6 +444,96 @@ const CalendarPage: React.FC = () => {
     "November",
     "December",
   ];
+
+  const goToEventDetail = () => {
+    if (!selectedEvent) return;
+    const eventPath = selectedEvent.slug || selectedEvent.id;
+    navigate(`/events/${encodeURIComponent(eventPath)}`);
+    setSelectedEvent(null);
+  };
+
+  const handleRegister = async () => {
+    if (!selectedEvent || isRegistering) return;
+
+    const token = localStorage.getItem("giva_access_token");
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    setIsRegistering(true);
+    setActionMessage(null);
+    setActionError(null);
+
+    try {
+      await eventsApi.registerToEvent(selectedEvent.id, {});
+
+      setEvents((previous) =>
+        previous.map((item) =>
+          item.id === selectedEvent.id
+            ? { ...item, status: "registered" as const }
+            : item,
+        ),
+      );
+      setSelectedEvent((previous) =>
+        previous && previous.id === selectedEvent.id
+          ? { ...previous, status: "registered" as const }
+          : previous,
+      );
+      setActionMessage("Registration successful.");
+    } catch (err: any) {
+      if (err?.response?.status === 401) {
+        navigate("/login");
+        return;
+      }
+      setActionError(
+        err?.response?.data?.message ||
+          "Unable to register now. Please try again.",
+      );
+    } finally {
+      setIsRegistering(false);
+    }
+  };
+
+  const handleAddToCalendar = () => {
+    if (!selectedEvent) return;
+
+    const start = new Date(selectedEvent.date);
+    const end = new Date(selectedEvent.date.getTime() + 2 * 60 * 60 * 1000);
+    const now = new Date();
+
+    const icsContent = [
+      "BEGIN:VCALENDAR",
+      "VERSION:2.0",
+      "PRODID:-//GIVA//Calendar Event//EN",
+      "CALSCALE:GREGORIAN",
+      "BEGIN:VEVENT",
+      `UID:${selectedEvent.id}@giva-calendar`,
+      `DTSTAMP:${toIcsDate(now)}`,
+      `DTSTART:${toIcsDate(start)}`,
+      `DTEND:${toIcsDate(end)}`,
+      `SUMMARY:${escapeIcsText(selectedEvent.title)}`,
+      `DESCRIPTION:${escapeIcsText(selectedEvent.description || "")}`,
+      `LOCATION:${escapeIcsText(selectedEvent.location || "TBA")}`,
+      "END:VEVENT",
+      "END:VCALENDAR",
+    ].join("\r\n");
+
+    const blob = new Blob([icsContent], {
+      type: "text/calendar;charset=utf-8",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${selectedEvent.slug || selectedEvent.id}.ics`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    setActionMessage("Calendar file downloaded.");
+    setActionError(null);
+  };
 
   return (
     <div className="relative min-h-screen bg-slate-50">
@@ -288,8 +597,11 @@ const CalendarPage: React.FC = () => {
 
                 {/* Mock Grid */}
                 <div className="grid grid-cols-7 gap-y-4 gap-x-2 text-center text-sm mb-4">
-                  {["S", "M", "T", "W", "T", "F", "S"].map((d) => (
-                    <div key={d} className="text-slate-400 text-xs font-bold">
+                  {["S", "M", "T", "W", "T", "F", "S"].map((d, idx) => (
+                    <div
+                      key={`${d}-${idx}`}
+                      className="text-slate-400 text-xs font-bold"
+                    >
                       {d}
                     </div>
                   ))}
@@ -404,8 +716,11 @@ const CalendarPage: React.FC = () => {
                   <ChevronRight size={20} />
                 </button>
               </div>
-              <button className="flex items-center gap-2 px-4 py-2 border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors">
-                <Filter size={16} /> Filter
+              <button
+                onClick={cycleFilter}
+                className="flex items-center gap-2 px-4 py-2 border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
+              >
+                <Filter size={16} /> {filterLabel}
               </button>
             </div>
 
@@ -654,14 +969,45 @@ const CalendarPage: React.FC = () => {
               </div>
 
               <div className="flex flex-col gap-3 pt-6">
-                <Button fullWidth>
-                  {selectedEvent.type === "deadline"
-                    ? "Submit Application"
-                    : "Register Now"}
+                <Button
+                  fullWidth
+                  onClick={handleRegister}
+                  disabled={
+                    isRegistering || selectedEvent.status === "registered"
+                  }
+                >
+                  {selectedEvent.status === "registered"
+                    ? "Registered"
+                    : isRegistering
+                      ? "Registering..."
+                      : selectedEvent.type === "deadline"
+                        ? "Submit Application"
+                        : "Register Now"}
                 </Button>
-                <button className="flex items-center justify-center gap-2 w-full py-3 border border-slate-200 rounded-full text-slate-700 font-medium hover:bg-slate-50 transition-colors">
+                <button
+                  onClick={handleAddToCalendar}
+                  className="flex items-center justify-center gap-2 w-full py-3 border border-slate-200 rounded-full text-slate-700 font-medium hover:bg-slate-50 transition-colors"
+                >
                   <CalendarPlus size={18} /> Add to Calendar
                 </button>
+                <Button
+                  fullWidth
+                  variant="outline"
+                  onClick={goToEventDetail}
+                  className="rounded-full"
+                >
+                  Event Detail
+                </Button>
+                {actionMessage && (
+                  <p className="text-xs text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-lg px-3 py-2">
+                    {actionMessage}
+                  </p>
+                )}
+                {actionError && (
+                  <p className="text-xs text-red-700 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
+                    {actionError}
+                  </p>
+                )}
               </div>
             </div>
           </div>

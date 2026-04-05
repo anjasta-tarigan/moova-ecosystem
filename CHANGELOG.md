@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.3.14] – 2026-04-05 00:00:00 (UTC+08:00)
+
+- Added end-to-end backend support for real-time calendar contract: `GET /api/events/calendar/range` with role-scoped authorization (`PUBLIC`, `STUDENT`, `JUDGE`) and `GET /api/events/stream` global SSE with audience scoping.
+- Extended events realtime bus to broadcast per-event updates into audience channels, including `eventId` and timestamps for reliable client synchronization.
+- Hardened calendar frontend realtime behavior with active-range-safe updates, metadata-only SSE fallback refetching, and explicit `role=PUBLIC` stream subscription resilience.
+
+## [0.3.13] – 2026-04-05 00:00:00 (UTC+08:00)
+
+- Implemented PRD-aligned dynamic calendar range loading on the public calendar page using `GET /api/events/calendar/range` with computed month boundaries and per-month cache to avoid redundant refetches.
+- Added global calendar realtime stream hook (`useCalendarStream`) that subscribes to `GET /api/events/stream`, ignores malformed payloads safely, and applies immutable in-place upsert/remove updates.
+- Updated calendar UI logic to keep Month and Agenda views synchronized with stream updates (including selected event panel updates) and enabled working type-filter cycling from the existing filter control.
+
 ## [0.3.12] – 2026-04-03 21:54:44 (UTC+08:00)
 
 - Refactored Superadmin event finalization flow so the `Manage Event` page now renders card-only navigation and each of the 11 domains opens in a dedicated form route (`/events/:id/edit/:cardKey`) with localized save actions.

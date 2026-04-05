@@ -14,6 +14,23 @@ const parsePagination = (page?: number, limit?: number) => {
   return { page: p < 1 ? 1 : p, limit: l < 1 ? 10 : l };
 };
 
+const parseCalendarDate = (value?: string | Date | null) => {
+  if (!value) return null;
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) {
+    return null;
+  }
+  return parsed;
+};
+
+const pickCalendarDate = (event: {
+  date?: string | Date;
+  deadline?: string | Date;
+}) => parseCalendarDate(event.date) || parseCalendarDate(event.deadline);
+
+const inRange = (date: Date, start: Date, end: Date) =>
+  date.getTime() >= start.getTime() && date.getTime() <= end.getTime();
+
 const baseListSelect = {
   id: true,
   customId: true,
@@ -308,6 +325,113 @@ export const listPublicEvents = async (query: any, userId?: string) => {
   );
 
   return { data: mapped, total, page, limit };
+};
+
+export const listCalendarEventsByRange = async (params: {
+  start: string;
+  end: string;
+  role: "PUBLIC" | "STUDENT" | "JUDGE";
+  userId?: string;
+}) => {
+  const start = new Date(params.start);
+  const end = new Date(params.end);
+
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+    const err: any = new Error("Invalid date range");
+    err.status = 400;
+    throw err;
+  }
+
+  if (end.getTime() < start.getTime()) {
+    const err: any = new Error("Invalid date range");
+    err.status = 400;
+    throw err;
+  }
+
+  const role = params.role;
+  const select: any = {
+    id: true,
+    title: true,
+    slug: true,
+    shortDescription: true,
+    date: true,
+    deadline: true,
+    location: true,
+    category: true,
+    status: true,
+    image: true,
+    registrationOpenDate: true,
+    registrationCloseDate: true,
+    registrationEndDate: true,
+    capacity: true,
+    _count: { select: { registrations: true } },
+  };
+
+  if (role === "STUDENT" && params.userId) {
+    select.registrations = {
+      where: { userId: params.userId },
+      select: { id: true },
+      take: 1,
+    };
+  }
+
+  const where: any = {
+    status: { in: [...PUBLIC_EVENT_STATUSES] },
+  };
+
+  if (role === "JUDGE") {
+    where.judgeAssignments = {
+      some: {
+        judgeId: params.userId,
+        status: "ACTIVE",
+      },
+    };
+  }
+
+  const data = await prisma.event.findMany({
+    where,
+    select,
+    orderBy: { createdAt: "desc" },
+  });
+
+  const mapped = data
+    .map((event: any) => {
+      const lifecycle = mapEventWithLifecycle(event, {
+        isSaved: false,
+        totalSaves: 0,
+      }) as any;
+
+      const calendarDate = pickCalendarDate(lifecycle);
+      if (!calendarDate || !inRange(calendarDate, start, end)) {
+        return null;
+      }
+
+      const isRegistered =
+        role === "STUDENT" ? Boolean(lifecycle.registrations?.length) : false;
+
+      return {
+        id: lifecycle.id,
+        title: lifecycle.title,
+        slug: lifecycle.slug,
+        shortDescription: lifecycle.shortDescription,
+        description: lifecycle.shortDescription,
+        date: lifecycle.date,
+        deadline: lifecycle.deadline,
+        location: lifecycle.location,
+        category: lifecycle.category,
+        status: lifecycle.status,
+        image: lifecycle.image,
+        isRegistered,
+      };
+    })
+    .filter(Boolean)
+    .sort((a: any, b: any) => {
+      const aDate = pickCalendarDate(a);
+      const bDate = pickCalendarDate(b);
+      return (aDate?.getTime() || 0) - (bDate?.getTime() || 0);
+    });
+
+  return mapped;
 };
 
 export const listEvents = listPublicEvents;

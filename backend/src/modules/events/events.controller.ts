@@ -2,7 +2,10 @@ import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { paginated, error, success } from "../../utils/response";
 import * as eventsService from "./events.service";
-import { subscribeEventUpdates } from "./events.realtime";
+import {
+  subscribeEventUpdates,
+  subscribeGlobalEventUpdates,
+} from "./events.realtime";
 
 const ACCESS_TOKEN_SECRET =
   process.env.ACCESS_TOKEN_SECRET || "dev_access_secret";
@@ -14,6 +17,13 @@ const mapError = (err: any, res: Response) => {
         ? "Registration is closed for this event"
         : err?.message || "Forbidden";
     return error(res, message, 403);
+  }
+  if (
+    typeof err?.status === "number" &&
+    err.status >= 400 &&
+    err.status < 500
+  ) {
+    return error(res, err?.message || "Bad request", err.status);
   }
   if (err?.code === "P2025") return error(res, "Data not found", 404);
   if (err?.code === "P2002") return error(res, "Data already exists", 409);
@@ -54,6 +64,24 @@ const resolveAuthContext = (req: Request) => {
   } catch {
     return { role: undefined, userId: undefined };
   }
+};
+
+const resolveAudience = (role: unknown) => {
+  const normalized = String(role || "PUBLIC").toUpperCase();
+  if (normalized === "STUDENT" || normalized === "JUDGE") {
+    return normalized;
+  }
+  return "PUBLIC";
+};
+
+const canAccessAudience = (
+  audience: "PUBLIC" | "STUDENT" | "JUDGE",
+  authRole?: string,
+) => {
+  if (audience === "PUBLIC") {
+    return true;
+  }
+  return authRole === audience;
 };
 
 export const getPublicEvents = async (req: Request, res: Response) => {
@@ -102,6 +130,42 @@ export const getAdminEvents = async (req: Request, res: Response) => {
   try {
     const result = await eventsService.listAdminEvents(req.query);
     return paginated(res, result.data, result.total, result.page, result.limit);
+  } catch (err) {
+    return mapError(err, res);
+  }
+};
+
+export const getCalendarEventsRange = async (req: Request, res: Response) => {
+  try {
+    const start = String(req.query.start || "");
+    const end = String(req.query.end || "");
+    const role = resolveAudience(req.query.role) as
+      | "PUBLIC"
+      | "STUDENT"
+      | "JUDGE";
+
+    if (!start || !end) {
+      return error(res, "Missing required start/end range", 400);
+    }
+
+    const auth = resolveAuthContext(req);
+    if (!canAccessAudience(role, auth.role)) {
+      return error(res, "Forbidden", 403);
+    }
+
+    const data = await eventsService.listCalendarEventsByRange({
+      start,
+      end,
+      role,
+      userId: auth.userId,
+    });
+
+    return success(res, {
+      role,
+      start,
+      end,
+      events: data,
+    });
   } catch (err) {
     return mapError(err, res);
   }
@@ -358,6 +422,42 @@ export const getEventRealtimeStream = async (req: Request, res: Response) => {
   push({ type: "connected", eventId: id });
 
   const unsubscribe = subscribeEventUpdates(id, push);
+  const heartbeat = setInterval(() => {
+    res.write(`event: heartbeat\n`);
+    res.write(`data: {"ok":true}\n\n`);
+  }, 25000);
+
+  req.on("close", () => {
+    clearInterval(heartbeat);
+    unsubscribe();
+    res.end();
+  });
+};
+
+export const getGlobalEventsStream = async (req: Request, res: Response) => {
+  const audience = resolveAudience(req.query.role) as
+    | "PUBLIC"
+    | "STUDENT"
+    | "JUDGE";
+  const auth = resolveAuthContext(req);
+
+  if (!canAccessAudience(audience, auth.role)) {
+    return error(res, "Forbidden", 403);
+  }
+
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+  res.flushHeaders?.();
+
+  const push = (payload: any) => {
+    res.write(`event: event-update\n`);
+    res.write(`data: ${JSON.stringify(payload)}\n\n`);
+  };
+
+  push({ type: "connected", audience });
+
+  const unsubscribe = subscribeGlobalEventUpdates(audience, push);
   const heartbeat = setInterval(() => {
     res.write(`event: heartbeat\n`);
     res.write(`data: {"ok":true}\n\n`);
